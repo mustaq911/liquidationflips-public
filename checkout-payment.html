@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Secure Payment - Liquidation Flips</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="/css/topnav.css">
+
+  <style>
+    :root{
+      --bg:#f7f7f8;
+      --panel:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --brand:#2563eb;
+      --brand-2:#1e40af;
+      --border:#e5e7eb;
+      --danger:#dc2626;
+      --success:#16a34a;
+      --shadow: 0 16px 40px rgba(15,23,42,0.08);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+
+    .page{max-width:1100px;margin:22px auto;padding:0 16px;}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width: 900px){
+      .grid{grid-template-columns:1fr;}
+    }
+
+    .card{
+      background:var(--panel);
+      border-radius:16px;
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    h1{font-size:22px;margin:0 0 6px;}
+    .subtitle{font-size:13px;color:var(--muted);margin-bottom:14px;}
+
+    /* Summary */
+    .summary-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+    .pill{font-size:12px;color:var(--muted);border:1px solid var(--border);padding:6px 10px;border-radius:999px;background:#fff;}
+    .items{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+    .item{
+      display:grid;
+      grid-template-columns: 56px 1fr auto;
+      gap:12px;
+      align-items:center;
+      padding:10px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+    }
+    .thumb{
+      width:56px;height:56px;border-radius:10px;border:1px solid var(--border);
+      background:#f3f4f6;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+    .title{font-weight:700;font-size:14px;margin:0;}
+    .meta{font-size:12px;color:var(--muted);margin-top:2px;}
+    .price{font-weight:800;}
+    .totals{
+      margin-top:14px;
+      padding-top:12px;
+      border-top:1px dashed var(--border);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .row{display:flex;justify-content:space-between;font-size:14px;}
+    .row.muted{color:var(--muted);}
+    .row.total{font-size:16px;font-weight:900;}
+
+    /* Payment form */
+    .field{margin-top:10px;}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;}
+    input{
+      width:100%;
+      padding:12px 12px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      font-size:14px;
+      outline:none;
+      background:#fff;
+    }
+    input:focus{border-color:#b7c5ff; box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+    .stripe-box{
+      padding:12px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#fff;
+    }
+
+    .btn{
+      margin-top:14px;
+      width:100%;
+      padding:12px 14px;
+      border-radius:10px;
+      border:1px solid var(--brand);
+      background:var(--brand);
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .btn:hover{background:var(--brand-2);border-color:var(--brand-2);}
+    .btn:disabled{opacity:.6;cursor:not-allowed;}
+    .msg{margin-top:10px;font-size:13px;}
+    .msg.error{color:var(--danger);}
+    .msg.success{color:var(--success);}
+
+    .top-actions{display:flex;gap:10px;margin-top:10px;}
+    .btn-ghost{
+      width:auto;
+      background:#fff;
+      color:var(--text);
+      border:1px solid var(--border);
+      font-weight:700;
+    }
+    .btn-ghost:hover{background:#f3f4f6;border-color:#d1d5db;}
+  </style>
+</head>
+<body>
+  <div id="topnavContainer"></div>
+
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js" defer></script>
+
+  <div class="page">
+    <div class="grid">
+      <!-- LEFT: Order Summary -->
+      <div class="card">
+        <div class="summary-header">
+          <div>
+            <h1>Order Summary</h1>
+            <div class="subtitle">Review your order before paying.</div>
+          </div>
+          <div class="pill" id="order-pill">Order #—</div>
+        </div>
+
+        <div id="summary-items" class="items"></div>
+
+        <div class="totals">
+          <div class="row muted"><span>Subtotal</span><span id="sum-subtotal">—</span></div>
+          <div class="row muted"><span>Tax</span><span id="sum-tax">—</span></div>
+          <div class="row muted"><span>Shipping</span><span id="sum-ship">—</span></div>
+          <div class="row total"><span>Total</span><span id="sum-total">—</span></div>
+
+          <div class="top-actions">
+            <button class="btn btn-ghost" type="button" onclick="window.location.href='/cart.html'">
+              <i class="fa-solid fa-arrow-left"></i> Back to cart
+            </button>
+            <button class="btn btn-ghost" type="button" onclick="window.location.href='/product-buynow.html'">
+              <i class="fa-solid fa-bag-shopping"></i> Continue shopping
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Payment -->
+      <div class="card">
+        <h1>Secure Payment</h1>
+        <div class="subtitle">Enter your card details to complete payment securely.</div>
+
+        <div class="field">
+          <label for="cardholder-name">Name on card</label>
+          <input id="cardholder-name" type="text" placeholder="Full name" autocomplete="cc-name" />
+        </div>
+
+        <div class="field">
+          <label>Card details</label>
+          <div id="card-element" class="stripe-box"></div>
+          <div id="card-errors" class="msg error" role="alert"></div>
+        </div>
+
+        <button id="pay-btn" class="btn" type="button">
+          <span><i class="fa-solid fa-lock"></i> Pay now</span>
+        </button>
+
+        <div id="pay-message" class="msg" role="status"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Topnav injection ----------
+    (async function loadTopnav(){
+      try{
+        const res = await fetch('/topnav.html');
+        document.getElementById('topnavContainer').innerHTML = await res.text();
+      }catch(e){
+        console.warn('topnav load failed', e);
+      }
+    })();
+
+	// ---------- Defining Global varialbes 
+	
+	const API_BASE_URL = CONFIG.API_BASE_URL;
+    const STRIPE_PUBLIC_KEY = CONFIG.STRIPE_PUBLIC_KEY;
+	const token  = localStorage.getItem('token');
+    const userId = localStorage.getItem('userid');
+	
+    // ---------- Helpers ----------
+    function money(v, currency="CAD"){
+      if (v === null || v === undefined) return "—";
+      const n = Number(v);
+      if (Number.isNaN(n)) return String(v);
+      return new Intl.NumberFormat('en-CA', { style:'currency', currency }).format(n);
+    }
+    function getQueryParam(name){
+      const u = new URL(window.location.href);
+      return u.searchParams.get(name);
+    }
+
+    
+    let stripe, elements, card;
+    let orderId, clientSecret;
+
+    async function fetchOrder(orderId){
+      // Adjust this if your gateway route differs:
+      const url = `${API_BASE_URL}/orders/${orderId}`;
+      const res = await fetch(url, {
+		headers: { 'Authorization': `Bearer ${token}` }
+        // headers: { 'Accept':'application/json' }
+        // If you need JWT header:
+        //headers: { 'Accept':'application/json', 'Authorization': `Bearer ${getToken()}` }
+      });
+      if(!res.ok) throw new Error(`Order fetch failed (${res.status})`);
+      return await res.json();
+    }
+
+    function renderSummary(order){
+      document.getElementById('order-pill').textContent = `Order #${order.id ?? orderId}`;
+
+      const list = document.getElementById('summary-items');
+      list.innerHTML = '';
+
+      const items = order.items || order.orderItems || [];
+      if(!items.length){
+        list.innerHTML = `<div class="subtitle">No items found for this order.</div>`;
+      } else {
+        for(const it of items){
+          const title = it.productTitle || it.title || `Product #${it.productId ?? ''}`;
+          const qty = it.quantity ?? 1;
+          const price = it.price ?? it.unitPrice ?? it.amount ?? 0;
+          const lineTotal = (it.lineTotal ?? (Number(price) * Number(qty)));
+
+          const imgUrl = it.productImageUrl || it.productImage || it.thumbnailUrl || '';
+
+          const el = document.createElement('div');
+          el.className = 'item';
+          el.innerHTML = `
+            <div class="thumb">
+              ${imgUrl ? `<img src="${imgUrl}" alt="">` : `<i class="fa-solid fa-box" style="color:#9ca3af"></i>`}
+            </div>
+            <div>
+              <p class="title">${title}</p>
+              <div class="meta">Qty: ${qty}</div>
+            </div>
+            <div class="price">${money(lineTotal, (order.currency || 'CAD').toUpperCase())}</div>
+          `;
+          list.appendChild(el);
+        }
+      }
+
+      const currency = (order.currency || 'CAD').toUpperCase();
+      const subtotal = order.subtotal ?? order.subTotal ?? null;
+      const tax = order.tax ?? null;
+      const shipping = order.shipping ?? 0;
+      const total = order.totalAmount ?? order.total ?? null;
+
+      document.getElementById('sum-subtotal').textContent = money(subtotal, currency);
+      document.getElementById('sum-tax').textContent = money(tax, currency);
+      document.getElementById('sum-ship').textContent = shipping ? money(shipping, currency) : 'Free';
+      document.getElementById('sum-total').textContent = money(total, currency);
+    }
+
+    function setPayLoading(on){
+      const btn = document.getElementById('pay-btn');
+      btn.disabled = on;
+      btn.innerHTML = on
+        ? `<span><i class="fa-solid fa-spinner fa-spin"></i> Processing…</span>`
+        : `<span><i class="fa-solid fa-lock"></i> Pay now</span>`;
+    }
+
+	// (1) Load Order Summary
+	// (2) Load Stripe Card Elements BY : STRIPE_PUBLIC_KEY
+    async function init(){
+	
+      orderId = sessionStorage.getItem('stripeOrderId') || getQueryParam('orderId');
+      clientSecret = sessionStorage.getItem('stripeClientSecret') || getQueryParam('clientSecret');
+
+
+      if(!orderId || !clientSecret){
+        document.getElementById('pay-message').textContent =
+          'Missing payment info. Please go back to your cart and try again.';
+        document.getElementById('pay-message').className = 'msg error';
+        document.getElementById('pay-btn').disabled = true;
+        return;
+      }
+
+      // (1) Load Order summary
+      try{
+        const order = await fetchOrder(orderId);
+        renderSummary(order);
+      }catch(e){
+        console.warn(e);
+        document.getElementById('pay-message').textContent = 'Could not load order summary.';
+        document.getElementById('pay-message').className = 'msg error';
+      }
+
+      // (2) Load Stripe Card Elements BY : STRIPE_PUBLIC_KEY
+      stripe = Stripe(STRIPE_PUBLIC_KEY);
+      elements = stripe.elements();
+
+      card = elements.create("card", {
+        style: {
+          base: {
+            fontSize: "16px",
+            color: "#111827",
+            "::placeholder": { color: "#9ca3af" }
+          }
+        }
+      });
+      card.mount("#card-element");
+
+      card.on("change", function(event){
+        const el = document.getElementById("card-errors");
+        el.textContent = event.error ? event.error.message : "";
+      });
+
+      document.getElementById('pay-btn').addEventListener('click', payNow);
+    }
+
+	// Calls -> stripe.confirmCardPayment
+    async function payNow(){
+      setPayLoading(true);
+      const msg = document.getElementById('pay-message');
+      msg.textContent = '';
+      msg.className = 'msg';
+
+      const name = document.getElementById('cardholder-name').value || '';
+
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card,
+          billing_details: { name }
+        }
+      });
+
+      if(error){
+        document.getElementById('card-errors').textContent = error.message || 'Payment failed.';
+        setPayLoading(false);
+        return;
+      }
+
+
+      if(paymentIntent?.status === 'succeeded'){
+        msg.textContent = 'Payment succeeded! Finalizing…';
+        msg.className = 'msg success';
+
+        // Optional: notify backend (your /payments/confirm)
+        try{
+          await fetch(`${API_BASE_URL}/payments/confirm`, {
+            method: 'POST',
+            headers: {
+				'Content-Type':'application/json',
+				'Authorization': `Bearer ${token}`
+			  },
+            body: JSON.stringify({
+              orderId: Number(orderId),
+              paymentIntentId: paymentIntent.id,
+              status: paymentIntent.status
+            })
+          });
+        }catch(e){
+          console.warn('confirm failed (non-blocking)', e);
+        }
+
+        // redirect to success page
+        window.location.href = `/payment-success.html?orderId=${encodeURIComponent(orderId)}&pi=${encodeURIComponent(paymentIntent.id)}`;
+        return;
+      }
+
+      msg.textContent = `Payment status: ${paymentIntent?.status || 'unknown'}. Please try again.`;
+      msg.className = 'msg error';
+      setPayLoading(false);
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

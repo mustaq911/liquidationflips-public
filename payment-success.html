@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payment Successful - Liquidation Flips</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    :root{
+      --bg:#f7f7f8;
+      --panel:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --brand:#2563eb;
+      --brand-2:#1e40af;
+      --border:#e5e7eb;
+      --success:#16a34a;
+      --danger:#dc2626;
+      --chip:#0ea5e9;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+    a{text-decoration:none;color:inherit}
+
+    .page{max-width:980px;margin:0 auto;padding:22px;}
+    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;}
+    @media(max-width: 900px){.grid{grid-template-columns:1fr}}
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:18px;
+      box-shadow:0 16px 40px rgba(15,23,42,0.07);
+    }
+
+    .hero{
+      display:flex;align-items:flex-start;gap:14px;
+      padding:16px 18px;border-radius:16px;
+      border:1px solid rgba(22,163,74,.25);
+      background:rgba(22,163,74,.06);
+      margin-bottom:16px;
+    }
+    .check{
+      width:44px;height:44px;border-radius:12px;
+      display:grid;place-items:center;
+      background:rgba(22,163,74,.15);
+      color:var(--success);
+      font-size:20px;
+      border:1px solid rgba(22,163,74,.25);
+      flex:0 0 auto;
+    }
+    h1{font-size:22px;margin:0 0 6px;}
+    .muted{color:var(--muted);font-size:13px;line-height:1.45}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:12px;color:var(--muted);
+    }
+    .pill strong{color:var(--text)}
+    .pill.success{border-color:rgba(22,163,74,.35)}
+    .pill.success i{color:var(--success)}
+    .pill.info{border-color:rgba(14,165,233,.35)}
+    .pill.info i{color:var(--chip)}
+
+    .row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .row + .row{margin-top:8px}
+    .divider{height:1px;background:var(--border);margin:14px 0}
+
+    .items{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .item{
+      display:grid;grid-template-columns: 64px 1fr auto;
+      gap:12px;align-items:center;
+      padding:10px;border:1px solid var(--border);border-radius:14px;
+      background:#fff;
+    }
+    .thumb{
+      width:64px;height:64px;border-radius:12px;
+      background:linear-gradient(135deg, rgba(37,99,235,.12), rgba(14,165,233,.10));
+      border:1px solid rgba(37,99,235,.15);
+      display:grid;place-items:center;color:#1f2937;
+      overflow:hidden;
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .title{font-weight:700;font-size:14px;margin:0}
+    .meta{font-size:12px;color:var(--muted);margin-top:2px}
+    .price{font-weight:800}
+    .qty{
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:12px;color:var(--muted);
+      margin-top:6px;
+    }
+
+    .btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:10px;
+      border:1px solid var(--border);
+      background:#fff;cursor:pointer;
+      font-weight:700;font-size:13px;
+    }
+    .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .btn-primary:hover{background:var(--brand-2)}
+    .btn-ghost{background:transparent}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+
+    .right .card{position:sticky;top:16px}
+    .kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .kpi .box{
+      border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff;
+    }
+    .kpi .label{font-size:12px;color:var(--muted)}
+    .kpi .val{font-size:14px;font-weight:800;margin-top:4px}
+
+    .error{
+      border:1px solid rgba(220,38,38,.25);
+      background:rgba(220,38,38,.06);
+      color:#991b1b;
+      padding:12px;border-radius:14px;
+      font-size:13px;
+    }
+
+    /* Print receipt */
+    @media print{
+      .btnbar, .right{display:none !important;}
+      body{background:#fff}
+      .card{box-shadow:none}
+      .page{max-width:100%;padding:0}
+    }
+  </style>
+</head>
+<body>
+
+		<!-- TOP NAV -->
+  <link rel="stylesheet" href="/css/topnav.css">
+  <div id="topnavContainer"></div>
+
+  <script>
+    fetch("/topnav.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("topnavContainer").innerHTML = html;
+      });
+  </script>
+
+  <script src="/js/config.js"></script>
+  <!-- if you use auth headers, keep auth.js -->
+  <script src="/js/auth.js" defer></script>
+
+  <div class="page">
+    <div class="hero">
+      <div class="check"><i class="fa-solid fa-check"></i></div>
+      <div style="flex:1">
+        <h1>Payment successful</h1>
+        <div class="muted">
+          Thank you! Your payment was processed and your order is now confirmed.
+        </div>
+        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+          <span class="pill success"><i class="fa-solid fa-circle-check"></i> <strong id="pillStatus">PAID</strong></span>
+          <span class="pill info"><i class="fa-solid fa-receipt"></i> Order <strong id="pillOrderId">#—</strong></span>
+          <span class="pill"><i class="fa-regular fa-clock"></i> <span id="pillDate">—</span></span>
+        </div>
+
+        <div class="btnbar">
+          <a class="btn btn-primary" href="/orders.html"><i class="fa-solid fa-bag-shopping"></i> View my orders</a>
+          <a class="btn" href="/product-buynow.html"><i class="fa-solid fa-store"></i> Continue shopping</a>
+          <button class="btn btn-ghost" id="btnPrint"><i class="fa-solid fa-print"></i> Download receipt</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: order items -->
+      <div class="left">
+        <div class="card">
+          <div class="row">
+            <div>
+              <div style="font-weight:900;font-size:16px">Order summary</div>
+              <div class="muted" id="orderSubtitle">Loading order…</div>
+            </div>
+            <div class="pill"><i class="fa-solid fa-shield"></i> Secure checkout</div>
+          </div>
+
+          <div id="errorBox" class="error" style="display:none;margin-top:12px;"></div>
+
+          <div class="items" id="items"></div>
+
+          <div class="divider"></div>
+
+          <div class="row">
+            <div class="muted">Subtotal</div>
+            <div style="font-weight:800" id="subtotal">—</div>
+          </div>
+          <div class="row">
+            <div class="muted">Tax</div>
+            <div style="font-weight:800" id="tax">—</div>
+          </div>
+          <div class="row">
+            <div style="font-weight:900">Total</div>
+            <div style="font-weight:900;font-size:18px" id="total">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: details -->
+      <div class="right">
+        <div class="card">
+          <div style="font-weight:900;font-size:16px">Order details</div>
+          <div class="divider"></div>
+
+          <div class="row">
+            <div class="muted">Order ID</div>
+            <div style="font-weight:900" id="orderId">—</div>
+          </div>
+          <div class="row">
+            <div class="muted">Status</div>
+            <div style="font-weight:900" id="status">—</div>
+          </div>
+          <div class="row">
+            <div class="muted">Created</div>
+            <div style="font-weight:900" id="createdAt">—</div>
+          </div>
+
+          <div class="kpi">
+            <div class="box">
+              <div class="label">Items</div>
+              <div class="val" id="itemCount">—</div>
+            </div>
+            <div class="box">
+              <div class="label">Currency</div>
+              <div class="val" id="currency">—</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <div class="muted">
+            A confirmation was recorded for this payment. You can track progress from “My Orders”.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+	const token  = localStorage.getItem('token');
+    
+
+    function money(amount, currency){
+      if (amount == null) return "—";
+      const n = Number(amount);
+      const cur = (currency || "CAD").toUpperCase();
+      try {
+        return new Intl.NumberFormat('en-CA', { style:'currency', currency: cur }).format(n);
+      } catch {
+        return `${n.toFixed(2)} ${cur}`;
+      }
+    }
+
+    function fmtDate(s){
+      if (!s) return "—";
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return s;
+      return d.toLocaleString();
+    }
+
+    function getOrderId(){
+      const url = new URL(window.location.href);
+      return url.searchParams.get("orderId")
+        || sessionStorage.getItem("stripeOrderId");
+    }
+
+    async function fetchOrder(orderId){
+      // If you need auth header from auth.js, add it here.
+      // Example:
+      // const token = localStorage.getItem('token');
+      // headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) throw new Error(`Order fetch failed: ${res.status}`);
+      return await res.json();
+    }
+
+    function render(order){
+      const orderId = order.id ?? order.orderId;
+
+      const currency = (order.currency || "CAD").toLowerCase();
+      const status = order.status || "PAID";
+
+      const createdAt = order.createdAt || order.created_at;
+      const items = order.items || order.orderItems || [];
+
+      // header pills
+      document.getElementById("pillOrderId").textContent = `#${orderId}`;
+      document.getElementById("pillDate").textContent = fmtDate(createdAt);
+      document.getElementById("pillStatus").textContent = status;
+
+      // right details
+      document.getElementById("orderId").textContent = `#${orderId}`;
+      document.getElementById("status").textContent = status;
+      document.getElementById("createdAt").textContent = fmtDate(createdAt);
+      document.getElementById("currency").textContent = currency.toUpperCase();
+      document.getElementById("itemCount").textContent = items.length;
+
+      document.getElementById("orderSubtitle").textContent =
+        `Order #${orderId} • ${items.length} item(s) • ${currency.toUpperCase()}`;
+
+      // amounts (supports both naming styles)
+      const subtotal = order.subtotal ?? order.subTotal ?? 0;
+      const tax = order.tax ?? 0;
+      const total = order.totalAmount ?? order.total ?? 0;
+
+      document.getElementById("subtotal").textContent = money(subtotal, currency);
+      document.getElementById("tax").textContent = money(tax, currency);
+      document.getElementById("total").textContent = money(total, currency);
+
+      // items list
+      const itemsEl = document.getElementById("items");
+      itemsEl.innerHTML = "";
+
+      if (!items.length){
+        itemsEl.innerHTML = `<div class="muted" style="padding:10px 2px;">No items found on this order.</div>`;
+        return;
+      }
+
+      for (const it of items){
+        const title = it.productTitle || it.title || `Product #${it.productId || ""}`;
+        const qty = it.quantity ?? 1;
+        const unit = it.unitPrice ?? it.price ?? it.amount ?? 0;
+        const lineTotal = (it.lineTotal ?? (Number(unit) * Number(qty)));
+
+        const img = it.productImageUrl || it.image || ""; // optional if your order service returns it
+
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <div class="thumb">
+            ${img ? `<img src="${img}" alt="">` : `<i class="fa-solid fa-box"></i>`}
+          </div>
+          <div>
+            <p class="title">${title}</p>
+            <div class="meta">Product ID: ${it.productId ?? "—"}</div>
+            <div class="qty"><i class="fa-solid fa-hashtag"></i> Qty: <strong>${qty}</strong></div>
+          </div>
+          <div style="text-align:right">
+            <div class="price">${money(lineTotal, currency)}</div>
+            <div class="meta">Unit: ${money(unit, currency)}</div>
+          </div>
+        `;
+        itemsEl.appendChild(div);
+      }
+    }
+
+    async function init(){
+      document.getElementById("btnPrint").addEventListener("click", () => window.print());
+
+      const orderId = getOrderId();
+      if (!orderId){
+        const err = document.getElementById("errorBox");
+        err.style.display = "block";
+        err.textContent = "Missing orderId. Please open this page with ?orderId=YOUR_ID";
+        return;
+      }
+
+      try{
+        const order = await fetchOrder(orderId);
+        render(order);
+      }catch(e){
+        console.error(e);
+        const err = document.getElementById("errorBox");
+        err.style.display = "block";
+        err.textContent = "Could not load order summary. Please check your Order Service endpoint and CORS.";
+        document.getElementById("orderSubtitle").textContent = "Unable to load order.";
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", init);
+  </script>
+
+</body>
+</html>

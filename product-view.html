@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Liquidation Flips</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- ✅ Replace ONLY your <style>...</style> with this (content/HTML stays same) -->
+<style>
+  :root{
+    /* index.html palette */
+    --panel:#ffffff;
+    --text:#111827;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+
+    --blue:#1f3b74;
+    --blue-2:#274d9b;
+
+    /* “primary” = blue theme */
+    --primary: var(--blue);
+    --primary-2: var(--blue-2);
+
+    --shadow:0 10px 28px rgba(0,0,0,.08);
+    --shadow-soft:0 6px 18px rgba(0,0,0,.06);
+    --radius:14px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;
+    background: url("/img/hero-bg.jpg") top center / cover repeat-y fixed;
+    color:var(--text);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a{text-decoration:none;color:inherit}
+
+  /* ===== Page wrapper (like index.html) ===== */
+  .page{max-width:1500px;margin:0 auto;padding:18px 20px 26px}
+
+  /* ===== Breadcrumbs (match strip style) ===== */
+  .breadcrumbs{
+    background:var(--panel);
+    border: 3px solid rgba(31,59,116,.35); /* 1px solid var(--border); */
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);
+    padding:12px 14px;
+    font-size:13px;
+    color:var(--muted);
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .breadcrumbs a{
+    color:var(--primary);
+    font-weight:900;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .chip-back i{opacity:.9}
+
+  /* ===== Header (title + status chip like index “tag”) ===== */
+  .header{
+    background:var(--panel);
+    border: 3px solid rgba(31,59,116,.35); /* 1px solid var(--border); */
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);
+    padding:14px 16px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:14px;
+  }
+  .lot-title{
+    font-size:28px;
+    font-weight:950;
+    line-height:1.2;
+    margin:0;
+    letter-spacing:-.3px;
+    color:var(--primary);
+  }
+  .lot-sub{
+    color:var(--muted);
+    font-size:13px;
+    font-weight:800;
+    margin-top:6px;
+  }
+
+  /* ===== Layout ===== */
+  .layout{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+  @media (max-width: 900px){ .layout{grid-template-columns:1fr} }
+
+  /* ===== Gallery card (like listCard / card) ===== */
+  .gallery{
+    background:var(--panel);
+    border: 3px solid rgba(31,59,116,.35); /* 1px solid var(--border); */
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);
+    padding:14px;
+  }
+
+  .hero{
+    position:relative;
+    height:420px;
+    border-radius:12px;
+    overflow:hidden;
+    background:#eef2f7;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:12px;
+    cursor:zoom-in;
+    border:1px solid rgba(0,0,0,.06);
+  }
+  .hero img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+
+  /* Thumb row (index-like buttons) */
+  .thumbRow{display:flex;align-items:center;gap:10px}
+  .thumbNav{
+    width:40px;height:40px;border-radius:10px;
+    border:1px solid var(--border);
+    background:#fff;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:900;
+    transition:transform .08s ease, box-shadow .12s ease;
+    flex:0 0 auto;
+  }
+  .thumbNav:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
+  .thumbNav:disabled{opacity:.45; cursor:not-allowed; transform:none; box-shadow:none}
+
+  .thumbs{
+    display:flex;
+    gap:8px;
+    overflow:auto;
+    scroll-behavior:smooth;
+    padding:2px 2px;
+    flex:1 1 auto;
+  }
+  .thumbs::-webkit-scrollbar{height:8px}
+  .thumbs::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:10px}
+
+  .thumb{
+    width:74px;height:74px;
+    border-radius:10px;
+    overflow:hidden;
+    background:#e5e7eb;
+    border:2px solid transparent;
+    flex:0 0 auto;
+    cursor:pointer;
+  }
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb.active{
+    border-color: rgba(31,59,116,.70);
+    box-shadow: 0 0 0 2px rgba(31,59,116,.15);
+  }
+
+  /* ===== Summary (right card like pickupBox/detailsPanel) ===== */
+  .summary{
+    background:var(--panel);
+	border: 3px solid rgba(31,59,116,.35); /* 1px solid var(--border); */
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .price{
+    font-size:28px;
+    font-weight:950;
+    color:var(--primary);
+    letter-spacing:-.3px;
+  }
+  .muted{color:var(--muted);font-weight:900;font-size:13px}
+  .countdown{
+	font-weight:950;
+	color:#f21717; /* var(--primary);*/
+	font-size:14px}
+
+  /* Buttons (match index .btn + primaryAction) */
+  .btn{
+    padding:11px 14px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#fff;
+    cursor:pointer;
+    font-weight:900;
+    min-height:42px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
+  .btn-primary{
+    background:var(--primary);
+    border-color:var(--primary);
+    color:#fff;
+  }
+  .btn-primary:hover{background:var(--primary-2);border-color:var(--primary-2)}
+  .btn-block{width:100%}
+
+  .bid-form{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .bid-form input{
+    padding:11px 12px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    font-size:14px;
+    font-weight:900;
+    outline:none;
+    width:160px;
+  }
+  .bid-form input:focus{
+    border-color: rgba(31,59,116,.45);
+    box-shadow: 0 0 0 4px rgba(31,59,116,.12);
+  }
+  #bidMessage{font-size:13px;margin-top:6px;font-weight:900}
+
+  /* Notice box (soft, like index panels) */
+  .notice{
+    background: rgba(31,59,116,.10);
+    border: 1px solid rgba(31,59,116,.35);
+    border-radius: 14px;
+    padding: 12px;
+    color: var(--text);
+    font-size:13px;
+    font-weight:900;
+    line-height:1.4;
+  }
+
+  /* ===== Bottom panels ===== */
+  .panels{display:grid;grid-template-columns:1fr .55fr;gap:18px;margin-top:18px}
+  @media (max-width: 900px){ .panels{grid-template-columns:1fr} }
+
+  .card{
+    background:var(--panel);
+    border: 3px solid rgba(31,59,116,.35); /* 1px solid var(--border); */
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);
+    padding:14px 16px;
+  }
+  .card h3{
+    margin:0 0 10px;
+    font-size:16px;
+    font-weight:950;
+    color:var(--primary);
+  }
+  .desc{white-space:pre-wrap;line-height:1.6;color:var(--text);font-weight:700}
+
+  /* Specs table (match clean look) */
+  .specs{width:100%;border-collapse:collapse}
+  .specs th,.specs td{
+    border-bottom:1px solid var(--border);
+    padding:10px 6px;
+    text-align:left;
+    font-size:13px;
+  }
+  .specs th{width:230px;color:var(--muted);font-weight:900}
+
+  /* Skeletons (keep) */
+  .skeleton{background:linear-gradient(90deg,#f5f5f5,#ececec,#f5f5f5);background-size:200% 100%;animation:shimmer 1.2s infinite}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  .skel-line{height:16px;border-radius:8px;margin:8px 0}
+  .skel-hero{height:420px;border-radius:12px;margin-bottom:10px}
+
+  /* Manifest pagination (blue themed like index buttons) */
+  .manifest-pagination{
+    margin-top:10px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    align-items:center;
+    font-size:13px;
+  }
+  .manifest-pagination button{
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#fff;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:900;
+    transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .manifest-pagination button:hover{
+    transform:translateY(-1px);
+    box-shadow:0 6px 16px rgba(0,0,0,.06);
+  }
+  .manifest-pagination button.active{
+    background:var(--primary);
+    color:#fff;
+    border-color:var(--primary);
+  }
+  .manifest-pagination button:hover:not(.active){
+    background: rgba(31,59,116,.10);
+    border-color: rgba(31,59,116,.35);
+    color: var(--primary);
+  }
+
+  .manifest-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-top:18px;
+  }
+  .manifest-page-size{display:flex;align-items:center;gap:8px}
+  .manifest-page-size select{
+    padding:10px 10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    font-size:13px;
+    background:#fff;
+    font-weight:900;
+    outline:none;
+  }
+  .manifest-page-size select:focus{
+    border-color: rgba(31,59,116,.45);
+    box-shadow: 0 0 0 4px rgba(31,59,116,.12);
+  }
+
+  /* Lightbox (keep but soften controls) */
+  .lightbox{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.86);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    padding:16px;
+  }
+  .lightbox.open{display:flex}
+  .lightboxInner{
+    position:relative;
+    width:min(1100px, 100%);
+    height:min(86vh, 760px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .lightboxImg{
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+    border-radius:14px;
+    background:#111;
+    border:1px solid rgba(255,255,255,.10);
+  }
+  .lbBtn{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:44px;height:44px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.22);
+    background:rgba(0,0,0,.35);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    user-select:none;
+  }
+  .lbBtn:hover{background:rgba(0,0,0,.55)}
+  .lbPrev{left:-6px}
+  .lbNext{right:-6px}
+  .lbClose{
+    top:10px; right:10px;
+    transform:none;
+    width:40px;height:40px;
+  }
+  .lbCap{
+    position:absolute;
+    bottom:-38px;
+    left:0; right:0;
+    color:rgba(255,255,255,.88);
+    font-size:13px;
+    text-align:center;
+    font-weight:900;
+  }
+  @media(max-width:700px){
+    .lbPrev{left:6px}
+    .lbNext{right:6px}
+    .lbCap{bottom:-30px}
+  }
+
+  /* Responsive tweaks (match your layout) */
+  @media (max-width: 520px){
+    .page{padding:14px 14px 20px}
+    .lot-title{font-size:22px}
+    .hero{height:320px}
+    .skel-hero{height:320px}
+    .thumb{width:64px;height:64px}
+  }
+  
+  /* ✅ make chip area hold status + message in same row */
+	.headerRight{
+	  display:flex;
+	  align-items:center;
+	  gap:10px;
+	  flex-wrap:wrap; /* wraps on small screens */
+	  justify-content:flex-end;
+	}
+
+	
+	/* Base */
+	.headerMsg{
+	  position:absolute;
+	  left:50%;
+	  transform:translateX(-50%);
+	  display:inline-flex;
+	  align-items:center;
+	  gap:8px;
+	  padding:10px 12px;
+	  border-radius:12px;
+	  font-weight:950;
+	  font-size:18px;
+	  white-space:nowrap;
+	}
+	.headerMsg.hidden{ display:none !important; }
+
+	/* ✅ WIN (green) */
+	.headerMsg.win{
+	  border:1px solid rgba(29,122,89,.35);
+	  background: rgba(29,122,89,.10);
+	  color:#0f7a3d;
+	}
+
+	/* ✅ OUTBID (red border + light orange bg) */
+	.headerMsg.outbid{
+	  border:1px solid rgba(220,38,38,.45);
+	  background: rgba(251,146,60,.18);  /* light orange */
+	  color:#9a3412;                      /* dark orange text */
+	}
+</style>
+
+</head>
+<body>
+
+  <!-- Shared Topnav -->
+  <link rel="stylesheet" href="/css/topnav.css">
+  <div id="topnavContainer"></div>
+
+  <!-- 1. Load CONFIG.js (defines CONFIG.API_BASE_URL) -->
+  <script src="/js/config.js"></script>
+
+  <!-- 2. Load auth.js after config -->
+  <script src="/js/auth.js" defer></script>
+
+  <div class="page">
+    <div class="breadcrumbs">
+      <div class="chip-back">
+        <a href="/index.html"><i class="fa-solid fa-chevron-left"></i> Back to Browse</a>
+      </div>
+    </div>
+
+    <div class="header">
+      <div>
+        <h1 class="lot-title" id="lotTitle"><span class="skel-line skeleton" style="width:60%;display:inline-block"></span></h1>
+        <div class="lot-sub" id="lotSub"><span class="skeleton skel-line" style="width:220px;display:inline-block;height:12px"></span></div>
+	  </div>
+	  
+       <div class="headerRight">
+		  <div class="headerMsg hidden" id="headerWonMsg">
+			<i class="fa-solid fa-trophy"></i>
+			<span id="headerWonText">🏆 Congratulations!🎉 You already won</span>
+		  </div>
+
+		  <div class="chip" id="lotStatus">AUCTION</div>
+		</div>
+    </div>
+
+    <div class="layout">
+      <!-- Left: Gallery -->
+      <div class="gallery" id="gallery">
+        <div class="hero" id="hero">
+          <div class="skel-hero skeleton" style="width:100%"></div>
+        </div>
+
+        <!-- NEW: arrow + scrolling thumbnails -->
+        <div class="thumbRow">
+          <button class="thumbNav" id="thumbPrev" aria-label="Previous thumbnails">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+
+          <div class="thumbs" id="thumbs"></div>
+
+          <button class="thumbNav" id="thumbNext" aria-label="Next thumbnails">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Summary & Bidding -->
+      <div class="summary">
+        <div class="row">
+          <div>
+            <div class="totalMsrpDisplay">Total MSRP :</div>
+            <div class="price" id="totalMsrpDisplay">$—</div>
+          </div>
+          <div>
+            <div class="totalMsrpDisplay">Time Left</div>
+            <div class="countdown" id="countdown">—</div>
+          </div>
+        </div>
+
+        <!-- <div class="row">
+          <div class="muted">Max Bid</div>
+          <div class="highestBid" id="maxBid">$0</div>
+        </div>
+
+        <div class="row">
+          <div class="muted">Won Max User</div>
+          <div class="highestBid" id="wonMaxId">—</div>
+        </div> -->
+
+        <div class="row">
+          <div class="totalMsrpDisplay">Highest Bid</div>
+          <div class="totalMsrpDisplay" id="highestBid">$0.00</div>
+        </div>
+
+        <div class="row">
+          <div class="muted">Lot ID</div>
+          <div id="lotId">—</div>
+        </div>
+
+        <div class="row">
+          <div class="muted">Category</div>
+          <div id="lotCategory">—</div>
+        </div>
+
+        <div class="bid-form">
+          <input type="number" id="bidAmount" placeholder="Enter amount" />
+          <button class="btn btn-primary" id="bidNow"><i class="fa-solid fa-gavel"></i> Bid Now</button>
+        </div>
+
+        <div id="bidIncrement"></div>
+        <input type="hidden" id="minAllowedBidValue" value="0" />
+        <input type="hidden" id="wonUserId" value="0" />
+        <div id="bidMessage"></div>
+
+        <button class="btn" id="watchBtn"><i class="fa-regular fa-bookmark"></i> Add to Watchlist</button>
+
+        <div class="notice">
+          New registrants may be asked to use alternate payment methods for the first invoice as part of credit card security procedures.
+        </div>
+      </div>
+    </div>
+
+    <div class="panels">
+      <div class="card">
+        <h3>Description</h3>
+        <div class="desc" id="description">Loading description…</div>
+
+        <h3 style="margin-top:20px">Specifications</h3>
+        <table class="specs">
+          <tbody>
+            <tr><th>Condition</th><td id="specCondition">—</td></tr>
+            <tr><th>Brand</th><td id="specBrand">—</td></tr>
+            <tr><th>Model</th><td id="specModel">—</td></tr>
+            <tr><th>SKU / Code</th><td id="specSku">—</td></tr>
+          </tbody>
+        </table>
+
+        <!-- Manifest section (your original) -->
+        <div class="manifest-header" style="margin-top:20px;">
+          <h3 style="margin:0;">Manifest</h3>
+
+          <div class="manifest-page-size">
+            <label for="manifestPageSize" class="muted" style="font-size:12px;margin-right:4px;">
+              Rows per page:
+            </label>
+            <select id="manifestPageSize">
+              <option value="5" selected>5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="manifestContainer">
+          <div class="muted" style="font-size:14px;">Loading manifest…</div>
+        </div>
+
+        <button class="btn btn-primary" id="downloadManifestBtn" style="margin-bottom:10px;">
+          <i class="fa-solid fa-file-excel"></i> Download Manifest (Excel)
+        </button>
+      </div>
+
+      <div class="card">
+        <h3>Pickup / Location</h3>
+        <div class="muted">
+          Location: <span id="pickupLocation">—</span><br/>
+          Pickup Window: <span id="pickupWindow">—</span>
+        </div>
+
+        <h3 style="margin-top:20px">Auction Terms</h3>
+        <div class="muted" style="font-size:14px;line-height:1.55">
+          All lots are sold as-is. Please read the buyer’s info & terms before bidding.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== NEW: Lightbox DOM ====== -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightboxInner" role="dialog" aria-modal="true" aria-label="Image viewer">
+      <img class="lightboxImg" id="lbImg" alt="Full view" />
+      <button class="lbBtn lbClose" id="lbClose" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <button class="lbBtn lbPrev" id="lbPrev" aria-label="Previous image">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button class="lbBtn lbNext" id="lbNext" aria-label="Next image">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      <div class="lbCap" id="lbCap"></div>
+    </div>
+  </div>
+
+  <!-- SockJS / STOMP -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+  <script>
+    // ========= Config & Auth =========
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+    console.log("API Base URL:", API_BASE_URL);
+
+    const token  = localStorage.getItem("token");
+    const userid = localStorage.getItem("userid");
+
+    // Manifest pagination state
+    let manifestList = [];
+    let manifestCurrentPage = 1;
+    let manifestPageSize = 5;
+
+    // ========= Helpers =========
+    const qs  = (s, r=document) => r.querySelector(s);
+    const qsa = (s, r=document) => Array.from(r.querySelectorAll(s));
+    const fmtMoney = (x) => {
+      if (x == null) return '$—';
+      const n = Number(x);
+      return Number.isNaN(n) ? '$—' : `$${n.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    };
+    const getIdFromQuery = () => new URLSearchParams(location.search).get("id");
+
+
+	// ===== Helper Method to Show WON-MESSAGE 
+	let __headerTimer = null;
+
+	function showHeaderMessage(type, text, autoHideMs = 0){
+	  const box = document.getElementById('headerWonMsg');
+	  const t = document.getElementById('headerWonText');
+	  if(!box || !t) return;
+
+	  // reset
+	  box.classList.remove('hidden', 'win', 'outbid');
+	  box.classList.add(type);  // "win" | "outbid"
+	  t.textContent = text;
+
+	  if (__headerTimer) clearTimeout(__headerTimer);
+	  __headerTimer = null;
+
+	  if (autoHideMs > 0){
+		__headerTimer = setTimeout(() => {
+		  box.classList.add('hidden');
+		  box.classList.remove('win','outbid');
+		  __headerTimer = null;
+		}, autoHideMs);
+	  }
+	}
+
+	// ===== Helper Method to Hide WON-MESSAGE 
+	function hideHeaderMessage(){
+	  const box = document.getElementById('headerWonMsg');
+	  if(!box) return;
+	  if (__headerTimer) clearTimeout(__headerTimer);
+	  __headerTimer = null;
+	  box.classList.add('hidden');
+	  box.classList.remove('win','outbid');
+	}
+	
+	
+	
+    function timeLeftLabel(endIso){
+      if(!endIso) return '—';
+      const end = new Date(endIso).getTime();
+      const now = Date.now();
+      const diff = end - now;
+      if (diff <= 0) return 'Ended';
+      const d = Math.floor(diff/86400000);
+      const h = Math.floor((diff%86400000)/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      const s = Math.floor((diff%60000)/1000);
+      if (d>0) return `${d}d ${h}h ${m}m`;
+      if (h>0) return `${h}h ${m}m ${s}s`;
+      return `${m}m ${s}s`;
+    }
+
+    // ========= NEW: Gallery State =========
+    let GALLERY_IMAGES = [];
+    let ACTIVE_INDEX = 0;
+
+    function setActiveIndex(idx){
+      if (!GALLERY_IMAGES.length) return;
+      ACTIVE_INDEX = Math.max(0, Math.min(idx, GALLERY_IMAGES.length - 1));
+      renderHero(GALLERY_IMAGES[ACTIVE_INDEX]);
+      highlightThumb(ACTIVE_INDEX);
+      updateThumbNavDisabled();
+    }
+
+    function renderHero(url){
+      const hero = qs('#hero');
+      hero.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = url || 'https://via.placeholder.com/800x600?text=No+Image';
+      img.alt = 'Product';
+      img.loading = 'eager';
+      hero.appendChild(img);
+
+      // Click main image => open lightbox
+      hero.onclick = () => openLightbox(ACTIVE_INDEX);
+    }
+
+    function highlightThumb(index){
+      const thumbs = qs('#thumbs');
+      qsa('.thumb', thumbs).forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+
+      // Ensure active thumb visible
+      const activeEl = thumbs.querySelector(`.thumb:nth-child(${index+1})`);
+      if (activeEl) activeEl.scrollIntoView({behavior:'smooth', block:'nearest', inline:'nearest'});
+    }
+
+    function renderThumbs(images){
+      const thumbs = qs('#thumbs');
+      thumbs.innerHTML = '';
+
+      images.forEach((src, idx) => {
+        const t = document.createElement('div');
+        t.className = 'thumb' + (idx===0 ? ' active' : '');
+        t.innerHTML = `<img src="${src}" alt="thumb ${idx+1}" loading="lazy">`;
+        t.addEventListener('click', () => setActiveIndex(idx));
+        thumbs.appendChild(t);
+      });
+
+      updateThumbNavDisabled();
+    }
+
+    function scrollThumbs(direction){
+      const thumbs = qs('#thumbs');
+      const amount = 260; // px scroll step
+      thumbs.scrollBy({ left: direction * amount, behavior: 'smooth' });
+    }
+
+    function updateThumbNavDisabled(){
+      const prev = qs('#thumbPrev');
+      const next = qs('#thumbNext');
+
+      // If less than 2 images, disable both
+      if (GALLERY_IMAGES.length <= 1){
+        prev.disabled = true;
+        next.disabled = true;
+        return;
+      }
+
+      // Not strictly needed to disable, but keep enabled
+      prev.disabled = false;
+      next.disabled = false;
+    }
+
+    // ========= NEW: Lightbox =========
+    const lb = {
+      root: () => qs('#lightbox'),
+      img: () => qs('#lbImg'),
+      cap: () => qs('#lbCap')
+    };
+
+    function openLightbox(index){
+      if (!GALLERY_IMAGES.length) return;
+      const root = lb.root();
+      root.classList.add('open');
+      root.setAttribute('aria-hidden', 'false');
+      setLightboxImage(index);
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(){
+      const root = lb.root();
+      root.classList.remove('open');
+      root.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function setLightboxImage(index){
+      ACTIVE_INDEX = Math.max(0, Math.min(index, GALLERY_IMAGES.length - 1));
+      lb.img().src = GALLERY_IMAGES[ACTIVE_INDEX];
+      lb.cap().textContent = `${ACTIVE_INDEX + 1} / ${GALLERY_IMAGES.length}`;
+      highlightThumb(ACTIVE_INDEX);
+      renderHero(GALLERY_IMAGES[ACTIVE_INDEX]); // keep main in sync
+    }
+
+    function lbNext(){ setLightboxImage((ACTIVE_INDEX + 1) % GALLERY_IMAGES.length); }
+    function lbPrev(){ setLightboxImage((ACTIVE_INDEX - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length); }
+
+    // Close on backdrop click
+    document.addEventListener('click', (e) => {
+      const root = lb.root();
+      if (!root.classList.contains('open')) return;
+      if (e.target === root) closeLightbox();
+    });
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      const root = lb.root();
+      if (!root.classList.contains('open')) return;
+
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') lbNext();
+      if (e.key === 'ArrowLeft') lbPrev();
+    });
+
+    // Button wiring
+    function wireGalleryControls(){
+      qs('#thumbPrev').addEventListener('click', () => scrollThumbs(-1));
+      qs('#thumbNext').addEventListener('click', () => scrollThumbs(1));
+
+      qs('#lbClose').addEventListener('click', closeLightbox);
+      qs('#lbNext').addEventListener('click', lbNext);
+      qs('#lbPrev').addEventListener('click', lbPrev);
+    }
+
+    // ========= Load product =========
+    let product = null;
+    let countdownTimer = null;
+
+    async function loadProduct() {
+      const id = getIdFromQuery();
+      if (!id) { alert("Missing product id"); location.href="/index.html"; return; }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/products/${id}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+        if (!res.ok) throw new Error("Unauthorized");
+        product = await res.json();
+
+        // Header
+        qs('#lotTitle').textContent   = product.title || 'Untitled';
+        qs('#lotSub').textContent     = product.shortDescription || product.subtitle || '';
+        qs('#lotStatus').textContent  = (product.status || 'AUCTION').toString().toUpperCase();
+
+        // ===== Gallery build from product.imageUrl + product.images =====
+        const imgs = [];
+        if (product.imageUrl) imgs.push(product.imageUrl);
+
+        // If product.images is array of strings => push directly
+        // If product.images is array of objects => try .imageUrl/.url/.path
+        if (Array.isArray(product.images)) {
+          product.images.forEach(it => {
+            if (!it) return;
+            if (typeof it === 'string') imgs.push(it);
+            else if (typeof it === 'object') {
+              const u = it.imageUrl || it.url || it.path;
+              if (u) imgs.push(u);
+            }
+          });
+        }
+
+        // De-duplicate
+        const uniqueImgs = Array.from(new Set(imgs.filter(Boolean)));
+        GALLERY_IMAGES = uniqueImgs.length ? uniqueImgs : ['https://via.placeholder.com/800x600?text=No+Image'];
+
+        renderHero(GALLERY_IMAGES[0]);
+        renderThumbs(GALLERY_IMAGES);
+        setActiveIndex(0);
+
+        // Summary
+        qs('#highestBid').textContent  = fmtMoney(product.highestBid);
+        // qs('#maxBid').textContent      = fmtMoney(product.maxBid);
+        qs('#lotId').textContent       = product.id ?? '—';
+        qs('#lotCategory').textContent = (product.category && product.category.name) || product.categoryName || '—';
+        qs('#description').textContent = product.description || 'No description provided.';
+        qs('#specCondition').textContent = product.condition || '—';
+        qs('#specBrand').textContent     = product.brand || '—';
+        qs('#specModel').textContent     = product.model || '—';
+        qs('#specSku').textContent       = product.sku || product.code || '—';
+        qs('#pickupLocation').textContent = product.pickupLocation || '—';
+        qs('#pickupWindow').textContent   = product.pickupWindow || '—';
+
+        qs('#wonUserId').value = product.wonUserId ?? 0;
+		qs('#wonUserId').dataset.prevWinner = (product.wonUserId ?? "").toString();
+        
+		const myId = localStorage.getItem('userid');
+		const iAmWinning = (myId && product.wonUserId != null && String(product.wonUserId) === String(myId));
+
+		
+		
+		if (iAmWinning) {
+		  showHeaderMessage("win", "🏆 Congratulations!🎉 You are currently winning this item.", 0);
+		} else {
+		  // if I have bid before AND I'm not winning => persistent outbid
+		  const iBidBefore = await hasMyBid(product.id); 
+		  if (iBidBefore) {
+			showHeaderMessage("outbid", "⚠️ You have been outbid. Place a higher bid to win.", 0); // persistent
+		  } else {
+			hideHeaderMessage();
+		  }
+		}
+		
+		
+		/** ✅ If already won => show green header message
+		const myId = localStorage.getItem('userid');
+		if (myId && product.wonUserId != null && String(product.wonUserId) === String(myId)) {
+		  showHeaderWonMessage("🏆 Congratulations!🎉 You are currently winning this item.");
+		}*/
+
+        // Countdown
+        startCountdown(product.auctionEnd);
+
+        // Bid increment
+        await loadBidIncrement();
+
+        // Manifest
+        loadManifest(product.id);
+
+      } catch (err) {
+        console.error("Error loading product:", err);
+        alert("Failed to load product. Please log in again.");
+        window.location.href = "/web/login_cu.html";
+      }
+    }
+
+    async function hasMyBid(productId){
+	
+	  const myId = localStorage.getItem("userid");
+	  if (!myId) return false;
+
+	  const res = await fetch(`${API_BASE_URL}/bids/product/${productId}/user/${myId}/exists`, {
+		headers: token ? { "Authorization": `Bearer ${token}` } : {}
+	  });
+	  if (!res.ok) return false;
+	  return await res.json(); // true/false
+	  
+	}
+	
+	async function loadBidIncrement(){
+      const highest = Number((qs('#highestBid')?.textContent || '0').replace(/[^0-9.]/g, '')) || 0;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/bids/increment?amount=${highest}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+
+        if (res.ok) {
+          let inc;
+          const ct = res.headers.get('content-type') || '';
+          inc = ct.includes('application/json') ? await res.json() : parseFloat(await res.text());
+
+          if (!Number.isFinite(inc)) {
+            qs('#bidIncrement').textContent = 'Increment step: $0';
+            return;
+          }
+
+          const minAllowed = highest + inc;
+          qs('#bidIncrement').textContent = `Please enter : ${fmtMoney(minAllowed)} or higher amount`;
+          qs('#minAllowedBidValue').value = String(Number(minAllowed) || 0);
+        } else {
+          qs('#bidIncrement').textContent = 'Increment step: $0';
+        }
+      } catch (err) {
+        console.error("Error loading bid increment:", err);
+      }
+    }
+
+    // ========= Countdown =========
+    function startCountdown(endIso){
+      if (countdownTimer) { clearInterval(countdownTimer); countdownTimer=null; }
+      const el = qs('#countdown');
+      function tick(){ el.textContent = timeLeftLabel(endIso); }
+      tick();
+      countdownTimer = setInterval(tick, 1000);
+    }
+
+    // ========= Bidding Submit() (your original - unchanged logic) =========
+    async function submitBid(){
+      const id = getIdFromQuery();
+      const amount = parseFloat(qs("#bidAmount").value);
+      const msg = qs("#bidMessage");
+
+      msg.textContent = ""; msg.style.color = "";
+
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+      if (!token || !userid) {
+        msg.textContent = "🔒 Please log in to place a bid.";
+        msg.style.color = "red";
+        if (typeof window.openLoginModal === 'function') {
+          if (qs('#authTitle')) qs('#authTitle').textContent = '🔒 Please log in to place a bid.';
+          window.openLoginModal();
+        }
+        return;
+      }
+
+      const minAllowed = Number(qs('#minAllowedBidValue').value || 0);
+      const wonUserId = qs('#wonUserId').value;
+
+      if (!amount || amount <= 0) {
+        msg.textContent = "Please enter a valid bid amount.";
+        msg.style.color = "red";
+        msg.style.fontSize = "15px";
+        msg.style.fontWeight = "bold";
+        setTimeout(() => { msg.textContent = ""; }, 4000);
+        return;
+      }
+      if (amount < minAllowed) {
+        msg.textContent = `❌ Bid must be at least or higher than minum allowed bid : ${fmtMoney(minAllowed)}.`;
+        msg.style.color = "red";
+        msg.style.fontSize = "15px";
+        msg.style.fontWeight = "bold";
+        setTimeout(() => { msg.textContent = ""; }, 4000);
+        return;
+      }
+      // if (wonUserId == userid) {
+	  if (wonUserId && String(wonUserId) === String(userid)) {
+        msg.textContent = `⚠️ You are already the highest bidder.`;
+        msg.style.color = "red";
+        msg.style.fontSize = "15px";
+        msg.style.fontWeight = "bold";
+        setTimeout(() => { msg.textContent = ""; }, 4000);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/bids`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            productId: parseInt(id),
+            userId: parseInt(userid),
+            bidAmount: amount
+          })
+        });
+
+        if (res.ok) {
+          const prod = await res.json();
+
+          if (prod.isAutoOutbid && String(prod.isAutoOutbid).trim() !== ""){
+            msg.textContent = prod.isAutoOutbid;
+            msg.style.color = "red";
+            msg.style.fontSize = "20px";
+            msg.style.fontWeight = "bold";
+            msg.style.padding = "5px 0";
+            setTimeout(() => { msg.textContent = ""; }, 10000);
+          } else {
+            msg.textContent = "✅ Congratulations!🎉 You are the current highest bidder!";
+            msg.style.color = "green";
+            msg.style.fontSize = "20px";
+            msg.style.fontWeight = "bold";
+            msg.style.padding = "5px 0";
+            setTimeout(() => { msg.textContent = ""; }, 5000);
+          }
+        } else {
+          const errText = await res.text();
+          msg.textContent = "❌ Failed to place bid: " + errText;
+          msg.style.color = "red";
+        }
+      } catch (e) {
+        msg.textContent = "❌ Error submitting bid.";
+        msg.style.color = "red";
+      }
+    }
+
+    // ========= Watchlist (UI only placeholder) =========
+    function wireWatch(){
+      const btn = qs('#watchBtn');
+      btn.addEventListener('click', () => {
+        if (btn.dataset.added === '1') {
+          btn.dataset.added = '0';
+          btn.innerHTML = `<i class="fa-regular fa-bookmark"></i> Add to Watchlist`;
+        } else {
+          btn.dataset.added = '1';
+          btn.innerHTML = `<i class="fa-solid fa-bookmark"></i> Watching`;
+        }
+      });
+    }
+
+    // ========= Manifest (your original, kept) =========
+    async function loadManifest(productId) {
+      const container = qs('#manifestContainer');
+      if (!container || !productId) return;
+
+      container.innerHTML = `<div class="muted" style="font-size:14px;">Loading manifest…</div>`;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/manifests/product/${productId}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+
+        if (!res.ok) {
+          container.innerHTML = `<div class="muted" style="font-size:14px;">Manifest not available.</div>`;
+          manifestList = [];
+          const totalMsrpEl = document.getElementById("totalMsrpDisplay");
+          if (totalMsrpEl) totalMsrpEl.textContent = `Total MSRP: $0.00`;
+          return;
+        }
+
+        const list = await res.json();
+        if (!Array.isArray(list) || list.length === 0) {
+          container.innerHTML = `<div class="muted" style="font-size:14px;">No manifest items listed for this lot.</div>`;
+          manifestList = [];
+          const totalMsrpEl = document.getElementById("totalMsrpDisplay");
+          if (totalMsrpEl) totalMsrpEl.textContent = `Total MSRP: $0.00`;
+          return;
+        }
+
+        manifestList = list;
+        manifestCurrentPage = 1;
+
+        let totalMsrpSum = 0;
+        manifestList.forEach(m => {
+          if (m.totalMsrp != null) totalMsrpSum += Number(m.totalMsrp);
+        });
+
+        const totalMsrpEl = document.getElementById("totalMsrpDisplay");
+        if (totalMsrpEl) totalMsrpEl.textContent = ` $${totalMsrpSum.toFixed(2)}`;
+
+        renderManifestPage();
+      } catch (err) {
+        console.error("Error loading manifest:", err);
+        container.innerHTML = `<div class="muted" style="font-size:14px;">Error loading manifest.</div>`;
+        manifestList = [];
+      }
+    }
+
+    function renderManifestPage() {
+      const container = qs('#manifestContainer');
+      if (!container || !Array.isArray(manifestList) || manifestList.length === 0) return;
+
+      const totalItems = manifestList.length;
+      const totalPages = Math.ceil(totalItems / manifestPageSize) || 1;
+
+      if (manifestCurrentPage > totalPages) manifestCurrentPage = totalPages;
+      if (manifestCurrentPage < 1) manifestCurrentPage = 1;
+
+      const startIdx = (manifestCurrentPage - 1) * manifestPageSize;
+      const endIdx = startIdx + manifestPageSize;
+      const pageItems = manifestList.slice(startIdx, endIdx);
+
+      const rowsHtml = pageItems.map(m => `
+        <tr>
+          <td>${m.quantity ?? ''}</td>
+          <td>${m.brand ?? ''}</td>
+          <td>${m.partNumber ?? ''}</td>
+          <td>${m.itemTitle ?? ''}</td>
+          <td>${m.upc ?? ''}</td>
+          <td>${m.sku ?? ''}</td>
+          <td>${m.estimatedMsrp != null ? fmtMoney(m.estimatedMsrp) : ''}</td>
+          <td>${m.totalMsrp != null ? fmtMoney(m.totalMsrp) : ''}</td>
+        </tr>
+      `).join('');
+
+      container.innerHTML = `
+        <table class="specs">
+          <thead>
+            <tr>
+              <th>Qty</th>
+              <th>Brand</th>
+              <th>Part #</th>
+              <th>Item Title</th>
+              <th>UPC</th>
+              <th>SKU</th>
+              <th>Est. MSRP</th>
+              <th>Total MSRP</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div class="manifest-pagination" id="manifestPagination"></div>
+      `;
+
+      const paginationDiv = container.querySelector('#manifestPagination');
+      if (!paginationDiv) return;
+
+      let buttonsHtml = '';
+
+      if (totalPages > 1) {
+        buttonsHtml += `<button type="button" data-page="${manifestCurrentPage - 1}" ${manifestCurrentPage === 1 ? 'disabled' : ''}>Prev</button>`;
+        for (let p = 1; p <= totalPages; p++) {
+          buttonsHtml += `<button type="button" data-page="${p}" class="${p === manifestCurrentPage ? 'active' : ''}">${p}</button>`;
+        }
+        buttonsHtml += `<button type="button" data-page="${manifestCurrentPage + 1}" ${manifestCurrentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+      }
+
+      const showingFrom = startIdx + 1;
+      const showingTo = Math.min(endIdx, totalItems);
+      buttonsHtml += `<span style="margin-left:8px;color:var(--muted);">Showing ${showingFrom}-${showingTo} of ${totalItems}</span>`;
+      paginationDiv.innerHTML = buttonsHtml;
+
+      paginationDiv.querySelectorAll('button[data-page]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetPage = parseInt(btn.getAttribute('data-page'), 10);
+          if (!Number.isNaN(targetPage) && targetPage >= 1 && targetPage <= totalPages) {
+            manifestCurrentPage = targetPage;
+            renderManifestPage();
+          }
+        });
+      });
+    }
+
+    function wireManifestPageSizeControl() {
+      const select = document.getElementById("manifestPageSize");
+      if (!select) return;
+      select.addEventListener("change", () => {
+        const val = parseInt(select.value, 10);
+        manifestPageSize = Number.isNaN(val) ? 10 : val;
+        manifestCurrentPage = 1;
+        renderManifestPage();
+      });
+    }
+
+    // Download Manifest
+    qs('#downloadManifestBtn').addEventListener('click', () => {
+      const id = getIdFromQuery();
+      window.location.href = `${API_BASE_URL}/manifests/product/${id}/excel`;
+    });
+
+    // ========= WebSocket live updates (your original) =========
+    let stompClient = null;
+    function connectSocket(){
+      const id = getIdFromQuery();
+      const socket = new SockJS(`${API_BASE_URL}/ws/auction`);
+      stompClient = Stomp.over(socket);
+      stompClient.debug = null;
+
+      stompClient.connect({}, () => {
+
+        stompClient.subscribe(`/topic/auction.${id}`, async frame => {
+		  const evt = JSON.parse(frame.body || "{}");
+
+		  // 1) Update price UI if provided
+		  if (evt.highestBid != null) {
+			qs('#highestBid').textContent = fmtMoney(evt.highestBid);
+		  }
+		  if (evt.nextMinumBid != null) {
+			qs('#minAllowedBidValue').value = String(Number(evt.nextMinumBid) || 0);
+			qs('#bidIncrement').textContent = `Min next bid: ${fmtMoney(evt.nextMinumBid)}`;
+		  }
+		  if (evt.auctionEnd) startCountdown(evt.auctionEnd);
+
+		  // 2) Winner switching logic MUST run when wonUserId is present
+		  if (evt.wonUserId !== undefined) {
+			const myId = localStorage.getItem('userid');
+			const prevWinner = qs('#wonUserId').dataset.prevWinner || "";   // read old
+			const newWinner  = (evt.wonUserId ?? "").toString();
+
+			// update hidden field AFTER reading prev
+			qs('#wonUserId').value = evt.wonUserId ?? 0;
+			qs('#wonUserId').dataset.prevWinner = newWinner;
+
+			const iAmWinningNow = (myId && newWinner && String(newWinner) === String(myId));
+			const iWasWinningBefore = (myId && prevWinner && String(prevWinner) === String(myId));
+
+			if (iAmWinningNow) {
+			  // outbid -> win OR keep win
+			  showHeaderMessage("win", "🏆 Congratulations!🎉 You are currently winning this item.", 0);
+			} else {
+			  // if I just lost leadership => temporary outbid
+			  if (iWasWinningBefore) {
+				showHeaderMessage("outbid", "⚠️ You have been outbid. Place a higher bid to win.", 0);
+			  } else {
+				// If I have bid before, keep persistent outbid (no timeout)
+				// Important: don't spam API on every WS tick, only when message is empty/hidden
+				const boxHidden = qs('#headerWonMsg').classList.contains('hidden');
+				const isCurrentlyWinMsg = qs('#headerWonMsg').classList.contains('win');
+
+				if (myId && (boxHidden || isCurrentlyWinMsg)) {
+				  const iBidBefore = await hasMyBid(Number(id));
+				  if (iBidBefore) {
+					showHeaderMessage("outbid", "⚠️ You have been outbid. Place a higher bid to win.", 0);
+				  } else {
+					hideHeaderMessage();
+				  }
+				}
+			  }
+			}
+		  }
+		});  // End of stompClient.subscribe()
+      
+	  
+	  }, () => setTimeout(connectSocket, 5000));
+    }
+
+    // ========= Wire UI =========
+    function wireUI(){
+      qs('#bidNow').addEventListener('click', (e) => { e.preventDefault(); submitBid(); });
+      wireWatch();
+    }
+
+    // ========= Init =========
+    (async function init(){
+      wireGalleryControls();          // NEW
+      await loadProduct();
+      wireUI();
+      wireManifestPageSizeControl();
+      connectSocket();
+    })();
+  </script>
+</body>
+</html>

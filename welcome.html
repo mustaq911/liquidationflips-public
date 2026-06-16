@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Welcome – Liquidation Flips</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- (Optional) Your global/topnav stylesheet if you already have one -->
+  <link rel="stylesheet" href="/web2/css/topnav.css"> 
+
+  <style>
+    /* --- Minimal page styling (kept lean; topnav styles remain in topnav.html / global CSS) --- */
+    :root{
+      --bg:#f7f7f8;
+      --panel:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --brand:#2563eb;
+      --success:#22c55e;
+      --border:#e5e7eb;
+      --shadow:0 10px 25px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    a{text-decoration:none}
+
+    /* Layout */
+    .page{max-width:1100px;margin:0 auto;padding:24px}
+    .center{display:flex;align-items:center;justify-content:center}
+
+    /* Card */
+    .card{
+      max-width:760px;margin:40px auto;background:var(--panel);
+      border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);
+      padding:36px 28px;text-align:center;
+    }
+
+    /* Icon */
+    .confetti{
+      width:56px;height:56px;margin:4px auto 10px;display:block;color:var(--success)
+    }
+
+    /* Text */
+    h1{font-size:28px;line-height:1.2;margin:8px 0 6px;font-weight:800}
+    p.subtitle{color:var(--muted);margin:0 0 18px;font-size:15px}
+    p.note{color:#0f5132;background:#d1fae5;border:1px solid #a7f3d0;border-radius:12px;padding:12px 14px;display:inline-block}
+
+    /* CTAs */
+    .actions{margin-top:22px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+    .btn{
+      padding:14px 18px;border-radius:10px;border:1px solid transparent;
+      font-weight:800;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;gap:8px
+    }
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-primary:hover{filter:brightness(.98)}
+    .btn-ghost{background:#fff;border-color:var(--border);color:#374151}
+    .btn-ghost:hover{background:#fafafa}
+
+    /* Footer (simple links row) */
+    .links{margin-top:18px;font-size:14px;color:var(--muted)}
+    .links a{color:#0b5ed7}
+  </style>
+</head>
+<body>
+  <!-- Top nav -->
+  <div id="topnavContainer"></div>
+
+  <div class="page">
+    <div class="card">
+      <!-- Success icon (inline SVG, no external deps) -->
+      <svg class="confetti" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M2 21l7.5-2.5L4.5 13 2 21zm9.9-9.4l4.6 4.6c.2.2.5.2.7 0l2.3-2.3c.2-.2.2-.5 0-.7l-4.6-4.6c-.2-.2-.5-.2-.7 0l-2.3 2.3c-.3.2-.3.5 0 .7zM8.6 7.8l1.6-1.6c.2-.2.2-.5 0-.7L9 3.3c-.2-.2-.5-.2-.7 0L6.8 4.8c-.2.2-.2.5 0 .7l1.6 1.6c.2.2.5.2.7 0zm9.6-2.6l1.1-1.1c.2-.2.2-.5 0-.7l-1.5-1.5c-.2-.2-.5-.2-.7 0l-1.1 1.1c-.2.2-.2.5 0 .7l1.5 1.5c.2.3.5.3.7 0zM13.5 6l1-1c.2-.2.2-.5 0-.7l-1.8-1.8a.5.5 0 0 0-.7 0l-1 1c-.2.2-.2.5 0 .7l1.8 1.8c.2.2.5.2.7 0z"/>
+      </svg>
+
+      <h1>Congratulations, your account has been created!</h1>
+      <p class="subtitle">
+        You can now browse all our deals and newest listings. To start bidding or buying,
+        please verify your email.
+      </p>
+
+      <p class="note">
+        Please check your email and <strong>click the verification link</strong> to activate your account.
+      </p>
+
+	<!-- 
+      <div class="actions">
+        <!-- Update href to your email verification route if you support manual re-send 
+        <a class="btn btn-primary" id="verifyCta" href="#">Get Verified Now ▸</a>
+        <a class="btn btn-ghost" id="laterCta" href="/web2/index.html">No thanks, I’ll verify later</a>
+      </div>
+	 -->
+	 
+      <div class="links">
+        Didn’t receive the email?
+        <a id="resendLink" href="#">Resend verification email</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Load top navigation from the shared partial
+    (async () => {
+      try {
+        const res = await fetch('/web2/topnav.html');
+        const html = await res.text();
+        document.getElementById('topnavContainer').innerHTML = html;
+
+        // Optional: toggle nav links based on auth (token saved at register/login)
+        const token = localStorage.getItem('token');
+        const greet = document.getElementById('greetUser');
+        const bids  = document.getElementById('bidsLink');
+        const watch = document.getElementById('watchLink');
+        const signIn= document.getElementById('signInLink');
+        const signOut= document.getElementById('signOutLink');
+        if (token) {
+          const username = localStorage.getItem('username') || 'User';
+          greet && (greet.textContent = `Hello, ${username}!`, greet.classList.remove('hidden'));
+          [bids,watch,signOut].forEach(el=>el && el.classList.remove('hidden'));
+          signIn && signIn.classList.add('hidden');
+        } else {
+          [greet,bids,watch,signOut].forEach(el=>el && el.classList.add('hidden'));
+          signIn && signIn.classList.remove('hidden');
+        }
+      } catch (e) {
+        console.warn('topnav load failed:', e);
+      }
+    })();
+
+    // ---- Page actions (wire these to your backend)
+    const API_BASE_URL = "http://localhost:8080"; // set for prod
+    const verifyCta = document.getElementById('verifyCta');
+    const resendLink = document.getElementById('resendLink');
+
+    // If you have a route to trigger verification immediately (e.g., send email again)
+    resendLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const email = localStorage.getItem('username'); // or separate 'email'
+        if (!email) return alert('No email found for current session.');
+        const res = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ email })
+        });
+        if (res.ok) {
+          alert('Verification email sent. Please check your inbox.');
+        } else {
+          const t = await res.text();
+          alert(t || 'Could not resend verification email.');
+        }
+      } catch (err) {
+        alert('Network error. Please try again.');
+      }
+    });
+
+    // If you maintain a dedicated page that explains verification or polls status,
+    // point this to it; otherwise keep it as a no-op or link to profile/security:
+    verifyCta.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Example: go to a verification-help page
+      window.location.href = '/web2/verify.html';
+    });
+  </script>
+</body>
+</html>

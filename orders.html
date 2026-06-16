@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Orders - Liquidation Flips</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    :root{
+      --bg:#f7f7f8;
+      --panel:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --brand:#2563eb;
+      --brand-2:#1e40af;
+      --border:#e5e7eb;
+
+      --success:#16a34a;
+      --danger:#dc2626;
+      --warn:#f59e0b;
+      --chip:#0ea5e9;
+
+      --shadow: 0 16px 40px rgba(15,23,42,0.07);
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+    a{text-decoration:none;color:inherit}
+
+    .page{max-width:1180px;margin:0 auto;padding:22px;}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+
+    .hero{
+      display:flex;align-items:flex-start;gap:14px;
+      padding:16px 18px;border-radius:var(--radius);
+      border:1px solid rgba(14,165,233,.25);
+      background:rgba(14,165,233,.06);
+      margin-bottom:16px;
+    }
+    .heroIcon{
+      width:44px;height:44px;border-radius:12px;
+      display:grid;place-items:center;
+      background:rgba(14,165,233,.16);
+      border:1px solid rgba(14,165,233,.25);
+      color:#0369a1;
+      font-size:18px;
+      flex:0 0 auto;
+    }
+    h1{font-size:22px;margin:0 0 6px;}
+    .muted{color:var(--muted);font-size:13px;line-height:1.45}
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:12px;color:var(--muted);
+      white-space:nowrap;
+    }
+    .pill strong{color:var(--text)}
+    .pill.success{border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.05)}
+    .pill.success i{color:var(--success)}
+    .pill.warn{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.06)}
+    .pill.warn i{color:var(--warn)}
+    .pill.danger{border-color:rgba(220,38,38,.35);background:rgba(220,38,38,.06)}
+    .pill.danger i{color:var(--danger)}
+    .pill.info{border-color:rgba(37,99,235,.30);background:rgba(37,99,235,.05)}
+    .pill.info i{color:var(--brand)}
+
+    .toolbar{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+      margin-top:10px;
+    }
+    .input, .select{
+      background:#fff;border:1px solid var(--border);
+      border-radius:12px;padding:10px 12px;
+      font-size:13px;outline:none;
+      min-width:220px;
+    }
+    .select{min-width:180px}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;cursor:pointer;
+      font-weight:800;font-size:13px;
+    }
+    .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .btn-primary:hover{background:var(--brand-2)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0;}
+    @media(max-width:950px){.kpis{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:520px){.kpis{grid-template-columns:1fr}}
+
+    .kpi{
+      border-radius:var(--radius);
+      padding:14px;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+    .kpi .label{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
+    .kpi .val{font-size:18px;font-weight:900;margin-top:6px}
+    .kpi .hint{font-size:12px;color:var(--muted);margin-top:4px}
+
+    .kpi.green{border:1px solid rgba(22,163,74,.25);background:rgba(22,163,74,.06)}
+    .kpi.blue{border:1px solid rgba(37,99,235,.22);background:rgba(37,99,235,.05)}
+    .kpi.red{border:1px solid rgba(220,38,38,.25);background:rgba(220,38,38,.06)}
+    .kpi.amber{border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.07)}
+
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;vertical-align:middle}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+    .tdRight{text-align:right}
+    .tdCenter{text-align:center}
+
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 10px;border-radius:999px;
+      font-size:12px;font-weight:800;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+    .badge.paid{border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.06);color:#14532d}
+    .badge.pending{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.08);color:#7a4b00}
+    .badge.cancelled{border-color:rgba(220,38,38,.35);background:rgba(220,38,38,.08);color:#7f1d1d}
+    .badge.shipped{border-color:rgba(37,99,235,.30);background:rgba(37,99,235,.06);color:#1e3a8a}
+    .badge.completed{border-color:rgba(22,163,74,.30);background:rgba(22,163,74,.05);color:#14532d}
+
+    .orderRow{cursor:pointer}
+    .orderRow:hover{background:rgba(15,23,42,.02)}
+
+    .empty{
+      padding:18px;border-radius:var(--radius);
+      border:1px dashed rgba(15,23,42,.18);
+      background:#fff;
+      text-align:center;
+      color:var(--muted);
+      margin-top:12px;
+    }
+
+    /* Drawer */
+    .drawerBackdrop{
+      position:fixed;inset:0;background:rgba(2,6,23,.40);
+      display:none;align-items:flex-end;justify-content:flex-end;
+      padding:14px; z-index:9999;
+    }
+    .drawer{
+      width:min(520px, 100%);
+      background:#fff;border-radius:18px;
+      border:1px solid rgba(15,23,42,.12);
+      box-shadow:0 30px 90px rgba(2,6,23,.35);
+      overflow:hidden;
+      transform:translateY(10px);
+    }
+    .drawerHeader{
+      padding:14px 16px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      background:linear-gradient(135deg, rgba(37,99,235,.06), rgba(14,165,233,.05));
+    }
+    .drawerTitle{font-weight:900}
+    .drawerBody{padding:14px 16px}
+    .divider{height:1px;background:var(--border);margin:12px 0}
+
+
+    .miniItems{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .miniItem{
+      display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:center;
+      border:1px solid var(--border);border-radius:14px;padding:10px;background:#fff;
+    }
+    .thumb{
+      width:56px;height:56px;border-radius:12px;
+      background:linear-gradient(135deg, rgba(37,99,235,.12), rgba(14,165,233,.10));
+      border:1px solid rgba(37,99,235,.15);
+      display:grid;place-items:center;color:#1f2937;overflow:hidden;
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .tTitle{font-weight:900;font-size:13px;margin:0}
+    .tMeta{font-size:12px;color:var(--muted);margin-top:2px}
+    .tPrice{font-weight:900;text-align:right}
+    .tUnit{font-size:12px;color:var(--muted);text-align:right;margin-top:2px}
+
+    .err{
+      border:1px solid rgba(220,38,38,.25);
+      background:rgba(220,38,38,.06);
+      color:#991b1b;
+      padding:12px;border-radius:14px;
+      font-size:13px;
+      display:none;
+    }
+
+    @media print{
+      .drawerBackdrop, .toolbar, .btn, #topnavContainer {display:none !important;}
+      body{background:#fff}
+      .card{box-shadow:none}
+      .page{max-width:100%;padding:0}
+    }
+  </style>
+</head>
+<body>
+  <!-- TOP NAV -->
+  <link rel="stylesheet" href="/css/topnav.css">
+  <div id="topnavContainer"></div>
+  <script>
+    fetch("/topnav.html")
+      .then(res => res.text())
+      .then(html => { document.getElementById("topnavContainer").innerHTML = html; });
+  </script>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js" defer></script>
+
+  <div class="page">
+    <div class="hero">
+      <div class="heroIcon"><i class="fa-solid fa-bag-shopping"></i></div>
+      <div style="flex:1">
+        <h1>My Orders</h1>
+        <div class="muted">View your previous orders, payment status, and order details.</div>
+
+        <div class="toolbar">
+          <input id="q" class="input" placeholder="Search by Order ID (e.g., 29)" />
+          <select id="statusFilter" class="select">
+            <option value="ALL">All statuses</option>
+            <option value="PENDING_PAYMENT">Pending payment</option>
+            <option value="PAID">Paid</option>
+            <option value="SHIPPED">Shipped</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+            <option value="PAYMENT_FAILED">Payment failed</option>
+          </select>
+
+          <button class="btn btn-primary" id="btnRefresh">
+            <i class="fa-solid fa-rotate"></i> Refresh
+          </button>
+          <button class="btn" id="btnPrint">
+            <i class="fa-solid fa-print"></i> Print
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <span class="pill info"><i class="fa-solid fa-user"></i> <strong id="pillUser">—</strong></span>
+        <span class="pill"><i class="fa-regular fa-clock"></i> <span id="pillNow">—</span></span>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi blue">
+        <div class="label"><i class="fa-solid fa-receipt"></i> Total orders</div>
+        <div class="val" id="kpiTotal">—</div>
+        <div class="hint">All time</div>
+      </div>
+      <div class="kpi green">
+        <div class="label"><i class="fa-solid fa-circle-check"></i> Paid</div>
+        <div class="val" id="kpiPaid">—</div>
+        <div class="hint">Successful payments</div>
+      </div>
+      <div class="kpi amber">
+        <div class="label"><i class="fa-solid fa-hourglass-half"></i> Pending</div>
+        <div class="val" id="kpiPending">—</div>
+        <div class="hint">Awaiting payment</div>
+      </div>
+      <div class="kpi red">
+        <div class="label"><i class="fa-solid fa-ban"></i> Cancelled/Failed</div>
+        <div class="val" id="kpiBad">—</div>
+        <div class="hint">Cancelled or payment failed</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div style="font-weight:900;font-size:16px">Order history</div>
+        <div class="pill"><i class="fa-solid fa-filter"></i> <span id="pillCount">—</span> shown</div>
+      </div>
+
+      <div id="errorBox" class="err" style="margin-top:12px;"></div>
+
+      <div style="overflow:auto;margin-top:10px;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:90px;">Order</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th class="tdCenter" style="width:90px;">Items</th>
+              <th class="tdRight" style="width:160px;">Total</th>
+              <th class="tdRight" style="width:120px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div id="empty" class="empty" style="display:none;">
+        No orders found. <a href="/index.html" style="color:var(--brand);font-weight:800;">Continue shopping</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer -->
+  <div id="drawerBackdrop" class="drawerBackdrop" role="dialog" aria-modal="true">
+    <div class="drawer">
+      <div class="drawerHeader">
+        <div>
+          <div class="drawerTitle" id="dTitle">Order #—</div>
+          <div class="muted" id="dSub">—</div>
+        </div>
+        <button class="btn" id="dClose"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="drawerBody">
+        <div style="display:flex;gap:10px;flex-wrap:wrap" id="dPills"></div>
+
+        <div class="divider"></div>
+
+        <div class="row">
+          <div class="muted">Subtotal</div>
+          <div style="font-weight:900" id="dSubtotal">—</div>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <div class="muted">Tax</div>
+          <div style="font-weight:900" id="dTax">—</div>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <div style="font-weight:900">Total</div>
+          <div style="font-weight:900;font-size:18px" id="dTotal">—</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div style="font-weight:900;">Items</div>
+        <div class="miniItems" id="dItems"></div>
+
+        <div class="divider"></div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn btn-primary" id="dOpenSuccess" href="#"><i class="fa-solid fa-circle-check"></i> Open receipt</a>
+          <a class="btn" href="/index.html"><i class="fa-solid fa-store"></i> Shop again</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+    const token  = localStorage.getItem('token');
+    const userId = localStorage.getItem('userid');
+
+    const state = {
+      orders: []
+    };
+
+    function setNow(){
+      document.getElementById("pillNow").textContent = new Date().toLocaleString();
+      document.getElementById("pillUser").textContent = localStorage.getItem("email") || userId || "—";
+    }
+
+    function money(amount, currency){
+      if (amount == null) return "—";
+      const n = Number(amount);
+      const cur = (currency || "CAD").toUpperCase();
+      try { return new Intl.NumberFormat('en-CA', { style:'currency', currency: cur }).format(n); }
+      catch { return `${n.toFixed(2)} ${cur}`; }
+    }
+    function fmtDate(s){
+      if (!s) return "—";
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return s;
+      return d.toLocaleString();
+    }
+    function normStatus(s){
+      return String(s || "").toUpperCase();
+    }
+    function badge(status){
+      const st = normStatus(status);
+      if (st === "PAID" || st === "SUCCEEDED") return `<span class="badge paid"><i class="fa-solid fa-circle-check"></i> PAID</span>`;
+      if (st === "PENDING_PAYMENT" || st === "PENDING") return `<span class="badge pending"><i class="fa-solid fa-hourglass-half"></i> PENDING</span>`;
+      if (st === "CANCELLED") return `<span class="badge cancelled"><i class="fa-solid fa-ban"></i> CANCELLED</span>`;
+      if (st === "PAYMENT_FAILED" || st === "FAILED") return `<span class="badge cancelled"><i class="fa-solid fa-triangle-exclamation"></i> FAILED</span>`;
+      if (st === "SHIPPED") return `<span class="badge shipped"><i class="fa-solid fa-truck"></i> SHIPPED</span>`;
+      if (st === "COMPLETED") return `<span class="badge completed"><i class="fa-solid fa-flag-checkered"></i> COMPLETED</span>`;
+      return `<span class="badge"><i class="fa-regular fa-circle"></i> ${st || "—"}</span>`;
+    }
+
+    function showErr(msg){
+      const el = document.getElementById("errorBox");
+      if (!msg){ el.style.display="none"; el.textContent=""; return; }
+      el.style.display="block"; el.textContent = msg;
+    }
+
+    // ✅ Change this URL if your order-service endpoint differs
+    async function fetchOrders(orderType){
+      if (!userId || !token) throw new Error("Not logged in");
+	  
+	  let url = `${API_BASE_URL}/orders/user/${userId}`;
+
+	  if (orderType) {
+		url += `?orderType=${encodeURIComponent(orderType)}`;
+	  }
+	  
+      const res = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error(`Fetch orders failed: ${res.status}`);
+      return await res.json();
+    }
+
+    function computeKPIs(list){
+      const total = list.length;
+      let paid=0, pending=0, bad=0;
+      for (const o of list){
+        const st = normStatus(o.status);
+        if (st === "PAID" || st === "SUCCEEDED") paid++;
+        else if (st === "PENDING_PAYMENT" || st === "PENDING") pending++;
+        else if (st === "CANCELLED" || st === "PAYMENT_FAILED" || st === "FAILED") bad++;
+      }
+      document.getElementById("kpiTotal").textContent = total;
+      document.getElementById("kpiPaid").textContent = paid;
+      document.getElementById("kpiPending").textContent = pending;
+      document.getElementById("kpiBad").textContent = bad;
+    }
+
+    function getFiltered(){
+      const q = (document.getElementById("q").value || "").trim();
+      const st = document.getElementById("statusFilter").value;
+      return state.orders.filter(o => {
+        const id = String(o.id ?? o.orderId ?? "");
+        const okQ = !q || id.includes(q);
+        const okS = (st === "ALL") || normStatus(o.status) === st;
+        return okQ && okS;
+      });
+    }
+
+    function renderTable(){
+      const tbody = document.getElementById("tbody");
+      const empty = document.getElementById("empty");
+      const filtered = getFiltered();
+
+      document.getElementById("pillCount").textContent = filtered.length;
+
+      tbody.innerHTML = "";
+      if (!filtered.length){
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+
+      for (const o of filtered){
+        const id = o.id ?? o.orderId;
+        const createdAt = o.createdAt || o.created_at;
+        const items = o.items || o.orderItems || [];
+        const currency = (o.currency || "CAD");
+        const total = o.totalAmount ?? o.total ?? 0;
+
+        const tr = document.createElement("tr");
+        tr.className = "orderRow";
+        tr.innerHTML = `
+          <td><strong>#${id}</strong></td>
+          <td>${badge(o.status)}</td>
+          <td>${fmtDate(createdAt)}</td>
+          <td class="tdCenter">${items.length}</td>
+          <td class="tdRight"><strong>${money(total, currency)}</strong></td>
+          <td class="tdRight">
+            <button class="btn" data-open="${id}">
+              <i class="fa-solid fa-eye"></i> View
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      // wire buttons
+      tbody.querySelectorAll("button[data-open]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute("data-open");
+          const order = state.orders.find(x => String(x.id ?? x.orderId) === String(id));
+          if (order) openDrawer(order);
+        });
+      });
+
+      // row click also opens
+      tbody.querySelectorAll("tr.orderRow").forEach(row => {
+        row.addEventListener("click", () => {
+          const id = row.querySelector("strong").textContent.replace("#","");
+          const order = state.orders.find(x => String(x.id ?? x.orderId) === String(id));
+          if (order) openDrawer(order);
+        });
+      });
+    }
+
+    function openDrawer(order){
+      const backdrop = document.getElementById("drawerBackdrop");
+      const id = order.id ?? order.orderId;
+      const currency = order.currency || "CAD";
+      const status = normStatus(order.status);
+      const createdAt = order.createdAt || order.created_at;
+      const items = order.items || order.orderItems || [];
+
+      document.getElementById("dTitle").textContent = `Order #${id}`;
+      document.getElementById("dSub").textContent = `${fmtDate(createdAt)} • ${items.length} item(s) • ${currency.toUpperCase()}`;
+
+      const pills = document.getElementById("dPills");
+      const pillClass =
+        (status === "PAID" || status === "SUCCEEDED") ? "success" :
+        (status === "PENDING_PAYMENT" || status === "PENDING") ? "warn" :
+        (status === "CANCELLED" || status === "PAYMENT_FAILED" || status === "FAILED") ? "danger" : "info";
+
+      pills.innerHTML = `
+        <span class="pill ${pillClass}"><i class="fa-solid fa-circle"></i> <strong>${status || "—"}</strong></span>
+        <span class="pill info"><i class="fa-solid fa-receipt"></i> Order <strong>#${id}</strong></span>
+        <span class="pill"><i class="fa-regular fa-clock"></i> ${fmtDate(createdAt)}</span>
+      `;
+
+      const subtotal = order.subtotal ?? order.subTotal ?? 0;
+      const tax = order.tax ?? 0;
+      const total = order.totalAmount ?? order.total ?? 0;
+
+      document.getElementById("dSubtotal").textContent = money(subtotal, currency);
+      document.getElementById("dTax").textContent = money(tax, currency);
+      document.getElementById("dTotal").textContent = money(total, currency);
+
+      const dItems = document.getElementById("dItems");
+      dItems.innerHTML = "";
+      if (!items.length){
+        dItems.innerHTML = `<div class="muted" style="padding:10px 2px;">No items found on this order.</div>`;
+      } else {
+        for (const it of items){
+          const title = it.productTitle || it.title || `Product #${it.productId || ""}`;
+          const qty = it.quantity ?? 1;
+          const unit = it.unitPrice ?? it.price ?? it.amount ?? 0;
+          const lineTotal = (it.lineTotal ?? (Number(unit) * Number(qty)));
+          const img = it.productImageUrl || it.image || "";
+
+          const div = document.createElement("div");
+          div.className = "miniItem";
+          div.innerHTML = `
+            <div class="thumb">
+              ${img ? `<img src="${img}" alt="">` : `<i class="fa-solid fa-box"></i>`}
+            </div>
+            <div>
+              <p class="tTitle">${title}</p>
+              <div class="tMeta">Product ID: ${it.productId ?? "—"} • Qty: <strong>${qty}</strong></div>
+            </div>
+            <div>
+              <div class="tPrice">${money(lineTotal, currency)}</div>
+              <div class="tUnit">Unit: ${money(unit, currency)}</div>
+            </div>
+          `;
+          dItems.appendChild(div);
+        }
+      }
+
+      // receipt: open your payment-success page with orderId
+      document.getElementById("dOpenSuccess").href = `/payment-success.html?orderId=${encodeURIComponent(id)}`;
+
+      backdrop.style.display = "flex";
+    }
+
+    function closeDrawer(){
+      document.getElementById("drawerBackdrop").style.display = "none";
+    }
+
+    async function load(){
+      setNow();
+      showErr(null);
+
+      if (!userId || !token){
+        showErr("Please sign in to view your orders.");
+        document.getElementById("empty").style.display = "block";
+        return;
+      }
+
+      try{
+        const list = await fetchOrders("BUY_NOW");
+        // allow backend to return {data:[...]} or [...]
+        state.orders = Array.isArray(list) ? list : (list.data || []);
+        computeKPIs(state.orders);
+        renderTable();
+      }catch(e){
+        console.error(e);
+        showErr("Could not load orders. Please check Order Service endpoint/CORS/auth.");
+        document.getElementById("empty").style.display = "block";
+      }
+    }
+
+    document.getElementById("btnRefresh").addEventListener("click", load);
+    document.getElementById("btnPrint").addEventListener("click", () => window.print());
+    document.getElementById("q").addEventListener("input", renderTable);
+    document.getElementById("statusFilter").addEventListener("change", renderTable);
+
+    document.getElementById("drawerBackdrop").addEventListener("click", (e) => {
+      if (e.target.id === "drawerBackdrop") closeDrawer();
+    });
+    document.getElementById("dClose").addEventListener("click", closeDrawer);
+
+    window.addEventListener("DOMContentLoaded", load);
+  </script>
+</body>
+</html>

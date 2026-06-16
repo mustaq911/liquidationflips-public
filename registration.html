@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Walbas Account Verification</title>
+
+  <script src="/js/config.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <!-- Canada Post AddressComplete -->
+  <!-- Replace this with the exact script/snippet from your AddressComplete dashboard -->
+  <!-- Example only:
+  <script src="https://ws1.postescanada-canadapost.ca/js/addresscomplete-2.30.min.js"></script>
+  -->
+  <script src="/js/canada-post-addresscomplete.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    .section {
+      padding: 30px 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .progress {
+      display: flex;
+      margin-bottom: 25px;
+      gap: 6px;
+    }
+
+    .progress .step {
+      flex: 1;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #e0e0e0;
+      color: #333;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .progress .step.active {
+      background-color: #2196f3;
+      color: #fff;
+    }
+
+    .progress .step.completed {
+      background-color: #4caf50;
+      color: #fff;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #444;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #444;
+    }
+
+    h3 {
+      margin-top: 0;
+      color: #444;
+      font-size: 18px;
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #666;
+      margin-top: 0;
+    }
+
+    form {
+      margin-top: 15px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 15px;
+      min-width: 220px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .form-group .required {
+      color: #c00;
+      margin-right: 4px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="number"],
+    .form-group input[type="password"],
+    .form-group select {
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .form-note {
+      font-size: 12px;
+      color: #777;
+      margin-top: -5px;
+      margin-bottom: 20px;
+    }
+
+    .terms {
+      margin-top: 20px;
+    }
+
+    .terms label {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .terms input[type="checkbox"] {
+      margin-right: 8px;
+      margin-top: 2px;
+    }
+
+    .button-container {
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      background-color: #4caf50;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #43a047;
+    }
+
+    .btn-secondary {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background-color: #d5d5d5;
+    }
+
+    .info-box {
+      background-color: #e7f3fe;
+      border-left: 4px solid #2196f3;
+      padding: 12px 16px;
+      margin: 15px 0;
+      color: #215a89;
+      font-size: 14px;
+    }
+
+    .otp-input {
+      padding: 8px;
+      font-size: 16px;
+      width: 220px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .resend {
+      margin-top: 5px;
+      font-size: 13px;
+      color: #2196f3;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .hidden { display: none !important; }
+    .error { color:#c00; font-size:13px; margin-top:6px; }
+    .success { color:#2e7d32; font-size:13px; margin-top:6px; }
+
+    .step-page {
+      background-color: #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      padding: 25px;
+      margin-bottom: 40px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .stripe-box {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      background: #fff;
+      margin-top: 8px;
+    }
+
+    .status-box {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .status-box.ok {
+      display: block;
+      background: #e8f5e9;
+      border-left: 4px solid #2e7d32;
+      color: #1b5e20;
+    }
+
+    .status-box.bad {
+      display: block;
+      background: #fdecea;
+      border-left: 4px solid #c62828;
+      color: #8a1f1f;
+    }
+
+    .payment-forms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .payment-forms .address-panel {
+      flex: 1;
+      min-width: 320px;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      padding: 16px;
+      background: #fafafa;
+    }
+
+    .checkbox-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .address-search-note {
+      font-size: 12px;
+      color: #777;
+      margin-top: -8px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<link rel="stylesheet" href="/css/topnav.css">
+<div id="topnavContainer"></div>
+
+<script>
+  (async () => {
+    const res = await fetch('/topnav.html');
+    document.getElementById('topnavContainer').innerHTML = await res.text();
+    const username = localStorage.getItem('username');
+    const greet = document.getElementById('greetUser');
+    if (greet) greet.textContent = username ? `Hello, ${username}!` : 'Hello!';
+  })();
+</script>
+
+<div class="section">
+
+  <!-- STEP 1 -->
+  <div class="step-page" id="step1">
+    <div class="progress">
+      <div class="step active">Profile</div>
+      <div class="step">Phone</div>
+      <div class="step">Payment</div>
+      <div class="step">Notifications</div>
+    </div>
+
+    <h1>Completing your account verification is quick and easy!</h1>
+    <p>Just 4 quick steps to set up your basic info, confirm your identity and set up your payment &amp; notification settings.</p>
+
+    <h2>Profile Details</h2>
+
+    <form>
+      <div class="form-group">
+        <label><span class="required">*</span>Email</label>
+        <input type="email" id="profileEmail" placeholder="you@example.com" readonly>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label><span class="required">*</span>First Name</label>
+          <input type="text" id="firstName" placeholder="First name">
+        </div>
+        <div class="form-group">
+          <label><span class="required">*</span>Last Name</label>
+          <input type="text" id="lastName" placeholder="Last name">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label><span class="required">*</span>Primary Phone Number</label>
+          <input type="tel" id="primaryPhone" placeholder="(123) 456-7890">
+        </div>
+        <div class="form-group">
+          <label>Alternate Phone Number</label>
+          <input type="tel" id="alternatePhone" placeholder="Optional">
+        </div>
+      </div>
+
+      <div class="form-note">
+        By proceeding you agree to receive a verification pin to confirm your phone number as part of your identity confirmation and account setup.
+      </div>
+    </form>
+
+    <div class="terms">
+      <h2>Terms</h2>
+      <p>Be sure to read all of the Buyer’s Info &amp; our <a href="#" style="color:#2196f3; text-decoration:underline;">Terms of Use</a>.</p>
+      <label><input type="checkbox"> I agree to the Terms of Use</label>
+      <label><input type="checkbox"> I'm over 18 years old</label>
+      <label><input type="checkbox"> I understand the following policy</label>
+      <label><input type="checkbox"> Sign up for our newsletter</label>
+    </div>
+
+    <div class="button-container">
+      <button type="button" class="btn" id="nextStep1">Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-page hidden" id="step2">
+    <div class="progress">
+      <div class="step completed">Profile</div>
+      <div class="step active">Phone</div>
+      <div class="step">Payment</div>
+      <div class="step">Notifications</div>
+    </div>
+
+    <h2>Your profile details are complete
+      <span id="step2FirstName"></span>
+      <span id="step2LastName"></span>!
+    </h2>
+
+    <p>We’ve sent a confirmation code to your number ending in
+      <strong><span id="step2PhoneLast4"></span></strong>.
+    </p>
+
+    <div class="form-group" style="max-width:240px;">
+      <label>Verification Code</label>
+      <input type="text" id="otpCode" class="otp-input" placeholder="Enter code">
+      <div id="otpError" class="error hidden">Invalid code. Try again.</div>
+      <div id="otpStatus" class="status-box"></div>
+    </div>
+
+    <div class="button-container button-row">
+      <button type="button" class="btn" id="nextStep2">Next</button>
+      <button type="button" class="btn btn-secondary" id="backStep2">Back</button>
+    </div>
+
+    <div class="resend" id="resendOtp">Didn't get your pin? Resend</div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-page hidden" id="step3">
+    <div class="progress">
+      <div class="step completed">Profile</div>
+      <div class="step completed">Phone</div>
+      <div class="step active">Payment</div>
+      <div class="step">Notifications</div>
+    </div>
+
+    <h2>Great job
+      <span id="step3FirstName"></span>
+      <span id="step3LastName"></span>!
+      your phone number is confirmed!
+    </h2>
+
+    <p>We require a valid payment profile to place a temporary authorization hold.</p>
+    <p>After OTP verification, your hold PaymentIntent is already created. Now enter your address and card details to authorize it.</p>
+
+    <div class="info-box">
+      <strong>Please Note –</strong>
+      This is a <strong>temporary authorization hold</strong>. It is not an immediate captured charge.
+      Stripe success for this flow is <strong>requires_capture</strong>.
+    </div>
+
+    <div class="payment-forms">
+      <div class="address-panel">
+        <h3>Billing Address</h3>
+
+        <div class="form-group">
+          <label><span class="required">*</span>Search Billing Address</label>
+          <input id="billingSearch" type="text" placeholder="Start typing billing address">
+          <div class="address-search-note">Use Canada Post address suggestions.</div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="required">*</span>Street Address</label>
+          <input id="billLine1" type="text" placeholder="Street Address">
+        </div>
+
+        <div class="form-group">
+          <label>Unit #</label>
+          <input id="billLine2" type="text" placeholder="Unit or Suite">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label><span class="required">*</span>City</label>
+            <input id="billCity" type="text" placeholder="City">
+          </div>
+          <div class="form-group">
+            <label><span class="required">*</span>Province</label>
+            <input id="billProvince" type="text" placeholder="Province">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label><span class="required">*</span>Postal Code</label>
+            <input id="billPostal" type="text" placeholder="A1A 1A1">
+          </div>
+          <div class="form-group">
+            <label><span class="required">*</span>Country</label>
+            <input id="billCountry" type="text" value="Canada">
+          </div>
+        </div>
+      </div>
+
+      <div class="address-panel">
+        <h3>Shipping Address</h3>
+
+        <label class="checkbox-inline">
+          <input type="checkbox" id="sameAsBilling" checked>
+          Same as billing
+        </label>
+
+        <div id="shippingBlock">
+          <div class="form-group">
+            <label><span class="required">*</span>Search Shipping Address</label>
+            <input id="shippingSearch" type="text" placeholder="Start typing shipping address">
+            <div class="address-search-note">Use Canada Post address suggestions.</div>
+          </div>
+
+          <div class="form-group">
+            <label><span class="required">*</span>Street Address</label>
+            <input id="shipLine1" type="text" placeholder="Street Address">
+          </div>
+
+          <div class="form-group">
+            <label>Unit #</label>
+            <input id="shipLine2" type="text" placeholder="Unit or Suite">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><span class="required">*</span>City</label>
+              <input id="shipCity" type="text" placeholder="City">
+            </div>
+            <div class="form-group">
+              <label><span class="required">*</span>Province</label>
+              <input id="shipProvince" type="text" placeholder="Province">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><span class="required">*</span>Postal Code</label>
+              <input id="shipPostal" type="text" placeholder="A1A 1A1">
+            </div>
+            <div class="form-group">
+              <label><span class="required">*</span>Country</label>
+              <input id="shipCountry" type="text" value="Canada">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top:20px;">
+      <label><span class="required">*</span>Name on Card</label>
+      <input type="text" id="cardholderName" placeholder="Full name">
+    </div>
+
+    <div class="form-group">
+      <label><span class="required">*</span>Card Details</label>
+      <div id="card-element" class="stripe-box"></div>
+      <div id="cardErrors" class="error"></div>
+    </div>
+
+    <div class="button-container button-row">
+      <button type="button" class="btn btn-secondary" id="backStep3">Back</button>
+      <button type="button" class="btn" id="nextStep3">Authorize Hold</button>
+    </div>
+
+    <div id="holdStatus" class="status-box"></div>
+  </div>
+</div>
+
+<script>
+  const API_BASE_URL = CONFIG?.API_BASE_URL || "";
+  const STRIPE_PUBLIC_KEY =
+    CONFIG?.STRIPE_PUBLIC_KEY ||
+    CONFIG?.STRIPE_PUBLISHABLE_KEY ||
+    "";
+
+  const CANADA_POST_API_KEY =
+    CONFIG?.CANADA_POST_API_KEY ||
+    CONFIG?.CANADA_POST_ADDRESSCOMPLETE_KEY ||
+    "";
+
+  const REGISTRATION_HOLD_AMOUNT_CAD = 250.00;
+
+  console.log("CONFIG =", window.CONFIG);
+  console.log("STRIPE_PUBLIC_KEY =", STRIPE_PUBLIC_KEY);
+  console.log("CANADA_POST_API_KEY =", CANADA_POST_API_KEY);
+
+  const qs = (sel, root = document) => root.querySelector(sel);
+  const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  const step1 = qs('#step1');
+  const step2 = qs('#step2');
+  const step3 = qs('#step3');
+
+  let stripe = null;
+  let elements = null;
+  let card = null;
+  let stripeMounted = false;
+  let canadaPostMounted = false;
+
+  const state = {
+    userId: null,
+    holdId: null,
+    paymentIntentId: null,
+    clientSecret: null
+  };
+
+  function showOnly(stepEl) {
+    [step1, step2, step3].forEach(s => s.classList.add('hidden'));
+    stepEl.classList.remove('hidden');
+  }
+
+  function setProgress({ profile, phone, payment }) {
+    const visibleStep = [step1, step2, step3].find(s => !s.classList.contains('hidden'));
+    const steps = qsa('.progress .step', visibleStep);
+    const states = [profile, phone, payment];
+
+    steps.forEach((el, idx) => {
+      el.classList.remove('active', 'completed');
+      const st = states[idx];
+      if (st === 'active') el.classList.add('active');
+      if (st === 'completed') el.classList.add('completed');
+    });
+  }
+
+  function updateStepSummaries(firstName, lastName, phone) {
+    const last4 = (phone || '').replace(/\D/g, '').slice(-4);
+
+    qs('#step2FirstName').textContent = firstName || '';
+    qs('#step2LastName').textContent = lastName ? ` ${lastName}` : '';
+    qs('#step2PhoneLast4').textContent = last4 || '****';
+
+    qs('#step3FirstName').textContent = firstName || '';
+    qs('#step3LastName').textContent = lastName ? ` ${lastName}` : '';
+  }
+
+  function showStatusBox(el, text, ok) {
+    el.className = 'status-box ' + (ok ? 'ok' : 'bad');
+    el.textContent = text;
+  }
+
+  function validateStep1() {
+    const requiredInputs = [
+      qs('#profileEmail'),
+      qs('#firstName'),
+      qs('#lastName'),
+      qs('#primaryPhone')
+    ];
+
+    let ok = true;
+    requiredInputs.forEach(inp => {
+      inp.style.borderColor = '#ccc';
+      if (!inp.value.trim()) {
+        inp.style.borderColor = '#c00';
+        ok = false;
+      }
+    });
+
+    const checks = qsa('.terms input[type="checkbox"]', step1);
+    const mustAgree = [0, 1, 2];
+    let checksOk = true;
+
+    mustAgree.forEach(idx => {
+      const cb = checks[idx];
+      if (cb) {
+        cb.parentElement.style.outline = 'none';
+        if (!cb.checked) {
+          cb.parentElement.style.outline = '2px solid #c00';
+          checksOk = false;
+        }
+      }
+    });
+
+    return ok && checksOk;
+  }
+
+  function validateStep3Address() {
+    const requiredIds = [
+      'billLine1', 'billCity', 'billProvince', 'billPostal', 'billCountry', 'cardholderName'
+    ];
+
+    if (!qs('#sameAsBilling').checked) {
+      requiredIds.push('shipLine1', 'shipCity', 'shipProvince', 'shipPostal', 'shipCountry');
+    }
+
+    let ok = true;
+    requiredIds.forEach(id => {
+      const el = qs(`#${id}`);
+      if (!el) return;
+      el.style.borderColor = '#ccc';
+      if (!el.value.trim()) {
+        el.style.borderColor = '#c00';
+        ok = false;
+      }
+    });
+
+    return ok;
+  }
+
+  async function initStripe() {
+    if (!state.clientSecret) {
+      showStatusBox(qs('#holdStatus'), 'Missing hold client secret.', false);
+      return;
+    }
+
+    if (!STRIPE_PUBLIC_KEY) {
+      showStatusBox(qs('#holdStatus'), 'Missing Stripe public key. Check /js/config.js.', false);
+      return;
+    }
+
+    if (!stripe) stripe = Stripe(STRIPE_PUBLIC_KEY);
+    if (!elements) elements = stripe.elements();
+
+    if (!stripeMounted) {
+      card = elements.create('card', {
+        style: {
+          base: {
+            fontSize: '16px',
+            color: '#111827',
+            '::placeholder': { color: '#9ca3af' }
+          }
+        }
+      });
+
+      card.mount('#card-element');
+
+      card.on('change', function(event) {
+        qs('#cardErrors').textContent = event.error ? event.error.message : '';
+      });
+
+      stripeMounted = true;
+    }
+  }
+
+  function copyBillingToShipping() {
+    qs('#shipLine1').value = qs('#billLine1').value;
+    qs('#shipLine2').value = qs('#billLine2').value;
+    qs('#shipCity').value = qs('#billCity').value;
+    qs('#shipProvince').value = qs('#billProvince').value;
+    qs('#shipPostal').value = qs('#billPostal').value;
+    qs('#shipCountry').value = qs('#billCountry').value;
+  }
+
+  function initShippingSync() {
+    const sameAsBilling = qs('#sameAsBilling');
+    const shippingBlock = qs('#shippingBlock');
+
+    function refreshShippingBlock() {
+      shippingBlock.style.display = sameAsBilling.checked ? 'none' : 'block';
+      if (sameAsBilling.checked) copyBillingToShipping();
+    }
+
+    sameAsBilling.addEventListener('change', refreshShippingBlock);
+
+    ['billLine1','billLine2','billCity','billProvince','billPostal','billCountry'].forEach(id => {
+      qs(`#${id}`)?.addEventListener('input', () => {
+        if (sameAsBilling.checked) copyBillingToShipping();
+      });
+    });
+
+    refreshShippingBlock();
+  }
+
+  function initCanadaPostAddressComplete() {
+    if (canadaPostMounted) return;
+
+    if (!CANADA_POST_API_KEY) {
+      console.warn('Canada Post API key missing in config.');
+      return;
+    }
+
+    if (typeof pca === 'undefined') {
+      console.warn('Canada Post AddressComplete script not loaded.');
+      return;
+    }
+
+    const billingFields = [
+      { element: "billingSearch", field: "", mode: pca.fieldMode.SEARCH },
+      { element: "billLine1", field: "Line1", mode: pca.fieldMode.POPULATE },
+      { element: "billLine2", field: "Line2", mode: pca.fieldMode.POPULATE },
+      { element: "billCity", field: "City", mode: pca.fieldMode.POPULATE },
+      { element: "billProvince", field: "ProvinceName", mode: pca.fieldMode.POPULATE },
+      { element: "billPostal", field: "PostalCode", mode: pca.fieldMode.POPULATE },
+      { element: "billCountry", field: "CountryName", mode: pca.fieldMode.COUNTRY }
+    ];
+
+    const shippingFields = [
+      { element: "shippingSearch", field: "", mode: pca.fieldMode.SEARCH },
+      { element: "shipLine1", field: "Line1", mode: pca.fieldMode.POPULATE },
+      { element: "shipLine2", field: "Line2", mode: pca.fieldMode.POPULATE },
+      { element: "shipCity", field: "City", mode: pca.fieldMode.POPULATE },
+      { element: "shipProvince", field: "ProvinceName", mode: pca.fieldMode.POPULATE },
+      { element: "shipPostal", field: "PostalCode", mode: pca.fieldMode.POPULATE },
+      { element: "shipCountry", field: "CountryName", mode: pca.fieldMode.COUNTRY }
+    ];
+
+    const options = {
+      key: CANADA_POST_API_KEY,
+      culture: "en-ca",
+      languagePreference: "eng"
+    };
+
+    new pca.Address(billingFields, options);
+    new pca.Address(shippingFields, options);
+
+    canadaPostMounted = true;
+  }
+
+  qs('#nextStep1').addEventListener('click', async () => {
+    if (!validateStep1()) {
+      alert('Please complete the required fields and accept the required terms.');
+      return;
+    }
+
+    const email = qs('#profileEmail').value.trim();
+    const phone = qs('#primaryPhone').value.trim();
+    const firstName = qs('#firstName').value.trim();
+    const lastName = qs('#lastName').value.trim();
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/user/phone/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ email, phone }).toString()
+      });
+
+      if (!res.ok) {
+        const msg = await res.text();
+        alert(msg || 'Failed to start phone verification.');
+        return;
+      }
+
+      updateStepSummaries(firstName, lastName, phone);
+      showOnly(step2);
+      setProgress({ profile: 'completed', phone: 'active', payment: null });
+
+    } catch (e) {
+      alert('Network error. Please try again.');
+    }
+  });
+
+  qs('#nextStep2').addEventListener('click', async () => {
+    const email = qs('#profileEmail').value.trim();
+    const phone = qs('#primaryPhone').value.trim();
+    const code = qs('#otpCode').value.trim();
+    const statusBox = qs('#otpStatus');
+
+    if (!code) {
+      alert('Enter the verification code.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/user/phone/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ email, phone, code }).toString()
+      });
+
+      let data = null;
+      try { data = await res.json(); } catch (e) {}
+
+      if (!res.ok) {
+        showStatusBox(statusBox, data?.message || 'Invalid code.', false);
+        return;
+      }
+
+      state.userId =
+        data?.userId ||
+        data?.id ||
+        localStorage.getItem('userid') ||
+        sessionStorage.getItem('registrationUserId') ||
+        null;
+
+      if (!state.userId) {
+        showStatusBox(statusBox, 'OTP verified but userId is missing in response and storage.', false);
+        return;
+      }
+
+      showStatusBox(statusBox, 'OTP verified. Creating hold intent...', true);
+
+
+	  <!-- ON OTP=='success' => Call Payment/holds -->
+     const holdRes = await fetch(`${API_BASE_URL}/payments/holds`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: Number(state.userId),
+          amountCad: REGISTRATION_HOLD_AMOUNT_CAD,
+          idempotencyKey: `hold:user:${state.userId}:amount:${Math.round(REGISTRATION_HOLD_AMOUNT_CAD * 100)}`
+        })
+      });
+
+      let holdData = null;
+      try { holdData = await holdRes.json(); 
+			console.log("holdRes.ok =", holdRes.ok);
+			console.log("holdData =", holdData);
+	  } catch (e) {}
+
+      if (!holdRes.ok) {
+        showStatusBox(statusBox, holdData?.message || 'Failed to create payment hold.', false);
+        return;
+      }
+
+      state.holdId = holdData?.holdId;
+      state.paymentIntentId = holdData?.stripePaymentIntentId;
+      state.clientSecret = holdData?.clientSecret;
+	  
+	  console.log("holdData =", holdData);
+	  console.log("mapped state =", state);
+
+      sessionStorage.setItem('stripeHoldId', state.holdId || '');
+      sessionStorage.setItem('stripeHoldPaymentIntentId', state.paymentIntentId || '');
+      sessionStorage.setItem('stripeHoldClientSecret', state.clientSecret || '');
+      sessionStorage.setItem('registrationUserId', state.userId || '');
+
+      showStatusBox(statusBox, 'OTP verified and payment hold created successfully.', true);
+
+      showOnly(step3);
+      setProgress({ profile: 'completed', phone: 'completed', payment: 'active' });
+      await initStripe();
+      initCanadaPostAddressComplete();
+
+    } catch (e) {
+      showStatusBox(statusBox, 'Network error. Please try again.', false);
+    }
+  });
+
+  qs('#resendOtp').addEventListener('click', async () => {
+    const email = qs('#profileEmail').value.trim();
+    const phone = qs('#primaryPhone').value.trim();
+    const statusBox = qs('#otpStatus');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/user/phone/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ email, phone }).toString()
+      });
+
+      if (!res.ok) {
+        showStatusBox(statusBox, 'Could not resend code.', false);
+        return;
+      }
+
+      showStatusBox(statusBox, 'Code re-sent.', true);
+
+    } catch (e) {
+      showStatusBox(statusBox, 'Network error while resending.', false);
+    }
+  });
+
+  qs('#nextStep3').addEventListener('click', async () => {
+    const holdStatusBox = qs('#holdStatus');
+    const name = qs('#cardholderName').value.trim();
+
+    if (!validateStep3Address()) {
+      showStatusBox(holdStatusBox, 'Please complete the required billing, shipping, and cardholder fields.', false);
+      return;
+    }
+
+    if (!state.clientSecret || !state.holdId || !state.paymentIntentId) {
+      showStatusBox(holdStatusBox, 'Missing hold session. Please restart verification.', false);
+      return;
+    }
+
+    if (!stripe) {
+      showStatusBox(holdStatusBox, 'Stripe is not initialized. Check your public key.', false);
+      return;
+    }
+
+    if (qs('#sameAsBilling').checked) {
+      copyBillingToShipping();
+    }
+
+    qs('#nextStep3').disabled = true;
+    qs('#nextStep3').textContent = 'Authorizing...';
+    qs('#cardErrors').textContent = '';
+
+    try {
+      const { error, paymentIntent } = await stripe.confirmCardPayment(state.clientSecret, {
+        payment_method: {
+          card,
+          billing_details: {
+            name,
+            address: {
+              line1: qs('#billLine1').value.trim(),
+              line2: qs('#billLine2').value.trim(),
+              city: qs('#billCity').value.trim(),
+              state: qs('#billProvince').value.trim(),
+              postal_code: qs('#billPostal').value.trim(),
+              country: 'CA'
+            }
+          }
+        }
+      });
+		
+      if (error) {
+        qs('#cardErrors').textContent = error.message || 'Payment authorization failed.';
+        return;
+      }
+
+      if (paymentIntent?.status === 'requires_capture') {
+        showStatusBox(holdStatusBox, 'Hold authorized. Finalizing with backend...', true);
+
+        const confirmRes = await fetch(`${API_BASE_URL}/payments/holds/confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            holdId: Number(state.holdId),
+            userId: Number(state.userId),
+            paymentIntentId: paymentIntent.id,
+            status: paymentIntent.status,
+            billingAddress: {
+              line1: qs('#billLine1').value.trim(),
+              line2: qs('#billLine2').value.trim(),
+              city: qs('#billCity').value.trim(),
+              province: qs('#billProvince').value.trim(),
+              postalCode: qs('#billPostal').value.trim(),
+              country: qs('#billCountry').value.trim()
+            },
+            shippingAddress: {
+              line1: qs('#shipLine1').value.trim(),
+              line2: qs('#shipLine2').value.trim(),
+              city: qs('#shipCity').value.trim(),
+              province: qs('#shipProvince').value.trim(),
+              postalCode: qs('#shipPostal').value.trim(),
+              country: qs('#shipCountry').value.trim()
+            }
+          })
+        });
+
+        let confirmData = null;
+        try { confirmData = await confirmRes.json(); } catch (e) {}
+
+        if (!confirmRes.ok) {
+          showStatusBox(holdStatusBox, confirmData?.message || 'Stripe succeeded but backend confirm failed.', false);
+          return;
+        }
+
+        showStatusBox(holdStatusBox, 'Deposit hold authorized successfully. Registration payment step completed.', true);
+        
+		// alert('Deposit hold authorized successfully.');
+		setTimeout(() => {
+		  window.location.href = '/index.html?login=1&registered=1';
+		}, 1200);
+		
+        return;
+      }
+
+      showStatusBox(holdStatusBox, `Unexpected Stripe status: ${paymentIntent?.status || 'unknown'}`, false);
+
+    } catch (e) {
+      showStatusBox(holdStatusBox, 'Network or Stripe error during hold authorization.', false);
+    } finally {
+      qs('#nextStep3').disabled = false;
+      qs('#nextStep3').textContent = 'Authorize Hold';
+    }
+  });
+
+  qs('#backStep2').addEventListener('click', () => {
+    showOnly(step1);
+    setProgress({ profile: 'active', phone: null, payment: null });
+  });
+
+  qs('#backStep3').addEventListener('click', () => {
+    showOnly(step2);
+    setProgress({ profile: 'completed', phone: 'active', payment: null });
+
+    const firstName = qs('#firstName').value.trim();
+    const lastName = qs('#lastName').value.trim();
+    const phone = qs('#primaryPhone').value.trim();
+    updateStepSummaries(firstName, lastName, phone);
+  });
+
+  async function loadOnboardingUserByEmail(email) {
+    if (!email) return null;
+    try {
+      const res = await fetch(`${API_BASE_URL}/user/onboarding?email=${encodeURIComponent(email)}`);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  initShippingSync();
+  
+  async function resumePaymentHold(email) {
+  
+	  const res = await fetch(`${API_BASE_URL}/user/onboarding/resume-payment?email=${encodeURIComponent(email)}`);
+
+	  let data = null;
+	  try {
+		data = await res.json();
+	  } catch (e) {
+		data = null;
+	  }
+
+	  if (!res.ok) {
+		throw new Error(data?.message || 'Failed to resume payment hold.');
+	  }
+
+	  state.userId = data.userId;
+	  state.holdId = data.holdId;
+	  state.paymentIntentId = data.paymentIntentId;
+	  state.clientSecret = data.clientSecret;
+
+	  qs('#profileEmail').value = data.email || email;
+	  qs('#firstName').value = data.firstName || '';
+	  qs('#lastName').value = data.lastName || '';
+	  qs('#primaryPhone').value = data.phone || '';
+
+	  updateStepSummaries(
+		data.firstName || '',
+		data.lastName || '',
+		data.phone || ''
+	  );
+
+	  sessionStorage.setItem('stripeHoldId', state.holdId || '');
+	  sessionStorage.setItem('stripeHoldPaymentIntentId', state.paymentIntentId || '');
+	  sessionStorage.setItem('stripeHoldClientSecret', state.clientSecret || '');
+	  sessionStorage.setItem('registrationUserId', state.userId || '');
+  }
+
+  (async function () {
+    const params = new URLSearchParams(window.location.search);
+
+    const verified = params.get('verified') || '';
+    const resume = params.get('resume') || '';
+    const email = params.get('email') || '';
+
+    let firstName = params.get('firstName') || '';
+    let lastName = params.get('lastName') || '';
+    let phone = '';
+
+    if (email) {
+      const user = await loadOnboardingUserByEmail(email);
+      if (user) {
+        firstName = user.firstName || firstName;
+        lastName = user.lastName || lastName;
+        phone = user.phone || '';
+        state.userId = user.id || user.userId || null;
+      }
+    }
+
+    qs('#profileEmail').value = email;
+    qs('#firstName').value = firstName;
+    qs('#lastName').value = lastName;
+    qs('#primaryPhone').value = phone;
+
+    updateStepSummaries(firstName, lastName, phone);
+
+    if (resume === 'payment') {
+	
+	  try {
+		await resumePaymentHold(email);
+
+		showOnly(step3);
+		setProgress({ profile: 'completed', phone: 'completed', payment: 'active' });
+		await initStripe();
+		initCanadaPostAddressComplete();
+		return;
+	  } catch (e) {
+		showStatusBox(qs('#holdStatus'), e.message || 'Unable to resume payment step.', false);
+		showOnly(step3);
+		setProgress({ profile: 'completed', phone: 'completed', payment: 'active' });
+		return;
+	  }
+	}
+
+    if (verified === '1') {
+      showOnly(step1);
+      setProgress({ profile: 'active', phone: null, payment: null });
+      return;
+    }
+
+    showOnly(step1);
+    setProgress({ profile: 'active', phone: null, payment: null });
+  })();
+</script>
+
+</body>
+</html>

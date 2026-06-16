@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create Your Free Account - MZAAD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" href="/css/topnav.css">
+  <script src="/js/config.js"></script>
+
+  <style>
+    :root{
+      --bg:#f7f7f8;
+      --panel:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --brand:#2563eb;
+      --success:#22c55e;
+      --danger:#dc2626;
+      --border:#e5e7eb;
+      --shadow:0 10px 25px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    a{color:var(--panel);text-decoration:none}
+    .page{max-width:960px;margin:0 auto;padding:16px}
+    .card{
+      max-width:640px;margin:32px auto;background:var(--panel);border:1px solid var(--border);
+      border-radius:16px;box-shadow:var(--shadow);padding:28px 28px 24px;
+    }
+    .h1{text-align:center;font-size:28px;font-weight:800;letter-spacing:.2px;margin:6px 0 6px}
+    .subtitle{text-align:center;color:var(--muted);margin:0 0 18px;font-size:14px}
+    form{margin-top:8px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .field{display:block;width:100%}
+    .half{flex:1 1 280px}
+    label span > span:first-child{display:block;font-size:12px;color:var(--muted);margin:8px 4px}
+    input[type="text"], input[type="email"], input[type="password"]{
+      width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;
+      outline:0;transition:border-color .15s ease, box-shadow .15s ease;background:#fff;
+    }
+    input:focus{border-color:#c7d2fe;box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+    .pw-wrap{position:relative}
+    .pw-toggle{
+      position:absolute;right:6px;top:50%;transform:translateY(-50%);
+      border:none;background:#f3f4f6;border-radius:8px;padding:8px 10px;cursor:pointer
+    }
+    .checkbox{display:flex;gap:10px;align-items:flex-start;margin:10px 2px;color:#374151;font-size:14px}
+    .checkbox input{margin-top:3px}
+    .btn{
+      width:100%;margin-top:12px;padding:14px 18px;border:none;border-radius:10px;
+      font-weight:800;font-size:16px;cursor:pointer;background:#22a06b;color:#fff;
+    }
+    .btn:hover{filter:brightness(.98)}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
+    .msg{margin-top:10px;font-size:14px}
+    .msg.error{color:var(--danger)}
+    .msg.ok{color:var(--success)}
+    .small{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
+    .email-status{display:flex;align-items:center;margin-top:4px;font-size:14px;padding-left:4px}
+    .field .email-status span{color:inherit !important;font-size:inherit !important;display:inline;margin:0}
+    .email-status .icon{margin-right:6px;width:16px;height:16px}
+    .email-status.ok{color:var(--success);font-size:16px}
+    .email-status.error{color:var(--danger);font-size:16px}
+    .input-success{border-color:var(--success);box-shadow:0 0 0 4px rgba(34, 197, 94, 0.15)}
+    .input-error{border-color:var(--danger);box-shadow:0 0 0 4px rgba(220, 38, 38, 0.15)}
+    .hidden{display:none !important}
+  </style>
+</head>
+<body>
+  <div id="topnavContainer"></div>
+
+  <div class="page">
+    <div class="card">
+      <h1 class="h1">CREATE YOUR FREE ACCOUNT</h1>
+      <p class="subtitle">Creating your account is quick and easy!</p>
+
+      <form id="regForm" novalidate>
+        <div class="row">
+          <label class="field half">
+            <span><span>* First Name</span></span>
+            <input id="firstName" type="text" placeholder="First Name" required />
+          </label>
+          <label class="field half">
+            <span><span>* Last Name</span></span>
+            <input id="lastName" type="text" placeholder="Last Name" required />
+          </label>
+        </div>
+
+        <label class="field">
+          <span><span>* Email</span></span>
+          <input id="email" type="email" placeholder="you@example.com" required />
+          <div id="emailStatus" class="email-status hidden">
+            <span id="emailStatusIcon"></span>
+            <span id="emailStatusText"></span>
+          </div>
+        </label>
+
+        <label class="field">
+          <span><span>* Password</span></span>
+          <div class="pw-wrap">
+            <input id="password" type="password" placeholder="••••••••" minlength="6" required />
+            <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show or hide password">👁</button>
+          </div>
+        </label>
+
+        <label class="checkbox">
+          <input id="newsletter" type="checkbox" checked />
+          <span>Sign up for our newsletter to stay in the loop about upcoming auctions, hot deals, new products, and more. Don’t worry, you can unsubscribe any time.</span>
+        </label>
+
+        <button id="submitBtn" class="btn" type="submit">CREATE ACCOUNT ▸</button>
+        <div id="formMsg" class="msg" role="status"></div>
+
+        <div class="small">Already have an account? <a href="/web2/login.html">Log in</a></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+    console.log("API Base URL:", API_BASE_URL);
+
+    (async () => {
+      const res = await fetch('topnav.html');
+      document.getElementById('topnavContainer').innerHTML = await res.text();
+
+      const token = localStorage.getItem('token');
+      const greet = document.getElementById('greetUser');
+      const bids = document.getElementById('bidsLink');
+      const watch = document.getElementById('watchLink');
+      const signIn = document.getElementById('signInLink');
+      const signOut = document.getElementById('signOutLink');
+
+      if (token) {
+        const username = localStorage.getItem('username') || 'User';
+        if (greet) {
+          greet.textContent = `Hello, ${username}!`;
+          greet.classList.remove('hidden');
+        }
+        [bids, watch, signOut].forEach(el => el && el.classList.remove('hidden'));
+        signIn && signIn.classList.add('hidden');
+      } else {
+        [greet, bids, watch, signOut].forEach(el => el && el.classList.add('hidden'));
+        signIn && signIn.classList.remove('hidden');
+      }
+    })();
+
+    const fName = document.getElementById('firstName');
+    const lName = document.getElementById('lastName');
+    const email = document.getElementById('email');
+    const pass = document.getElementById('password');
+    const pwToggle = document.getElementById('pwToggle');
+    const form = document.getElementById('regForm');
+    const formMsg = document.getElementById('formMsg');
+    const submit = document.getElementById('submitBtn');
+    const emailStatus = document.getElementById('emailStatus');
+    const emailStatusText = document.getElementById('emailStatusText');
+    const emailStatusIcon = document.getElementById('emailStatusIcon');
+
+    let isEmailAvailable = false;
+    const EMAIL_CHECK_URL = `${API_BASE_URL}/user/validateEmail`;
+
+    pwToggle.addEventListener('click', () => {
+      pass.type = pass.type === 'password' ? 'text' : 'password';
+    });
+
+    function showMsg(text, ok = false) {
+      formMsg.textContent = text || '';
+      formMsg.className = 'msg ' + (ok ? 'ok' : 'error');
+    }
+
+    function showEmailStatus(message, isOk) {
+      emailStatusText.textContent = message;
+      emailStatus.className = `email-status ${isOk ? 'ok' : 'error'}`;
+      emailStatus.classList.remove('hidden');
+
+      const iconSvg = isOk
+        ? `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`
+        : `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.3 12.87-1.43 1.43L12 13.43l-2.87 2.87-1.43-1.43L10.57 12 7.7 9.13l1.43-1.43L12 10.57l2.87-2.87 1.43 1.43L13.43 12l2.87 2.87z"/></svg>`;
+      emailStatusIcon.innerHTML = iconSvg;
+    }
+
+    function validateEmailFormat(value) {
+      return /^\S+@\S+\.\S+$/.test(value);
+    }
+
+    async function checkEmailAvailability() {
+      const e = email.value.trim();
+      email.classList.remove('input-success', 'input-error');
+      emailStatus.classList.add('hidden');
+      isEmailAvailable = false;
+
+      if (!e) return;
+
+      if (!validateEmailFormat(e)) {
+        showEmailStatus("Please enter a valid email.", false);
+        email.classList.add('input-error');
+        return;
+      }
+
+      try {
+        const res = await fetch(EMAIL_CHECK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: e })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          isEmailAvailable = true;
+          showEmailStatus(data.message || "This email is available!", true);
+          email.classList.add('input-success');
+        } else {
+          isEmailAvailable = false;
+          showEmailStatus(data.message || "This email is already in use.", false);
+          email.classList.add('input-error');
+        }
+      } catch (err) {
+        console.error('Email check error:', err);
+        showEmailStatus("Error checking email. Please try again.", false);
+        email.classList.add('input-error');
+      }
+    }
+
+    function debounce(func, delay) {
+      let timeoutId;
+      return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
+
+    const debouncedCheckEmail = debounce(checkEmailAvailability, 500);
+    email.addEventListener('input', debouncedCheckEmail);
+    email.addEventListener('blur', checkEmailAvailability);
+
+    function validate() {
+      if (!fName.value.trim()) { fName.focus(); return "First name is required."; }
+      if (!lName.value.trim()) { lName.focus(); return "Last name is required."; }
+      if (!email.value.trim()) { email.focus(); return "Email is required."; }
+      if (!validateEmailFormat(email.value.trim())) { email.focus(); return "Please enter a valid email."; }
+      if (!isEmailAvailable) { email.focus(); return "Please enter an available email."; }
+      if (!pass.value || pass.value.length < 6) { pass.focus(); return "Password must be at least 6 characters."; }
+      return null;
+    }
+
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      showMsg('');
+
+      const err = validate();
+      if (err) {
+        showMsg(err, false);
+        return;
+      }
+
+      submit.disabled = true;
+      submit.textContent = 'Creating…';
+
+      const payload = {
+        firstName: fName.value.trim(),
+        lastName: lName.value.trim(),
+        email: email.value.trim(),
+        password: pass.value,
+        role: 'CUSTOMER'
+      };
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/user/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const t = await res.text();
+          showMsg(t || 'Registration failed.', false);
+          submit.disabled = false;
+          submit.textContent = 'CREATE ACCOUNT ▸';
+          return;
+        }
+
+        const data = await res.json().catch(() => ({}));
+
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          if (data.user) {
+            localStorage.setItem('userid', String(data.user.id ?? ''));
+            localStorage.setItem('username', data.user.username || data.user.email || payload.email);
+          }
+        }
+
+        showMsg('Account created! Redirecting…', true);
+        setTimeout(() => window.location.href = '/welcome.html', 600);
+      } catch (e) {
+        showMsg('Network error. Please try again.', false);
+        submit.disabled = false;
+        submit.textContent = 'CREATE ACCOUNT ▸';
+      }
+    });
+  </script>
+</body>
+</html>

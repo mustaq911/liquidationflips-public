@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Liquidation Flips - Buy Now</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+ <!-- ✅ Replace ONLY your <style>...</style> in product-buynow.html with this GREEN version -->
+<style>
+  :root{
+    /* product-buy.html green palette */
+    --panel:#ffffff;
+    --text:#111827;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+
+    --green:#1d7a59;
+    --green-2:#176248;
+
+    --primary: var(--green);
+    --primary-2: var(--green-2);
+
+    --shadow:0 10px 28px rgba(0,0,0,.08);
+    --shadow-soft:0 6px 18px rgba(0,0,0,.06);
+    --radius:14px;
+
+    /* ✅ requested blocks */
+    --greenPanelBg: rgba(29,122,89,.08);
+    --greenPanelBd: rgba(10,52,38,.35);
+  }
+
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;
+    background: url("/img/hero-bg.jpg") top center / cover repeat-y fixed;
+    color:var(--text);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a{text-decoration:none;color:inherit}
+
+  .page{max-width:1500px;margin:0 auto;padding:18px 20px 26px}
+
+  /* ===== Breadcrumbs ===== */
+  .breadcrumbs{
+    background:var(--panel);
+    border: 3px solid rgba(10,52,38,.35); /* 1px solid var(--border); */
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);
+    padding:12px 14px;
+    font-size:13px;
+    color:var(--muted);
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .breadcrumbs a{
+    color:var(--primary);
+    font-weight:900;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  /* ===== Header (title + status chip) ===== */
+  .header{
+    background:var(--panel);
+    border: 3px solid rgba(10,52,38,.35); /* 1px solid var(--border); */
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);
+    padding:14px 16px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:14px;
+  }
+  .lot-title{
+    font-size:28px;
+    font-weight:950;
+    line-height:1.2;
+    margin:0;
+    letter-spacing:-.3px;
+    color:var(--primary);
+  }
+  .lot-sub{
+    color:var(--muted);
+    font-size:13px;
+    font-weight:800;
+    margin-top:6px;
+  }
+
+  /* ===== Layout ===== */
+  .layout{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+  @media (max-width: 900px){ .layout{grid-template-columns:1fr} }
+
+  /* ===== Gallery ===== */
+  .gallery{
+    background:var(--panel);
+    border: 3px solid rgba(10,52,38,.35); /*1px solid var(--border);*/
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);
+    padding:14px;
+  }
+  .hero{
+    position:relative;
+    height:420px;
+    border-radius:12px;
+    overflow:hidden;
+    background:#eef2f7;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:12px;
+    cursor: zoom-in;
+    border:1px solid rgba(0,0,0,.06);
+  }
+  .hero img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+
+  /* ===== Thumbs slider (same behavior, green active) ===== */
+  .thumbs-wrap{position:relative;display:flex;align-items:center;gap:10px}
+  .thumbs-viewport{overflow:hidden;width:100%}
+  .thumbs-track{display:flex;gap:8px;transition:transform .25s ease;will-change:transform}
+
+  .thumb{
+    flex:0 0 auto;
+    width:74px;height:74px;
+    border-radius:10px;
+    overflow:hidden;
+    background:#e5e7eb;
+    border:2px solid transparent;
+    cursor:pointer;
+  }
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb.active{
+    border-color: rgba(29,122,89,.70);
+    box-shadow: 0 0 0 2px rgba(29,122,89,.15);
+  }
+
+  .thumb-nav{
+    width:44px;height:44px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:#fff;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    font-weight:900;
+    user-select:none;
+    transition:transform .08s ease, box-shadow .12s ease;
+  }
+  .thumb-nav:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
+  .thumb-nav:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+
+  /* ===== Summary box ===== */
+  .summary{
+    background:var(--panel);
+    border: 3px solid rgba(10,52,38,.35); /* 1px solid var(--border);*/
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .price{
+    font-size:28px;
+    font-weight:950;
+    color:var(--primary);
+    letter-spacing:-.3px;
+  }
+  .muted{color:var(--muted);font-weight:900;font-size:13px}
+
+  /* ✅ Status badges (green theme) */
+  .badge-status{
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:11px;
+    border:1px solid rgba(10,52,38,.35);
+    background: rgba(29,122,89,.10);
+    color: var(--primary);
+    font-weight:900;
+    letter-spacing:.3px;
+  }
+  .badge-status-closed{
+    border-color:#fecaca;
+    background:#fef2f2;
+    color:#b91c1c;
+  }
+
+  /* Buttons (index-like) */
+  .btn{
+    padding:11px 14px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#fff;
+    cursor:pointer;
+    font-weight:900;
+    min-height:42px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .btn:hover{
+	background:var(--primary-2)!important; ;
+	transform:translateY(-1px);
+	box-shadow:0 6px 16px rgba(0,0,0,.06)}
+  .btn-primary{
+    background:var(--primary)!important; ;
+    border-color:var(--primary-2)!important; ;
+    color:#fff;
+  }
+  .btn-primary:hover{background:var(--primary-2);border-color:var(--primary-2)}
+  .btn-block{width:100%}
+
+  /* Quantity input */
+  .qty-row{display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap}
+  .qty-row input{
+    width:90px;
+    padding:11px 12px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#fff;
+    font-size:14px;
+    font-weight:900;
+    outline:none;
+  }
+  .qty-row input:focus{
+    border-color: rgba(29,122,89,.45);
+    box-shadow: 0 0 0 4px rgba(29,122,89,.12);
+  }
+
+  #buyMessage{font-size:13px;margin-top:6px;font-weight:900}
+
+  /* ===== Lower panels ===== */
+  .panels{display:grid;grid-template-columns:1fr .55fr;gap:18px;margin-top:18px}
+  @media (max-width: 900px){ .panels{grid-template-columns:1fr} }
+
+  .card{
+    background:var(--panel);
+    border: 3px solid rgba(10,52,38,.35); /*1px solid var(--border);*/
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);
+    padding:14px 16px;
+  }
+  .card h3{
+    margin:0 0 10px;
+    font-size:16px;
+    font-weight:950;
+    color:var(--primary);
+  }
+  .desc{white-space:pre-wrap;line-height:1.6;color:var(--text);font-weight:700}
+
+  .specs{width:100%;border-collapse:collapse}
+  .specs th,.specs td{
+    border-bottom:1px solid var(--border);
+    padding:10px 6px;
+    text-align:left;
+    font-size:13px;
+  }
+  .specs th{width:230px;color:var(--muted);font-weight:900}
+
+  /* ✅ Notice box (green soft panel) */
+  .notice{
+    background: var(--greenPanelBg);
+    border: 1px solid var(--greenPanelBd);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 12px;
+    font-size:13px;
+    font-weight:900;
+    line-height:1.45;
+  }
+
+  /* Skeletons */
+  .skeleton{background:linear-gradient(90deg,#f5f5f5,#ececec,#f5f5f5);background-size:200% 100%;animation:shimmer 1.2s infinite}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  .skel-line{height:16px;border-radius:8px;margin:8px 0}
+  .skel-hero{height:420px;border-radius:12px;margin-bottom:10px}
+
+  /* ===== Manifest pagination (green themed) ===== */
+  .manifest-pagination{
+    margin-top:10px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    align-items:center;
+    font-size:13px;
+  }
+  .manifest-pagination button{
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#fff;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:900;
+    transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .manifest-pagination button:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
+  .manifest-pagination button.active{
+    background:var(--primary);
+    color:#fff;
+    border-color:var(--primary);
+  }
+  .manifest-pagination button:hover:not(.active){
+    background: rgba(29,122,89,.10);
+    border-color: rgba(10,52,38,.35);
+    color: var(--primary);
+  }
+
+  .manifest-header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .manifest-page-size{display:flex;align-items:center;gap:8px}
+  .manifest-page-size select{
+    padding:10px 10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    font-size:13px;
+    background:#fff;
+    font-weight:900;
+    outline:none;
+  }
+  .manifest-page-size select:focus{
+    border-color: rgba(29,122,89,.45);
+    box-shadow: 0 0 0 4px rgba(29,122,89,.12);
+  }
+
+  /* ===== Lightbox (keep, just rounding consistent) ===== */
+  .lightbox{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.86);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:9999;
+  }
+  .lightbox.open{display:flex}
+  .lightboxInner{
+    position:relative;
+    width:min(1100px, 100%);
+    height:min(86vh, 760px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .lightbox img{
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+    border-radius:14px;
+    background:#111;
+    border:1px solid rgba(255,255,255,.10);
+  }
+  .lbBtn{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:44px;height:44px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.22);
+    background:rgba(0,0,0,.35);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    user-select:none;
+  }
+  .lbBtn:hover{background:rgba(0,0,0,.55)}
+  .lbPrev{left:-6px}
+  .lbNext{right:-6px}
+  .lbClose{top:10px;right:10px;transform:none;width:40px;height:40px}
+  .lbCap{
+    position:absolute;
+    bottom:-34px;
+    left:0; right:0;
+    color:rgba(255,255,255,.88);
+    font-size:13px;
+    text-align:center;
+    font-weight:900;
+  }
+  @media(max-width:700px){
+    .lbPrev{left:6px}
+    .lbNext{right:6px}
+    .lbCap{bottom:-28px}
+  }
+
+  /* ===== ✅ Your requested green blocks (drop-in ready) ===== */
+  .detailsPanel{
+    background: var(--greenPanelBg);
+    border: 1px solid var(--greenPanelBd);
+    border-radius: 14px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 140px 1fr 140px 1fr;
+    gap: 10px 14px;
+    align-items: start;
+  }
+  .pickupBox{
+    background: var(--greenPanelBg);
+    border: 1px solid var(--greenPanelBd);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Mobile */
+  @media (max-width: 520px){
+    .page{padding:14px 14px 20px}
+    .lot-title{font-size:22px}
+    .hero{height:320px}
+    .skel-hero{height:320px}
+    .thumb{width:64px;height:64px}
+  }
+</style>
+
+</head>
+<body>
+
+  <!-- Shared Topnav (keep if you use it) -->
+  <link rel="stylesheet" href="/css/topnav.css">
+  <div id="topnavContainer"></div>
+
+  <!-- Config + Auth -->
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js" defer></script>
+
+  <div class="page">
+    <div class="breadcrumbs">
+      <div class="chip-back">
+        <a href="/product-buy.html"><i class="fa-solid fa-chevron-left"></i> Back to Browse</a>
+      </div>
+    </div>
+
+    <div class="header">
+      <div>
+        <h1 class="lot-title" id="lotTitle">
+          <span class="skel-line skeleton" style="width:60%;display:inline-block"></span>
+        </h1>
+        <div class="lot-sub" id="lotSub">
+          <span class="skeleton skel-line" style="width:220px;display:inline-block;height:12px"></span>
+        </div>
+      </div>
+      <div class="chip">
+        <span id="lotStatusText">BUY-NOW</span>
+      </div>
+    </div>
+
+    <div class="layout">
+      <!-- Left: Gallery -->
+      <div class="gallery">
+        <div class="hero" id="hero">
+          <div class="skel-hero skeleton" style="width:100%"></div>
+        </div>
+
+        <!-- Slider thumbs -->
+        <div class="thumbs-wrap" id="thumbsWrap" style="display:none;">
+          <button class="thumb-nav" id="thumbPrev" type="button" aria-label="Previous images">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+
+          <div class="thumbs-viewport">
+            <div class="thumbs-track" id="thumbsTrack"></div>
+          </div>
+
+          <button class="thumb-nav" id="thumbNext" type="button" aria-label="Next images">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Buy-Now Summary -->
+      <div class="summary">
+        <div class="row">
+          <div>
+            <div class="muted">Buy Now Price</div>
+            <div class="price" id="buyPrice">$—</div>
+          </div>
+          <div>
+            <span id="statusBadge" class="badge-status">AVAILABLE</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="muted">Lot ID</div>
+          <div id="lotId">—</div>
+        </div>
+
+        <div class="row">
+          <div class="muted">Category</div>
+          <div id="lotCategory">—</div>
+        </div>
+
+        <div class="row">
+          <div class="muted">Available Qty</div>
+          <div id="availableQty">—</div>
+        </div>
+
+        <div>
+          <div class="muted">Select Quantity</div>
+          <div class="qty-row">
+            <input type="number" id="buyQty" min="1" value="1" />
+            <span class="muted" id="qtyHelper"></span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="muted">Order Total</div>
+          <div id="orderTotal" style="font-weight:700;">$—</div>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="buyNowBtn">
+          <i class="fa-solid fa-cart-shopping"></i> Buy Now
+        </button>
+
+        <div id="buyMessage"></div>
+
+        <div class="notice">
+          For Buy-Now orders, payment must be completed within the specified time.
+          New customers may be asked to complete additional verification as part of our security procedures.
+        </div>
+      </div>
+    </div>
+
+    <!-- Lower panels -->
+    <div class="panels">
+      <div class="card">
+        <h3>Description</h3>
+        <div class="desc" id="description">Loading description…</div>
+
+        <h3 style="margin-top:20px">Specifications</h3>
+        <table class="specs">
+          <tbody>
+            <tr><th>Condition</th><td id="specCondition">—</td></tr>
+            <tr><th>Brand</th><td id="specBrand">—</td></tr>
+            <tr><th>Model</th><td id="specModel">—</td></tr>
+            <tr><th>SKU / Code</th><td id="specSku">—</td></tr>
+          </tbody>
+        </table>
+
+        <!-- Manifest -->
+        <div class="manifest-header" style="margin-top:20px;">
+          <h3 style="margin:0;">Manifest</h3>
+          <div class="manifest-page-size">
+            <label for="manifestPageSize" class="muted" style="font-size:12px;margin-right:4px;">
+              Rows per page:
+            </label>
+            <select id="manifestPageSize">
+              <option value="5" selected>5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="manifestContainer">
+          <div class="muted" style="font-size:14px;">Loading manifest…</div>
+        </div>
+
+        <button class="btn btn-primary" id="downloadManifestBtn" style="margin-top:10px;">
+          <i class="fa-solid fa-file-excel"></i> Download Manifest (Excel)
+        </button>
+      </div>
+
+      <div class="card">
+        <h3>Pickup / Location</h3>
+        <div class="muted">
+          Location: <span id="pickupLocation">—</span><br/>
+          Pickup Window: <span id="pickupWindow">—</span>
+        </div>
+
+        <h3 style="margin-top:20px">Terms</h3>
+        <div class="muted" style="font-size:14px;line-height:1.55">
+          All Buy-Now items are sold as-is. Please review the item details, manifest,
+          and terms before completing your purchase.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Lightbox (FIXED STRUCTURE) ====== -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightboxInner" role="dialog" aria-modal="true" aria-label="Image viewer">
+      <img id="lightboxImg" alt="preview" />
+      <button class="lbBtn lbClose" id="lbClose" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <button class="lbBtn lbPrev" id="lbPrev" aria-label="Previous image">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button class="lbBtn lbNext" id="lbNext" aria-label="Next image">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      <div class="lbCap" id="lbCap"></div>
+    </div>
+  </div>
+
+  <script>
+    // ========= Helpers =========
+    const qs  = (s, r=document) => r.querySelector(s);
+    const qsa = (s, r=document) => Array.from(r.querySelectorAll(s));
+    const fmtMoney = (x) => {
+      if (x == null) return '$—';
+      const n = Number(x);
+      return Number.isNaN(n) ? '$—' : `$${n.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    };
+    const getIdFromQuery = () => new URLSearchParams(location.search).get("id");
+
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+    const token  = localStorage.getItem("token");
+    const userid = localStorage.getItem("userid");
+
+    let product = null;
+    let unitPrice = 0;
+    let maxQty    = 1;
+
+    // Manifest state
+    let manifestList = [];
+    let manifestCurrentPage = 1;
+    let manifestPageSize = 5;
+
+    // ========= NEW: Gallery + Lightbox State =========
+    let GALLERY_IMAGES = [];
+    let ACTIVE_INDEX = 0;
+
+    function setActiveIndex(idx){
+      if (!GALLERY_IMAGES.length) return;
+      ACTIVE_INDEX = Math.max(0, Math.min(idx, GALLERY_IMAGES.length - 1));
+      renderHero(GALLERY_IMAGES[ACTIVE_INDEX]);
+      highlightThumb(ACTIVE_INDEX);
+      // keep caption up-to-date if lightbox open
+      if (lb.root().classList.contains('open')) setLightboxImage(ACTIVE_INDEX);
+    }
+
+    // ========= Gallery =========
+    function renderHero(url){
+      const hero = qs('#hero');
+      hero.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = url || 'https://via.placeholder.com/800x600?text=No+Image';
+      img.alt = 'Product';
+      hero.appendChild(img);
+
+      // Click hero => open lightbox (with current active index)
+      hero.onclick = () => openLightbox(ACTIVE_INDEX);
+    }
+
+    function highlightThumb(index){
+      const track = qs('#thumbsTrack');
+      if (!track) return;
+      Array.from(track.querySelectorAll('.thumb')).forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+    }
+
+    // Thumbnail slider (with ACTIVE_INDEX integration)
+    function renderThumbsSlider(images){
+      const wrap  = qs('#thumbsWrap');
+      const track = qs('#thumbsTrack');
+      const prev  = qs('#thumbPrev');
+      const next  = qs('#thumbNext');
+
+      if (!wrap || !track || !prev || !next) return;
+
+      if (!images || images.length <= 1) {
+        wrap.style.display = "none";
+        track.innerHTML = "";
+        return;
+      }
+
+      wrap.style.display = "flex";
+      track.innerHTML = "";
+
+      // Slider state
+      let sliderIndex = 0;
+      const GAP = 8;
+      const THUMB_W = 74;
+      const STEP = THUMB_W + GAP;
+
+      function visibleCount(){
+        const viewport = wrap.querySelector('.thumbs-viewport');
+        const w = viewport?.clientWidth || 0;
+        return Math.max(1, Math.floor((w + GAP) / STEP));
+      }
+
+      function maxIndex(){
+        return Math.max(0, images.length - visibleCount());
+      }
+
+      function update(){
+        const mi = maxIndex();
+        if (sliderIndex > mi) sliderIndex = mi;
+        if (sliderIndex < 0) sliderIndex = 0;
+        track.style.transform = `translateX(${-sliderIndex * STEP}px)`;
+        prev.disabled = (sliderIndex === 0);
+        next.disabled = (sliderIndex >= mi);
+      }
+
+      function scrollThumbIntoView(activeIdx){
+        const mi = maxIndex();
+        if (activeIdx < sliderIndex) sliderIndex = activeIdx;
+
+        const vc = visibleCount();
+        if (activeIdx > sliderIndex + vc - 1) sliderIndex = activeIdx - (vc - 1);
+
+        if (sliderIndex < 0) sliderIndex = 0;
+        if (sliderIndex > mi) sliderIndex = mi;
+        update();
+      }
+
+      images.forEach((src, idx) => {
+        const t = document.createElement('div');
+        t.className = 'thumb' + (idx === 0 ? ' active' : '');
+        t.innerHTML = `<img src="${src}" alt="thumb ${idx+1}">`;
+
+        t.addEventListener('click', () => {
+          ACTIVE_INDEX = idx;
+          highlightThumb(ACTIVE_INDEX);
+          renderHero(src);
+          scrollThumbIntoView(idx);
+        });
+
+        track.appendChild(t);
+      });
+
+      prev.onclick = () => { sliderIndex -= 1; update(); };
+      next.onclick = () => { sliderIndex += 1; update(); };
+
+      wrap.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          e.preventDefault();
+          sliderIndex += (e.deltaY > 0 ? 1 : -1);
+          update();
+        }
+      }, { passive: false });
+
+      window.addEventListener('resize', update);
+      update();
+    }
+
+    // ========= Lightbox logic (MATCHES your auction page) =========
+    const lb = {
+      root: () => qs('#lightbox'),
+      img:  () => qs('#lightboxImg'),
+      cap:  () => qs('#lbCap')
+    };
+
+    function openLightbox(index){
+      if (!GALLERY_IMAGES.length) return;
+      const root = lb.root();
+      root.classList.add('open');
+      root.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+      setLightboxImage(index);
+    }
+
+    function closeLightbox(){
+      const root = lb.root();
+      root.classList.remove('open');
+      root.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    function setLightboxImage(index){
+      ACTIVE_INDEX = Math.max(0, Math.min(index, GALLERY_IMAGES.length - 1));
+      lb.img().src = GALLERY_IMAGES[ACTIVE_INDEX];
+      lb.cap().textContent = `${ACTIVE_INDEX + 1} / ${GALLERY_IMAGES.length}`;
+    }
+
+    function lbNext(){ setLightboxImage((ACTIVE_INDEX + 1) % GALLERY_IMAGES.length); }
+    function lbPrev(){ setLightboxImage((ACTIVE_INDEX - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length); }
+
+    // Close on backdrop click
+    document.addEventListener('click', (e) => {
+      const root = lb.root();
+      if (!root.classList.contains('open')) return;
+      if (e.target === root) closeLightbox();
+    });
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      const root = lb.root();
+      if (!root.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') lbNext();
+      if (e.key === 'ArrowLeft') lbPrev();
+    });
+
+    // Button wiring
+    function wireGalleryControls(){
+      const closeBtn = qs('#lbClose');
+      const nextBtn  = qs('#lbNext');
+      const prevBtn  = qs('#lbPrev');
+
+      if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+      if (nextBtn)  nextBtn.addEventListener('click', lbNext);
+      if (prevBtn)  prevBtn.addEventListener('click', lbPrev);
+    }
+
+    // ========= Product load =========
+    async function loadProduct(){
+      const id = getIdFromQuery();
+      if(!id){
+        alert("Missing product id");
+        window.location.href = "/index.html";
+        return;
+      }
+
+      try{
+        const res = await fetch(`${API_BASE_URL}/products/${id}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+
+        if(!res.ok){
+          alert("Failed to load product");
+          return;
+        }
+
+        product = await res.json();
+
+        // Header
+        qs('#lotTitle').textContent  = product.title || 'Untitled';
+        qs('#lotSub').textContent    = product.shortDescription || product.subtitle || '';
+        const statusText = (product.status || 'BUYNOW').toString().toUpperCase();
+        qs('#lotStatusText').textContent = statusText;
+
+        // Status badge
+        const statusBadge = qs('#statusBadge');
+        if(statusText !== 'BUYNOW'){
+          statusBadge.textContent = 'NOT BUY-NOW';
+          statusBadge.classList.add('badge-status-closed');
+          qs('#buyNowBtn').disabled = true;
+        }
+
+        // Gallery images
+        const imgs = [];
+        if(product.imageUrl) imgs.push(product.imageUrl);
+
+        if(Array.isArray(product.images)){
+          product.images.forEach(it => {
+            if (!it) return;
+            if (typeof it === 'string') imgs.push(it);
+            else if (typeof it === 'object') {
+              const u = it.imageUrl || it.url || it.path;
+              if (u) imgs.push(u);
+            }
+          });
+        }
+
+        const uniqueImgs = Array.from(new Set(imgs.filter(Boolean)));
+        GALLERY_IMAGES = uniqueImgs.length ? uniqueImgs : ['https://via.placeholder.com/800x600?text=No+Image'];
+
+        ACTIVE_INDEX = 0;
+        renderHero(GALLERY_IMAGES[0]);
+        renderThumbsSlider(GALLERY_IMAGES);
+
+        // Price + qty
+        unitPrice = Number(product.buyNowPrice ?? product.basePrice ?? 0) || 0;
+        maxQty    = Number(product.quantity ?? product.stockQty ?? 1) || 1;
+
+        qs('#buyPrice').textContent  = fmtMoney(unitPrice);
+        qs('#lotId').textContent     = product.id ?? '—';
+        qs('#lotCategory').textContent = (product.category && product.category.name) || product.categoryName || '—';
+        qs('#availableQty').textContent = maxQty;
+        qs('#qtyHelper').textContent = maxQty ? `(max ${maxQty})` : '';
+
+        // Description + specs
+        qs('#description').textContent   = product.description || 'No description provided.';
+        qs('#specCondition').textContent = product.condition || '—';
+        qs('#specBrand').textContent     = product.brand || '—';
+        qs('#specModel').textContent     = product.model || '—';
+        qs('#specSku').textContent       = product.sku || product.code || '—';
+
+        qs('#pickupLocation').textContent = product.pickupLocation || '—';
+        qs('#pickupWindow').textContent   = product.pickupWindow || '—';
+
+        updateOrderTotal();
+        loadManifest(product.id);
+
+      } catch(e){
+        console.error("Error loading product:", e);
+        alert("Error loading product");
+      }
+    }
+
+    function updateOrderTotal(){
+      const qtyInput = qs('#buyQty');
+      const totalEl  = qs('#orderTotal');
+      let qty = parseInt(qtyInput.value,10);
+      if(Number.isNaN(qty) || qty <= 0) qty = 1;
+      if(maxQty && qty > maxQty) qty = maxQty;
+      qtyInput.value = qty;
+      totalEl.textContent = fmtMoney(unitPrice * qty);
+    }
+
+    async function handleBuyNow(){
+      const msg = qs('#buyMessage');
+      msg.textContent = '';
+      msg.style.color = '';
+
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+
+	  /*====   VALIDATION ===== */
+	  
+      if(!token || !userid){
+        msg.textContent = "🔒 Please log in to complete your purchase.";
+        msg.style.color = "red";
+        setTimeout(() => { msg.textContent = ""; }, 4000);
+
+        if(typeof window.openLoginModal === 'function'){
+          const authTitle = document.getElementById('authTitle');
+          if(authTitle) authTitle.textContent = '🔒 Please log in to complete your purchase.';
+          window.openLoginModal();
+        }
+        return;
+      }
+
+      let qty = parseInt(qs('#buyQty').value,10);
+	  
+      if(Number.isNaN(qty) || qty <= 0){
+        msg.textContent = "Please enter a valid quantity.";
+        msg.style.color = "red";
+        return;
+      }
+      if(maxQty && qty > maxQty){
+        msg.textContent = `Maximum available quantity is ${maxQty}.`;
+        msg.style.color = "red";
+        return;
+      }
+      if(unitPrice <= 0){
+        msg.textContent = "This item is not available for Buy-Now at the moment.";
+        msg.style.color = "red";
+        return;
+      }
+	  /*====   END - VALIDATION ===== */
+	  
+	  
+      msg.textContent = "Processing your order…";
+      msg.style.color = "#4b5563";
+
+      try{
+        const res = await fetch(`${API_BASE_URL}/orders/buy-now`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            productId: product.id,
+            userId: parseInt(userid, 10),
+            quantity: qty
+          })
+        });
+
+        if(!res.ok){
+          const txt = await res.text();
+          msg.textContent = "❌ Failed to create order: " + txt;
+          msg.style.color = "red";
+          return;
+        }
+
+        msg.textContent = "✅ Order created successfully. Redirecting to checkout…";
+        msg.style.color = "green";
+
+        setTimeout(() => {
+          window.location.href = `/cart.html`;
+        }, 1500);
+
+      }catch(e){
+        console.error("Error in Buy Now:", e);
+        msg.textContent = "❌ Error processing your order.";
+        msg.style.color = "red";
+      }
+    }
+
+    // ========= Manifest loading =========
+    async function loadManifest(productId){
+      const container = qs('#manifestContainer');
+      if(!container || !productId) return;
+
+      container.innerHTML = `<div class="muted" style="font-size:14px;">Loading manifest…</div>`;
+
+      try{
+        const res = await fetch(`${API_BASE_URL}/manifests/product/${productId}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+
+        if(!res.ok){
+          container.innerHTML = `<div class="muted" style="font-size:14px;">Manifest not available.</div>`;
+          manifestList = [];
+          return;
+        }
+
+        const list = await res.json();
+        if(!Array.isArray(list) || list.length === 0){
+          container.innerHTML = `<div class="muted" style="font-size:14px;">No manifest items listed for this lot.</div>`;
+          manifestList = [];
+          return;
+        }
+
+        manifestList = list;
+        manifestCurrentPage = 1;
+        renderManifestPage();
+
+      }catch(err){
+        console.error("Error loading manifest:", err);
+        container.innerHTML = `<div class="muted" style="font-size:14px;">Error loading manifest.</div>`;
+        manifestList = [];
+      }
+    }
+
+    function renderManifestPage(){
+      const container = qs('#manifestContainer');
+      if(!container || !Array.isArray(manifestList) || manifestList.length === 0) return;
+
+      const totalItems = manifestList.length;
+      const totalPages = Math.ceil(totalItems / manifestPageSize) || 1;
+      if(manifestCurrentPage > totalPages) manifestCurrentPage = totalPages;
+      if(manifestCurrentPage < 1) manifestCurrentPage = 1;
+
+      const startIdx = (manifestCurrentPage - 1) * manifestPageSize;
+      const endIdx   = startIdx + manifestPageSize;
+      const pageItems = manifestList.slice(startIdx, endIdx);
+
+      const rowsHtml = pageItems.map(m => `
+        <tr>
+          <td>${m.quantity ?? ''}</td>
+          <td>${m.brand ?? ''}</td>
+          <td>${m.partNumber ?? ''}</td>
+          <td>${m.itemTitle ?? ''}</td>
+          <td>${m.upc ?? ''}</td>
+          <td>${m.sku ?? ''}</td>
+          <td>${m.estimatedMsrp != null ? fmtMoney(m.estimatedMsrp) : ''}</td>
+          <td>${m.totalMsrp != null ? fmtMoney(m.totalMsrp) : ''}</td>
+        </tr>
+      `).join('');
+
+      container.innerHTML = `
+        <table class="specs">
+          <thead>
+            <tr>
+              <th>Qty</th>
+              <th>Brand</th>
+              <th>Part #</th>
+              <th>Item Title</th>
+              <th>UPC</th>
+              <th>SKU</th>
+              <th>Est. MSRP</th>
+              <th>Total MSRP</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div class="manifest-pagination" id="manifestPagination"></div>
+      `;
+
+      const paginationDiv = container.querySelector('#manifestPagination');
+      if(!paginationDiv) return;
+
+      let buttonsHtml = '';
+      if(totalPages > 1){
+        buttonsHtml += `<button type="button" data-page="${manifestCurrentPage - 1}" ${manifestCurrentPage === 1 ? 'disabled' : ''}>Prev</button>`;
+        for(let p=1; p<=totalPages; p++){
+          buttonsHtml += `<button type="button" data-page="${p}" class="${p === manifestCurrentPage ? 'active' : ''}">${p}</button>`;
+        }
+        buttonsHtml += `<button type="button" data-page="${manifestCurrentPage + 1}" ${manifestCurrentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+      }
+      const showingFrom = startIdx + 1;
+      const showingTo   = Math.min(endIdx, totalItems);
+      buttonsHtml += `<span style="margin-left:8px;color:var(--muted);">Showing ${showingFrom}-${showingTo} of ${totalItems}</span>`;
+      paginationDiv.innerHTML = buttonsHtml;
+
+      paginationDiv.querySelectorAll('button[data-page]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetPage = parseInt(btn.getAttribute('data-page'),10);
+          if(!Number.isNaN(targetPage) && targetPage >= 1 && targetPage <= totalPages){
+            manifestCurrentPage = targetPage;
+            renderManifestPage();
+          }
+        });
+      });
+    }
+
+    function wireManifestPageSizeControl(){
+      const select = document.getElementById("manifestPageSize");
+      if(!select) return;
+      select.addEventListener("change", () => {
+        const val = parseInt(select.value,10);
+        manifestPageSize = Number.isNaN(val) ? 10 : val;
+        manifestCurrentPage = 1;
+        renderManifestPage();
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#downloadManifestBtn');
+      if(!btn) return;
+      const id = getIdFromQuery();
+      window.location.href = `${API_BASE_URL}/manifests/product/${id}/excel`;
+    });
+
+    // ========= Init =========
+    (function init(){
+      qs('#buyQty').addEventListener('input', updateOrderTotal);
+
+      qs('#buyNowBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        handleBuyNow();
+      });
+
+      wireGalleryControls();          // ✅ NEW (lightbox buttons)
+      wireManifestPageSizeControl();
+      loadProduct();
+    })();
+  </script>
+</body>
+</html>

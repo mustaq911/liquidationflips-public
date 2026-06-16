@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Auctions - Admin | Liquidation Flips</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    :root{
+      --bg:#f7f7f8;
+      --panel:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --brand:#2563eb;
+      --brand-2:#1e40af;
+      --border:#e5e7eb;
+
+      --success:#16a34a;
+      --danger:#dc2626;
+      --warn:#f59e0b;
+      --info:#0ea5e9;
+
+      --shadow: 0 16px 40px rgba(15,23,42,0.07);
+      --radius: 16px;
+
+      --winner-bg:#fff7ed;
+      --winner-b:#fdba74;
+      --winner-t:#9a3412;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    a{text-decoration:none;color:inherit}
+    code{background:#f3f4f6;padding:2px 6px;border-radius:8px}
+
+    .page{max-width:1200px;margin:0 auto;padding:20px;}
+
+    /* Header */
+    .header{
+      display:flex;align-items:flex-start;justify-content:space-between;
+      gap:12px;flex-wrap:wrap;margin-bottom:14px;
+    }
+    .header-title{font-size:26px;font-weight:800;letter-spacing:.2px;}
+    .header-sub{color:var(--muted);font-size:13px;margin-top:4px;}
+    .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+
+    .chip{
+      background:#eaf6ff;color:#075985;border-radius:999px;
+      padding:6px 10px;border:1px solid #cde9ff;
+      font-size:12px;font-weight:600;
+      display:inline-flex;align-items:center;gap:6px;
+    }
+    .chip i{font-size:13px;}
+
+    .btn{
+      padding:9px 14px;border-radius:10px;border:1px solid var(--border);
+      background:#fff;cursor:pointer;font-weight:700;font-size:13px;
+      display:inline-flex;align-items:center;gap:8px;
+    }
+    .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff;}
+    .btn-primary:hover{background:var(--brand-2);}
+    .btn-danger{background:var(--danger);border-color:var(--danger);color:#fff;}
+    .btn-danger:hover{filter:brightness(.95);}
+    .btn:disabled{opacity:.6;cursor:not-allowed;}
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow);
+    }
+
+    /* KPI cards */
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0;}
+    @media(max-width:950px){.kpis{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:520px){.kpis{grid-template-columns:1fr}}
+
+    .kpi{
+      border-radius:var(--radius);
+      padding:14px;
+      border:1px solid var(--border);
+      background:#fff;
+      display:flex;flex-direction:column;gap:4px;
+    }
+    .kpi .label{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
+    .kpi .val{font-size:18px;font-weight:900;margin-top:4px}
+    .kpi .hint{font-size:12px;color:var(--muted)}
+
+    .kpi.blue{border:1px solid rgba(37,99,235,.22);background:rgba(37,99,235,.05)}
+    .kpi.green{border:1px solid rgba(22,163,74,.25);background:rgba(22,163,74,.06)}
+    .kpi.amber{border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.07)}
+    .kpi.red{border:1px solid rgba(220,38,38,.25);background:rgba(220,38,38,.06)}
+
+    /* Tabs */
+    .tabs{
+      display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+    }
+    .tabBtn{
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:999px;
+      padding:9px 12px;
+      font-weight:900;
+      font-size:13px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .tabBtn.active{
+      background:var(--brand);
+      border-color:var(--brand);
+      color:#fff;
+    }
+    .tabCount{
+      background:rgba(255,255,255,.25);
+      border:1px solid rgba(255,255,255,.35);
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:950;
+    }
+
+    /* Filters bar */
+    .filters-bar{
+      background:var(--panel);
+      border-radius:14px;
+      border:1px solid var(--border);
+      padding:10px 12px;
+      margin-bottom:14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:flex-end;
+    }
+    .filter-group{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:180px;
+      flex:1 1 180px;
+    }
+    .filter-label{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:var(--muted);
+    }
+    .filters-bar input,
+    .filters-bar select{
+      width:100%;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      font-size:13px;
+      background:#fff;
+      outline:none;
+    }
+    .filters-right{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    /* Table */
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;vertical-align:middle}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+    tbody tr:hover{background:#f9fafb}
+    .row{cursor:pointer}
+    .tdRight{text-align:right}
+    .tdCenter{text-align:center}
+    .muted{color:var(--muted)}
+    .small{font-size:12px}
+	
+	
+
+	/* MAIN ADMIN TABLE ONLY */
+	table.adminTable{
+	  width:100%;
+	  border-collapse:collapse;
+	  font-size:13px;
+	  table-layout:fixed;
+	  min-width: 1250px;        /* ✅ KEY: force horizontal scroll instead of collapsing */
+	}
+
+	table.adminTable th,
+	table.adminTable td{
+	  border-bottom:1px solid var(--border);
+	  padding:10px 8px;
+	  text-align:left;
+	  vertical-align:middle;
+	  overflow:hidden;
+	  text-overflow:ellipsis;
+	  white-space:nowrap; /* important for fixed layout */
+	}
+
+	/* actions needs wrapping (buttons) */
+	table.adminTable td.actionsCell{
+	  white-space:normal;
+	}
+	/* End of MAIN ADMIN TABLE ONLY */
+	
+	
+	
+
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 10px;border-radius:999px;
+      font-size:12px;font-weight:800;
+      border:1px solid var(--border);background:#fff;
+      white-space:nowrap;
+    }
+    .badge.ongoing{border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.06);color:#14532d}
+    .badge.completed{border-color:rgba(220,38,38,.35);background:rgba(220,38,38,.08);color:#7f1d1d}
+    .badge.winner{border-color:var(--winner-b);background:var(--winner-bg);color:var(--winner-t)}
+
+    .empty{
+      padding:18px;border-radius:var(--radius);
+      border:1px dashed rgba(15,23,42,.18);
+      background:#fff;text-align:center;color:var(--muted);margin-top:12px;
+      display:none;
+    }
+
+    .err{
+      border:1px solid rgba(220,38,38,.25);
+      background:rgba(220,38,38,.06);
+      color:#991b1b;
+      padding:12px;border-radius:14px;
+      font-size:13px;
+      display:none;
+      margin-top:10px;
+    }
+
+    /* Pagination */
+    #pagination{
+      margin-top:10px;
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+    }
+    .pagination-info{
+      font-size:12px;
+      color:var(--muted);
+      margin-right:auto;
+    }
+    .pagination-btn{
+      padding:6px 10px;
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:10px;
+      cursor:pointer;
+      font-size:12px;
+      font-weight:800;
+    }
+    .pagination-btn.active{
+      background:var(--brand);
+      color:#fff;
+      border-color:var(--brand);
+    }
+    .pagination-btn:hover{
+      background:var(--brand-2);
+      color:#fff;
+      border-color:var(--brand-2);
+    }
+
+    /* Expand row */
+    .expandRow td{padding:0;background:#fff;}
+    .expandBox{
+      border-top:1px solid var(--border);
+      padding:12px;
+      background:#fff;
+      width:92%;
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .expandHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .expandHeader h3{
+      margin:0;
+      font-size:14px;
+      font-weight:950;
+    }
+    .innerTableWrap{
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:auto;
+      background:#fff;
+    }
+    .innerTable{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+      min-width:760px;
+    }
+    .innerTable thead{background:#f9fafb}
+    .innerTable th,.innerTable td{
+      padding:8px 10px;
+      border-bottom:1px solid var(--border);
+      white-space:nowrap;
+      text-align:left;
+    }
+    .innerPager{
+      width:100%;
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:10px;
+    }
+    .pager-info{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+    }
+    .winnerRow{
+      background:rgba(251,146,60,.14);
+      font-weight:900;
+    }
+
+    /* admin layout wrapper */
+    .admin-layout{
+      display:flex;
+      min-height:100vh;
+    }
+    @media(max-width:900px){
+      .admin-layout{flex-direction:column;}
+      .expandBox{width:100%;}
+    }
+	/* lock widths nicely (tweak if needed) */
+	.col-lot{width:34%;}
+	.col-warehouse{width:11%;}
+	.col-status{width:10%;}
+	.col-winner{width:10%;}
+	.col-highest{width:8%;}
+	.col-start{width:9%;}
+	.col-end{width:9%;}
+	.col-left{width:7%;}
+	
+	.col-actions{ width:220px; } /* ✅ fixed width so buttons never crush columns */
+	/*.col-actions{width:12%;}*/
+	.badge{flex:0 0 auto;}
+	
+	.lotFlex{ min-width:0; }
+	.lotText{ min-width:0; overflow:hidden; }
+	.ellipsis{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  </style>
+</head>
+
+<body>
+  <!-- TOP NAV -->
+  <link rel="stylesheet" href="/css/topnav.css">
+  <div id="topnavContainer"></div>
+  <script>
+    fetch("/topnav.html")
+      .then(res => res.text())
+      .then(html => { document.getElementById("topnavContainer").innerHTML = html; });
+  </script>
+
+  <!-- CONFIG + AUTH -->
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js" defer></script>
+
+  <!-- ADMIN LAYOUT: sidebar + page -->
+  <div class="admin-layout">
+    <div id="leftPanelContainer"></div>
+
+    <div class="page">
+      <div class="header">
+        <div>
+          <div class="header-title">Auctions</div>
+          <div class="header-sub">Admin view of all auctions. Filter, paginate, expand to view bid history, and Force End.</div>
+        </div>
+        <div class="header-right">
+          <span class="chip"><i class="fa-solid fa-shield-halved"></i> Admin</span>
+
+          <div class="tabs">
+            <button class="tabBtn active" id="tabOngoing">
+              Ongoing <span class="tabCount" id="countOngoing">0</span>
+            </button>
+            <button class="tabBtn" id="tabCompleted">
+              Completed <span class="tabCount" id="countCompleted">0</span>
+            </button>
+          </div>
+
+          <button class="btn btn-primary" id="btnRefresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+          <button class="btn" id="btnClear"><i class="fa-solid fa-eraser"></i> Clear</button>
+        </div>
+      </div>
+
+      <!-- KPI row -->
+      <div class="kpis">
+        <div class="kpi blue">
+          <div class="label"><i class="fa-solid fa-gavel"></i> Total auctions</div>
+          <div class="val" id="kpiTotal">—</div>
+          <div class="hint">Filtered result set</div>
+        </div>
+        <div class="kpi green">
+          <div class="label"><i class="fa-solid fa-bolt"></i> Ongoing</div>
+          <div class="val" id="kpiOngoing">—</div>
+          <div class="hint">Not ended yet</div>
+        </div>
+        <div class="kpi red">
+          <div class="label"><i class="fa-solid fa-flag-checkered"></i> Completed</div>
+          <div class="val" id="kpiCompleted">—</div>
+          <div class="hint">Ended / completed</div>
+        </div>
+        <div class="kpi amber">
+          <div class="label"><i class="fa-solid fa-trophy"></i> With winner</div>
+          <div class="val" id="kpiWithWinner">—</div>
+          <div class="hint">wonUserId is present</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="filter-group">
+          <label class="filter-label">Search (title / lot id / category)</label>
+          <input type="text" id="q" placeholder="e.g. iphone, lot 120, electronics">
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Warehouse</label>
+          <select id="warehouse">
+            <option value="">All</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Auction Start From</label>
+          <input type="date" id="fromDate">
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Auction End To</label>
+          <input type="date" id="toDate">
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Rows per page</label>
+          <select id="rowsPerPage">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="30">30</option>
+          </select>
+        </div>
+
+        <div class="filters-right">
+          <span class="chip"><i class="fa-solid fa-filter"></i> <span id="pillCount">—</span> shown</span>
+        </div>
+      </div>
+
+      <section class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <div style="font-weight:900;font-size:16px">All Auctions</div>
+          <div class="muted small" id="rangeLabel">—</div>
+        </div>
+
+        <div id="errorBox" class="err"></div>
+
+        <div style="overflow:auto;margin-top:10px;">
+          <table class="adminTable">
+			<colgroup>
+			  <col style="width:360px;">     <!-- Lot -->
+			  <col style="width:140px;">     <!-- Warehouse -->
+			  <col style="width:140px;">     <!-- Status -->
+			  <col style="width:160px;">     <!-- Winner -->
+			  <col style="width:140px;">     <!-- Highest Bid -->
+			  <col style="width:190px;">     <!-- Start -->
+			  <col style="width:190px;">     <!-- End -->
+			  <col style="width:120px;">     <!-- Time Left -->
+			  <col class="col-actions">      <!-- Actions (220px from CSS) -->
+			</colgroup>
+            <thead>
+              <tr>
+                <th>Lot</th>
+                <th>Warehouse</th>
+                <th>Status</th>
+                <th>Winner</th>
+                <th class="tdRight">Highest Bid</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Time Left</th>
+                <th class="tdRight actionsCell">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+
+        <div id="empty" class="empty">No auctions match your filters.</div>
+
+        <div id="pagination">
+          <span class="pagination-info" id="paginationInfo"></span>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // load left panel
+    fetch("/left-panel.html")
+      .then(res => res.text())
+      .then(html => { document.getElementById("leftPanelContainer").innerHTML = html; });
+
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+    const token = localStorage.getItem("token");
+
+    function authHeaders(){
+      return token ? { "Authorization": "Bearer " + token } : {};
+    }
+
+    // ====== EDIT THESE IF YOUR ROUTES DIFFER ======
+    const ENDPOINTS = {
+      AUCTIONS_ADMIN: `${API_BASE_URL}/products/admin/auctions`,
+      BIDS_BY_PRODUCT: (productId) => `${API_BASE_URL}/bids/product/${productId}`,
+      FORCE_END: (productId) => `${API_BASE_URL}/notification/force-end/${productId}`,
+      WAREHOUSES: `${API_BASE_URL}/warehouses`
+    };
+
+    // ====== STATE ======
+    const state = {
+      all: [],
+      filtered: [],
+      tab: "ONGOING",
+      page: 1,
+      pageSize: 20,
+      warehouseMap: new Map() // id -> name
+    };
+
+    // ====== HELPERS ======
+    function showErr(msg){
+      const el = document.getElementById("errorBox");
+      if(!msg){ el.style.display="none"; el.textContent=""; return; }
+      el.style.display="block"; el.textContent = msg;
+    }
+
+    function debounce(fn, delay){
+      let t;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+    }
+
+    function fmtMoney(x){
+      if(x == null) return "$—";
+      const n = Number(x);
+      return Number.isNaN(n) ? "$—" : `$${n.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    }
+
+    function fmtDate(s){
+      if(!s) return "—";
+      const d = new Date(s);
+      if(isNaN(d.getTime())) return s;
+      return d.toLocaleString();
+    }
+
+    function timeLeftLabel(endIso){
+      if(!endIso) return "—";
+      const end = new Date(endIso).getTime();
+      const now = Date.now();
+      const diff = end - now;
+      if(diff <= 0) return "Ended";
+      const d = Math.floor(diff/86400000);
+      const h = Math.floor((diff%86400000)/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      const s = Math.floor((diff%60000)/1000);
+      if(d>0) return `${d}d ${h}h ${m}m`;
+      if(h>0) return `${h}h ${m}m ${s}s`;
+      return `${m}m ${s}s`;
+    }
+
+    function isCompleted(p){
+      const st = String(p.status || "").toUpperCase();
+      if(st.includes("COMPLETED") || st.includes("ENDED")) return true;
+      return timeLeftLabel(p.auctionEnd) === "Ended";
+    }
+
+    function badgeStatus(p){
+      return isCompleted(p)
+        ? `<span class="badge completed"><i class="fa-solid fa-flag-checkered"></i> COMPLETED</span>`
+        : `<span class="badge ongoing"><i class="fa-solid fa-bolt"></i> ONGOING</span>`;
+    }
+
+    function badgeWinner(p){
+      if(p.wonUserId == null) return `<span class="badge"><i class="fa-regular fa-circle"></i> None</span>`;
+      return `<span class="badge winner"><i class="fa-solid fa-trophy"></i> User #${p.wonUserId}</span>`;
+    }
+
+    function safeTitle(s){
+      return String(s || "").replace(/"/g,"&quot;");
+    }
+
+    function getWarehouseName(p){
+      const wid = p.warehouseId;
+      if(wid == null) return "—";
+      if(p.warehouseName) return p.warehouseName;
+      return state.warehouseMap.get(String(wid)) || `#${wid}`;
+    }
+
+    // Expand helpers (only one open)
+    function closeAllExpands(){
+      document.querySelectorAll("tr.expandRow").forEach(tr => tr.remove());
+      document.querySelectorAll("tr.row").forEach(tr => tr.dataset.open = "0");
+    }
+
+    async function fetchAuctionsAdmin(){
+      const res = await fetch(`${ENDPOINTS.AUCTIONS_ADMIN}?ts=${Date.now()}`, {
+        headers: authHeaders(),
+        cache: "no-store"
+      });
+      if(!res.ok) throw new Error(`Failed to fetch auctions: ${res.status}`);
+      return await res.json();
+    }
+
+    async function fetchBidsByProduct(productId){
+      const res = await fetch(`${ENDPOINTS.BIDS_BY_PRODUCT(productId)}?ts=${Date.now()}`, {
+        headers: authHeaders(),
+        cache: "no-store"
+      });
+      if(!res.ok) throw new Error(`Failed to fetch bids: ${res.status}`);
+      return await res.json();
+    }
+
+    async function fetchWarehouses(){
+      try{
+        const res = await fetch(`${ENDPOINTS.WAREHOUSES}?ts=${Date.now()}`, {
+          headers: authHeaders(),
+          cache: "no-store"
+        });
+        if(!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      }catch(e){
+        return [];
+      }
+    }
+
+    async function forceEndAuction(productId){
+      const ok = confirm(`Force end auction for Lot #${productId}?\nThis will notify users + create invoice if winner exists.`);
+      if(!ok) return;
+
+      try{
+        const res = await fetch(ENDPOINTS.FORCE_END(productId), {
+          method: "POST",
+          headers: authHeaders()
+        });
+        if(!res.ok){
+          alert("Force End failed:\n" + await res.text());
+          return;
+        }
+        alert(await res.text());
+        await load();
+      }catch(e){
+        alert("Force End failed. Check console.");
+        console.error(e);
+      }
+    }
+
+    // ====== FILTERING ======
+    function getFilters(){
+      const q = (document.getElementById("q").value || "").trim().toLowerCase();
+      const warehouse = (document.getElementById("warehouse").value || "").trim();
+      const fromDate = document.getElementById("fromDate").value ? new Date(document.getElementById("fromDate").value + "T00:00:00") : null;
+      const toDate   = document.getElementById("toDate").value ? new Date(document.getElementById("toDate").value + "T23:59:59") : null;
+      return { q, warehouse, fromDate, toDate };
+    }
+
+    function applyFilters(){
+      const f = getFilters();
+      state.pageSize = Number(document.getElementById("rowsPerPage").value || 20);
+
+      const list = state.all.filter(p => {
+        // tab filter
+        const done = isCompleted(p);
+        if(state.tab === "ONGOING" && done) return false;
+        if(state.tab === "COMPLETED" && !done) return false;
+
+        // warehouse filter
+        if(f.warehouse){
+          if(String(p.warehouseId) !== String(f.warehouse)) return false;
+        }
+
+        // date filter (start from, end to)
+        const start = p.auctionStart ? new Date(p.auctionStart) : null;
+        const end   = p.auctionEnd ? new Date(p.auctionEnd) : null;
+
+        if(f.fromDate){
+          if(start && start < f.fromDate) return false;
+        }
+        if(f.toDate){
+          if(end && end > f.toDate) return false;
+        }
+
+        // search
+        if(f.q){
+          const hay = [
+            p.title,
+            String(p.id ?? ""),
+            p.categoryName,
+            (p.category && p.category.name),
+            String(p.wonUserId ?? "")
+          ].filter(Boolean).join(" ").toLowerCase();
+          if(!hay.includes(f.q)) return false;
+        }
+
+        return true;
+      });
+
+      state.filtered = list;
+      state.page = 1;
+      render();
+    }
+
+    // ====== KPIs + PAGINATION ======
+    function computeKPIs(){
+      const list = state.filtered;
+      document.getElementById("pillCount").textContent = list.length;
+
+      let total = list.length;
+      let ongoing = 0, completed = 0, withWinner = 0;
+      for(const p of list){
+        if(isCompleted(p)) completed++; else ongoing++;
+        if(p.wonUserId != null) withWinner++;
+      }
+
+      document.getElementById("kpiTotal").textContent = total;
+      document.getElementById("kpiOngoing").textContent = ongoing;
+      document.getElementById("kpiCompleted").textContent = completed;
+      document.getElementById("kpiWithWinner").textContent = withWinner;
+
+      const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+      document.getElementById("rangeLabel").textContent =
+        `Tab ${state.tab} • Page ${state.page} of ${totalPages} • Page size ${state.pageSize}`;
+    }
+
+    function getPageSlice(){
+      const total = state.filtered.length;
+      const start = (state.page - 1) * state.pageSize;
+      const end = Math.min(start + state.pageSize, total);
+      return { slice: state.filtered.slice(start, end), from: total ? start+1 : 0, to: end, total };
+    }
+
+    function renderPaginationButtons(){
+      const paginationEl = document.getElementById("pagination");
+      const existing = Array.from(paginationEl.querySelectorAll("button"));
+      existing.forEach(b => b.remove());
+
+      const total = state.filtered.length;
+      const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+
+      document.getElementById("paginationInfo").textContent =
+        total ? `Showing ${getPageSlice().from}–${getPageSlice().to} of ${total}` : "";
+
+      const prevBtn = document.createElement("button");
+      prevBtn.className = "pagination-btn";
+      prevBtn.textContent = "Prev";
+      prevBtn.disabled = state.page === 1;
+      prevBtn.onclick = () => { if(state.page>1){ state.page--; render(); } };
+      paginationEl.appendChild(prevBtn);
+
+      // keep buttons compact
+      const maxBtns = 7;
+      let start = Math.max(1, state.page - 3);
+      let end = Math.min(totalPages, start + maxBtns - 1);
+      start = Math.max(1, end - maxBtns + 1);
+
+      if(start > 1){
+        const b1 = document.createElement("button");
+        b1.className = "pagination-btn";
+        b1.textContent = "1";
+        b1.onclick = () => { state.page = 1; render(); };
+        paginationEl.appendChild(b1);
+
+        const dots = document.createElement("span");
+        dots.className = "pagination-info";
+        dots.textContent = "…";
+        dots.style.marginRight = "0";
+        paginationEl.appendChild(dots);
+      }
+
+      for(let i=start;i<=end;i++){
+        const btn = document.createElement("button");
+        btn.className = "pagination-btn" + (i===state.page ? " active" : "");
+        btn.textContent = i;
+        btn.onclick = () => { state.page = i; render(); };
+        paginationEl.appendChild(btn);
+      }
+
+      if(end < totalPages){
+        const dots = document.createElement("span");
+        dots.className = "pagination-info";
+        dots.textContent = "…";
+        dots.style.marginRight = "0";
+        paginationEl.appendChild(dots);
+
+        const bn = document.createElement("button");
+        bn.className = "pagination-btn";
+        bn.textContent = String(totalPages);
+        bn.onclick = () => { state.page = totalPages; render(); };
+        paginationEl.appendChild(bn);
+      }
+
+      const nextBtn = document.createElement("button");
+      nextBtn.className = "pagination-btn";
+      nextBtn.textContent = "Next";
+      nextBtn.disabled = state.page === totalPages;
+      nextBtn.onclick = () => { if(state.page<totalPages){ state.page++; render(); } };
+      paginationEl.appendChild(nextBtn);
+    }
+
+    // ====== EXPAND BID TABLE (PAGED) ======
+    function initExpandBidPagination(expandTr, bids, winnerId, rowsPerPage = 5){
+      const tbody    = expandTr.querySelector(".innerTbody");
+      const prevBtn  = expandTr.querySelector(".pager-prev");
+      const nextBtn  = expandTr.querySelector(".pager-next");
+      const infoSpan = expandTr.querySelector(".pager-info");
+
+      const sorted = (Array.isArray(bids) ? bids : [])
+        .slice()
+        .sort((a,b) => new Date(b.bidTime) - new Date(a.bidTime));
+
+      const totalPages = Math.max(1, Math.ceil(sorted.length / rowsPerPage));
+      let currentPage  = 1;
+
+      function renderPage(){
+        tbody.innerHTML = "";
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const items = sorted.slice(start, start + rowsPerPage);
+
+        if(items.length === 0){
+          tbody.innerHTML = `<tr><td colspan="5" class="muted small" style="padding:12px;font-weight:800;">No bids found.</td></tr>`;
+        }else{
+          for(const b of items){
+            const isWinner = (winnerId != null && String(b.userId) === String(winnerId));
+            const tr = document.createElement("tr");
+            if(isWinner) tr.classList.add("winnerRow");
+            tr.innerHTML = `
+              <td>${fmtMoney(b.bidAmount)}</td>
+              <td>${b.userId ?? "—"}</td>
+              <td>${b.username || "—"}</td>
+              <td>${fmtDate(b.bidTime)}</td>
+              <td>${isWinner ? `<span class="badge winner"><i class="fa-solid fa-trophy"></i> WINNER</span>` : ``}</td>
+            `;
+            tbody.appendChild(tr);
+          }
+        }
+
+        infoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+      }
+
+      prevBtn.onclick = (e) => { e.stopPropagation(); if(currentPage>1){ currentPage--; renderPage(); } };
+      nextBtn.onclick = (e) => { e.stopPropagation(); if(currentPage<totalPages){ currentPage++; renderPage(); } };
+
+      renderPage();
+    }
+
+    async function toggleExpand(rowTr, product){
+      const open = rowTr.dataset.open === "1";
+      closeAllExpands();
+      if(open) return;
+
+      rowTr.dataset.open = "1";
+
+      const expandTr = document.createElement("tr");
+      expandTr.className = "expandRow";
+      expandTr.innerHTML = `
+        <td colspan="9">
+          <div class="expandBox">
+            <div class="expandHeader">
+              <h3><i class="fa-solid fa-list"></i> Bid History (Lot #${product.id ?? "—"})</h3>
+              <button class="btn" type="button" id="collapseBtn">
+                <i class="fa-solid fa-chevron-up"></i> Collapse
+              </button>
+            </div>
+
+            <div class="innerTableWrap">
+              <table class="innerTable">
+                <thead>
+                  <tr>
+                    <th>Bid Amount</th>
+                    <th>User ID</th>
+                    <th>User Name</th>
+                    <th>Bid Time</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody class="innerTbody">
+                  <tr><td colspan="5" class="muted small" style="padding:12px;font-weight:800;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading…
+                  </td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="innerPager">
+              <button class="btn pagination-btn pager-prev" type="button">Prev</button>
+              <span class="pager-info"></span>
+              <button class="btn pagination-btn pager-next" type="button">Next</button>
+            </div>
+          </div>
+        </td>
+      `;
+
+      rowTr.parentNode.insertBefore(expandTr, rowTr.nextSibling);
+
+      expandTr.querySelector("#collapseBtn")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeAllExpands();
+      });
+
+      try{
+        const bids = await fetchBidsByProduct(product.id);
+        initExpandBidPagination(expandTr, bids, product.wonUserId, 5);
+      }catch(e){
+        console.error(e);
+        const tbody = expandTr.querySelector(".innerTbody");
+        tbody.innerHTML = `<tr><td colspan="5" class="muted small" style="padding:12px;font-weight:800;">Failed to load bids.</td></tr>`;
+      }
+    }
+
+    // ====== RENDER TABLE ======
+    function render(){
+      computeKPIs();
+      closeAllExpands();
+
+      const tbody = document.getElementById("tbody");
+      const empty = document.getElementById("empty");
+      tbody.innerHTML = "";
+
+      const { slice, total } = getPageSlice();
+
+      if(!slice.length){
+        empty.style.display = "block";
+        renderPaginationButtons();
+        return;
+      }
+      empty.style.display = "none";
+
+      for(const p of slice){
+        const tr = document.createElement("tr");
+        tr.className = "row";
+        tr.dataset.open = "0";
+
+        const img = p.imageUrl || "https://via.placeholder.com/80x80?text=No+Img";
+        const cat = (p.category && p.category.name) || p.categoryName || "—";
+        const wh = getWarehouseName(p);
+        const left = timeLeftLabel(p.auctionEnd);
+
+        tr.innerHTML = `
+          <td>
+            <div style="display:flex;gap:10px;align-items:center;min-width:0;">
+              <div style="width:44px;height:44px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:#f1f3f6;flex:0 0 auto;">
+                <img src="${img}" alt="thumb" style="width:100%;height:100%;object-fit:cover;display:block">
+              </div>
+              <div style="min-width:0; flex: 1;">
+                <div style="font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;"
+                     title="${safeTitle(p.title)}">${p.title || "Untitled"}</div>
+                <div class="muted small" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">
+                  ${cat} • Lot #${p.id ?? "—"}
+                </div>
+              </div>
+            </div>
+          </td>
+          <td><strong>${wh}</strong></td>
+          <td>${badgeStatus(p)}</td>
+          <td>${badgeWinner(p)}</td>
+          <td class="tdRight"><strong>${fmtMoney(p.highestBid)}</strong></td>
+          <td>${fmtDate(p.auctionStart)}</td>
+          <td>${fmtDate(p.auctionEnd)}</td>
+          <td><strong>${left}</strong></td>
+          <td class="tdRight">
+            <a class="btn btn-primary" href="/product-view.html?id=${p.id}" onclick="event.stopPropagation()">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> View
+            </a>
+            <button class="btn btn-danger" onclick="event.stopPropagation(); forceEndAuction(${p.id})">
+              <i class="fa-solid fa-gavel"></i> Force End
+            </button>
+          </td>
+        `;
+
+        tr.addEventListener("click", () => toggleExpand(tr, p));
+        tbody.appendChild(tr);
+      }
+
+      renderPaginationButtons();
+    }
+
+    // ====== TABS ======
+    function setTab(tab){
+      state.tab = tab;
+
+      document.getElementById("tabOngoing").classList.toggle("active", tab==="ONGOING");
+      document.getElementById("tabCompleted").classList.toggle("active", tab==="COMPLETED");
+
+      applyFilters();
+    }
+
+    // ====== LOAD ======
+    async function loadWarehousesIntoDropdown(){
+      const sel = document.getElementById("warehouse");
+      // keep "All"
+      const keepFirst = sel.querySelector("option[value='']");
+      sel.innerHTML = "";
+      sel.appendChild(keepFirst);
+
+      const list = await fetchWarehouses();
+      for(const w of list){
+        if(w == null) continue;
+        const id = w.id ?? w.warehouseId;
+        const name = w.name ?? w.warehouseName ?? `Warehouse #${id}`;
+        if(id == null) continue;
+
+        state.warehouseMap.set(String(id), String(name));
+
+        const opt = document.createElement("option");
+        opt.value = id;
+        opt.textContent = name;
+        sel.appendChild(opt);
+      }
+    }
+
+    async function load(){
+      showErr(null);
+
+      if(!token){
+        showErr("Not logged in. Please sign in to view admin auctions.");
+        state.all = [];
+        state.filtered = [];
+        render();
+        return;
+      }
+
+      try{
+        await loadWarehousesIntoDropdown();
+
+        const data = await fetchAuctionsAdmin();
+        const list = Array.isArray(data) ? data : (data.content || data.data || []);
+        state.all = list;
+
+        // counts for tabs
+        const ongoingCount = state.all.filter(p => !isCompleted(p)).length;
+        const completedCount = state.all.filter(p => isCompleted(p)).length;
+        document.getElementById("countOngoing").textContent = ongoingCount;
+        document.getElementById("countCompleted").textContent = completedCount;
+
+        applyFilters();
+      }catch(e){
+        console.error(e);
+        showErr("Could not load admin auctions. Please check endpoint, CORS, and auth.");
+        state.all = [];
+        state.filtered = [];
+        render();
+      }
+    }
+
+    function clearFilters(){
+      document.getElementById("q").value = "";
+      document.getElementById("warehouse").value = "";
+      document.getElementById("fromDate").value = "";
+      document.getElementById("toDate").value = "";
+      document.getElementById("rowsPerPage").value = "20";
+      applyFilters();
+    }
+
+    // ====== EVENTS ======
+    document.getElementById("btnRefresh").addEventListener("click", load);
+    document.getElementById("btnClear").addEventListener("click", clearFilters);
+
+    document.getElementById("q").addEventListener("input", debounce(applyFilters, 250));
+    document.getElementById("warehouse").addEventListener("change", applyFilters);
+    document.getElementById("fromDate").addEventListener("change", applyFilters);
+    document.getElementById("toDate").addEventListener("change", applyFilters);
+    document.getElementById("rowsPerPage").addEventListener("change", applyFilters);
+
+    document.getElementById("tabOngoing").addEventListener("click", () => setTab("ONGOING"));
+    document.getElementById("tabCompleted").addEventListener("click", () => setTab("COMPLETED"));
+
+    // ====== START ======
+    window.addEventListener("DOMContentLoaded", () => {
+      setTab("ONGOING");
+      load();
+    });
+  </script>
+</body>
+</html>

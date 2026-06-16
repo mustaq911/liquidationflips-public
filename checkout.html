@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Checkout - Liquidation Flips</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    :root{
+      --bg:#f7f7f8;
+      --panel:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --brand:#2563eb;
+      --brand-2:#1e40af;
+      --border:#e5e7eb;
+      --chip:#0ea5e9;
+      --danger:#dc2626;
+      --success:#16a34a;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    a{text-decoration:none;color:inherit}
+
+    .page{
+      max-width:1200px;
+      margin:0 auto;
+      padding:20px;
+    }
+
+    .breadcrumbs{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+    .breadcrumbs a{
+      color:var(--brand);
+    }
+
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+    .header-title{
+      font-size:26px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .header-sub{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+    .chip{
+      background:#eaf6ff;
+      color:#075985;
+      border-radius:999px;
+      padding:6px 10px;
+      border:1px solid #cde9ff;
+      font-size:12px;
+      font-weight:600;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    /* Layout */
+    .layout{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+    }
+    @media(max-width:900px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+    }
+
+    .card{
+      background:var(--panel);
+      border-radius:14px;
+      border:1px solid var(--border);
+      padding:16px;
+    }
+    .card h3{
+      margin:0 0 10px 0;
+      font-size:18px;
+    }
+
+    /* Order summary table */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    th,td{
+      border-bottom:1px solid var(--border);
+      padding:8px 6px;
+      text-align:left;
+      vertical-align:middle;
+    }
+    th{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--muted);
+    }
+    tbody tr:last-child td{
+      border-bottom:none;
+    }
+
+    .muted{color:var(--muted);font-size:13px;}
+
+    .totals-row{
+      display:flex;
+      justify-content:space-between;
+      margin:6px 0;
+      font-size:14px;
+    }
+    .totals-label{
+      color:var(--muted);
+    }
+    .totals-value{
+      font-weight:700;
+    }
+    .totals-grand{
+      font-size:18px;
+      font-weight:800;
+      margin-top:6px;
+    }
+
+    /* Buttons */
+    .btn{
+      padding:10px 14px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:#fff;
+      cursor:pointer;
+      font-weight:600;
+      font-size:14px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn-primary{
+      background:var(--brand);
+      color:#fff;
+      border-color:var(--brand);
+    }
+    .btn-primary:hover{
+      background:var(--brand-2);
+    }
+    .btn-ghost{
+      background:transparent;
+    }
+    .btn-block{
+      width:100%;
+      justify-content:center;
+      text-align:center;
+    }
+    .btn-row{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:10px;
+    }
+    @media(min-width:700px){
+      .btn-row{
+        flex-direction:row;
+        justify-content:space-between;
+      }
+      .btn-row .btn-block{
+        width:auto;
+      }
+    }
+
+    .notice{
+      margin-top:10px;
+      background:#fff8e1;
+      border-radius:10px;
+      border:1px solid #f7e09b;
+      padding:10px;
+      font-size:13px;
+      color:#7a5d00;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:11px;
+      border:1px solid #e5e7eb;
+      background:#f3f4f6;
+      color:#374151;
+    }
+    .status-pill.processing{
+      border-color:#ddd6fe;
+      background:#ede9fe;
+      color:#4c1d95;
+    }
+    .status-pill.pending{
+      border-color:#facc15;
+      background:#fef3c7;
+      color:#92400e;
+    }
+    .status-pill.paid{
+      border-color:#bbf7d0;
+      background:#dcfce7;
+      color:#166534;
+    }
+
+    .error-msg{
+      color:var(--danger);
+      font-size:13px;
+      margin-top:6px;
+    }
+
+    .skeleton{
+      background:linear-gradient(90deg,#f5f5f5,#ececec,#f5f5f5);
+      background-size:200% 100%;
+      animation:shimmer 1.2s infinite;
+    }
+    @keyframes shimmer{
+      0%{background-position:200% 0}
+      100%{background-position:-200% 0}
+    }
+    .skel-line{
+      height:16px;
+      border-radius:6px;
+      margin:6px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Shared Topnav -->
+  <link rel="stylesheet" href="/css/topnav.css">
+  <div id="topnavContainer"></div>
+
+  <!-- CONFIG + AUTH -->
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js" defer></script>
+
+  <div class="page">
+    <div class="breadcrumbs">
+      <a href="/index.html"><i class="fa-solid fa-chevron-left"></i> Back to Home</a>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header">
+      <div>
+        <div class="header-title">Checkout</div>
+        <div class="header-sub">
+          Review your order and proceed to secure payment.
+        </div>
+      </div>
+      <div class="chip">
+        <i class="fa-solid fa-receipt"></i>
+        Order <span id="orderIdChip">—</span>
+      </div>
+    </div>
+
+    <!-- LAYOUT -->
+    <div class="layout">
+
+      <!-- LEFT: Order summary -->
+      <section class="card">
+        <h3>Order Summary</h3>
+        <div id="orderSummarySkeleton">
+          <div class="skel-line skeleton" style="width:70%;"></div>
+          <div class="skel-line skeleton" style="width:60%;"></div>
+          <div class="skel-line skeleton" style="width:80%;"></div>
+        </div>
+        <div id="orderSummary" style="display:none;">
+          <div class="muted" style="margin-bottom:8px;">
+            Status:
+            <span id="orderStatusPill" class="status-pill pending">Pending</span>
+          </div>
+
+          <table>
+            <thead>
+            <tr>
+              <th>Item</th>
+              <th style="width:90px;">Qty</th>
+              <th style="width:110px;">Unit</th>
+              <th style="width:120px;">Line total</th>
+            </tr>
+            </thead>
+            <tbody id="orderItemsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- RIGHT: Payment panel -->
+      <section class="card">
+        <h3>Payment</h3>
+        <div id="totalsSkeleton">
+          <div class="skel-line skeleton" style="width:50%;"></div>
+          <div class="skel-line skeleton" style="width:40%;"></div>
+        </div>
+        <div id="totalsPanel" style="display:none;">
+          <div class="totals-row">
+            <div class="totals-label">Subtotal</div>
+            <div class="totals-value" id="subtotalLabel">$0.00</div>
+          </div>
+          <div class="totals-row">
+            <div class="totals-label">Estimated taxes</div>
+            <div class="totals-value" id="taxLabel">$0.00</div>
+          </div>
+          <div class="totals-row">
+            <div class="totals-label">Fees</div>
+            <div class="totals-value" id="feeLabel">$0.00</div>
+          </div>
+          <div class="totals-grand">
+            Total: <span id="grandTotalLabel">$0.00</span>
+          </div>
+
+          <div class="btn-row">
+            <!-- 🔹 PROCEED TO PAYMENT -->
+            <button class="btn btn-primary btn-block" id="payNowBtn">
+              <i class="fa-solid fa-credit-card"></i>
+              Proceed to Payment
+            </button>
+
+            <!-- 🔹 CONTINUE SHOPPING (go back to Buy-Now listing) -->
+            <button class="btn btn-ghost btn-block" id="continueShoppingBtn">
+              <i class="fa-solid fa-cart-shopping"></i>
+              Continue Shopping
+            </button>
+          </div>
+
+          <div class="notice">
+            Your Buy-Now item is reserved for a limited time. Please complete
+            payment promptly to avoid cancellation.
+          </div>
+
+          <div id="checkoutError" class="error-msg"></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+  // ======== Helpers ========
+  const qs  = (s, r=document) => r.querySelector(s);
+  const fmtMoney = (x) => {
+    if (x == null) return '$0.00';
+    const n = Number(x);
+    return Number.isNaN(n)
+      ? '$0.00'
+      : '$' + n.toLocaleString(
+          undefined,
+          { minimumFractionDigits:2, maximumFractionDigits:2 }
+        );
+  };
+  const getOrderIdFromQuery = () =>
+    new URLSearchParams(location.search).get("orderId");
+
+  const token  = localStorage.getItem("token");
+  const userId = localStorage.getItem("userid");
+
+  // From config.js
+  const API_BASE_URL = CONFIG.API_BASE_URL;
+
+  // ======== Load order from backend ========
+  let currentOrder = null;
+
+  async function loadOrder() {
+    const orderId = getOrderIdFromQuery();
+    if (!orderId) {
+      alert("Missing orderId in URL. Redirecting back to Buy-Now page.");
+      window.location.href = "/product-buynow.html";
+      return;
+    }
+
+    if (!token) {
+      alert("Please log in to view your order.");
+      window.location.href = "/web/login_cu.html";
+      return;
+    }
+
+	
+    try {
+      const res = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error("Failed to load order:", txt);
+        alert("Unable to load order. Please try again.");
+        return;
+      }
+
+      const order = await res.json();
+      currentOrder = order;
+      renderOrder(order);
+
+    } catch (err) {
+      console.error("Error loading order:", err);
+      alert("Error loading order.");
+    }
+  }
+
+  function renderOrder(order) {
+    // Hide skeletons
+    qs("#orderSummarySkeleton").style.display = "none";
+    qs("#totalsSkeleton").style.display       = "none";
+    qs("#orderSummary").style.display         = "block";
+    qs("#totalsPanel").style.display          = "block";
+
+    // Order id in header
+    qs("#orderIdChip").textContent = order.id ?? "—";
+
+    // Status pill
+    const pill = qs("#orderStatusPill");
+    const rawStatus = (order.status || "PENDING_PAYMENT").toUpperCase();
+    pill.textContent = rawStatus;
+    pill.classList.remove("pending","paid","processing");
+
+    if (rawStatus === "PAID" || rawStatus === "COMPLETED") {
+      pill.classList.add("paid");
+    } else if (rawStatus === "PROCESSING" || rawStatus === "IN_PROGRESS") {
+      pill.classList.add("processing");
+    } else {
+      pill.classList.add("pending");
+    }
+
+    // Items – from order.items
+    const items = Array.isArray(order.items) ? order.items : [];
+    const tbody = qs("#orderItemsBody");
+    tbody.innerHTML = "";
+
+    if (items.length === 0) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td colspan="4" class="muted" style="text-align:center;padding:14px;">
+          No items found in this order.
+        </td>
+      `;
+      tbody.appendChild(tr);
+    } else {
+      items.forEach(it => {
+        const tr = document.createElement("tr");
+
+        const title = it.productTitle || ("Product #" + (it.productId ?? ""));
+        const qty   = it.quantity ?? 1;
+        const unit  = it.unitPrice ?? 0;
+        const line  = it.lineTotal ?? (Number(qty) * Number(unit));
+
+        tr.innerHTML = `
+          <td>${title}</td>
+          <td>${qty}</td>
+          <td>${fmtMoney(unit)}</td>
+          <td>${fmtMoney(line)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Totals
+    const subtotal = order.subtotal ?? 0;
+    const tax      = order.tax ?? 0;
+    const fees     = order.feeAmount ?? 0; // optional, if you add later
+    const grand    = order.totalAmount ?? (Number(subtotal) + Number(tax) + Number(fees));
+
+    qs("#subtotalLabel").textContent   = fmtMoney(subtotal);
+    qs("#taxLabel").textContent        = fmtMoney(tax);
+    qs("#feeLabel").textContent        = fmtMoney(fees);
+    qs("#grandTotalLabel").textContent = fmtMoney(grand);
+  }
+
+  // ======== Buttons ========
+  function wireButtons() {
+    // Continue shopping -> go to Buy-Now listing page
+    qs("#continueShoppingBtn").addEventListener("click", () => {
+      window.location.href = "/product-buynow.html";
+    });
+
+    // Proceed to payment
+    qs("#payNowBtn").addEventListener("click", async () => {
+      const errEl = qs("#checkoutError");
+      errEl.textContent = "";
+
+      if (!currentOrder) {
+        errEl.textContent = "Order not loaded yet. Please wait.";
+        return;
+      }
+      if (!token) {
+        errEl.textContent = "Please log in again.";
+        return;
+      }
+
+      const orderId = currentOrder.id;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/payments/intent`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            orderId: orderId,
+          })
+        });
+
+        if (!res.ok) {
+          const txt = await res.text();
+          console.error("Payment intent error:", txt);
+          errEl.textContent = "Unable to start payment: " + txt;
+          return;
+        }
+
+        const data = await res.json();
+
+		// ✅ if already paid, go directly to success page
+		if (data.alreadyPaid === true) {
+		  sessionStorage.setItem("stripeOrderId", data.orderId);
+		  sessionStorage.setItem("stripePaymentIntentId", data.paymentIntentId || "");
+		  window.location.href = "/payment-success.html";
+		  return;
+		}
+
+		// ✅ normal Stripe card payment flow
+		sessionStorage.setItem("stripeClientSecret", data.clientSecret);
+		sessionStorage.setItem("stripeOrderId", data.orderId);
+		sessionStorage.setItem("stripePaymentIntentId", data.paymentIntentId || "");
+
+		window.location.href = "/checkout-payment.html";
+
+      } catch (e) {
+        console.error("Payment error:", e);
+        errEl.textContent = "Error starting payment. Please try again.";
+      }
+    });
+  }
+
+  // ======== Init ========
+  (function init(){
+    if (!token) {
+      console.warn("No token found, user might be redirected by auth.js");
+    }
+    wireButtons();
+    loadOrder();
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Auction Deposit Hold</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="/js/config.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; }
+    .form-row { margin-bottom: 15px; }
+    #card-element { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    #card-errors { color: red; margin-top: 8px; }
+    button { padding: 10px 16px; }
+  </style>
+</head>
+<body>
+
+<h2>Pay Auction Deposit</h2>
+
+<form id="payment-form">
+  <div class="form-row">
+    <label for="cardholder-name">Name on card</label><br/>
+    <input id="cardholder-name" type="text" required />
+  </div>
+
+  <div class="form-row">
+    <label>Card details</label>
+    <div id="card-element"><!-- Stripe Card Element will go here --></div>
+    <div id="card-errors" role="alert"></div>
+  </div>
+
+  <button id="pay-button" type="submit">Place Deposit Hold</button>
+</form>
+
+<div id="result" style="margin-top:20px;"></div>
+
+<script>
+
+  const API_BASE_URL = CONFIG.API_BASE_URL;
+  console.log("API Base URL:", API_BASE_URL);
+  
+  // 1. Initialize Stripe with your **publishable** key
+  const stripe = Stripe("pk_test_51SB3m1IIchWoEqKqXIfObOksOX98DDZm0LVyhIfO2zvEhrAa92QZWYUs6QdinWMW4uWRuCq7rmdlwOJy5Hk8EDXj006tmSDc3j"); // replace with your own pk_ key
+  const elements = stripe.elements();
+
+  // 2. Create and mount the card Element
+  const card = elements.create("card");
+  card.mount("#card-element");
+
+  card.on("change", function(event) {
+    const displayError = document.getElementById("card-errors");
+    if (event.error) {
+      displayError.textContent = event.error.message;
+    } else {
+      displayError.textContent = "";
+    }
+  });
+
+  const form = document.getElementById("payment-form");
+  const resultDiv = document.getElementById("result");
+
+  // Helper: call your backend to create the PaymentIntent (deposit hold)
+  async function createDepositHoldOnBackend() {
+    // these values would come from your app context
+    const userId = 123;              // logged-in user id
+    const amountCad = 50.00;         // deposit amount
+    const idempotencyKey = crypto.randomUUID();
+
+    // const res = await fetch("http://localhost:8080/payments/holds", {
+	const res = await fetch(`${API_BASE_URL}/payments/holds`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: userId,
+        amountCad: amountCad,
+        idempotencyKey: idempotencyKey
+      })
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to create PaymentIntent on backend");
+    }
+
+    return await res.json();   // should contain { holdId, clientSecret, paymentIntentId, status }
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    resultDiv.textContent = "Creating deposit hold…";
+
+    try {
+      // 3. Ask your backend to create the PaymentIntent (manual capture)
+      const holdResponse = await createDepositHoldOnBackend();
+      const clientSecret = holdResponse.clientSecret;
+
+      // 4. Confirm the payment (card auth) with Stripe.js
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: card,
+          billing_details: {
+            name: document.getElementById("cardholder-name").value
+          }
+        }
+      });
+
+      if (error) {
+        // Card declined or validation error
+        document.getElementById("card-errors").textContent = error.message;
+        resultDiv.textContent = "Payment failed.";
+        return;
+      }
+
+      // 5. Success: Stripe authorized the hold (no capture yet, because MANUAL)
+      resultDiv.textContent =
+        "Deposit hold created. PaymentIntent status: " + paymentIntent.status;
+
+      // at this point, status should be "requires_capture"
+      // you can optionally notify your backend here too:
+      // await fetch("/payments/holds/confirm", { method: "POST", ... });
+
+    } catch (err) {
+      document.getElementById("card-errors").textContent = err.message;
+      resultDiv.textContent = "Something went wrong.";
+    }
+  });
+</script>
+
+</body>
+</html>

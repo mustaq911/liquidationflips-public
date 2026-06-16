@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Watchlist - Liquidation Flips</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    :root{
+      --bg:#f7f7f8;
+      --panel:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --brand:#2563eb;
+      --brand-2:#1e40af;
+      --border:#e5e7eb;
+
+      --success:#16a34a;
+      --danger:#dc2626;
+      --warn:#f59e0b;
+      --chip:#0ea5e9;
+
+      --shadow: 0 16px 40px rgba(15,23,42,0.07);
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+    a{text-decoration:none;color:inherit}
+
+    .page{max-width:1180px;margin:0 auto;padding:22px;}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+
+    .hero{
+      display:flex;align-items:flex-start;gap:14px;
+      padding:16px 18px;border-radius:var(--radius);
+      border:1px solid rgba(14,165,233,.25);
+      background:rgba(14,165,233,.06);
+      margin-bottom:16px;
+    }
+    .heroIcon{
+      width:44px;height:44px;border-radius:12px;
+      display:grid;place-items:center;
+      background:rgba(14,165,233,.16);
+      border:1px solid rgba(14,165,233,.25);
+      color:#0369a1;
+      font-size:18px;
+      flex:0 0 auto;
+    }
+    h1{font-size:22px;margin:0 0 6px;}
+    .muted{color:var(--muted);font-size:13px;line-height:1.45}
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:12px;color:var(--muted);
+      white-space:nowrap;
+    }
+    .pill strong{color:var(--text)}
+    .pill.info{border-color:rgba(37,99,235,.30);background:rgba(37,99,235,.05)}
+    .pill.info i{color:var(--brand)}
+
+    .toolbar{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+      margin-top:10px;
+    }
+    .input, .select{
+      background:#fff;border:1px solid var(--border);
+      border-radius:12px;padding:10px 12px;
+      font-size:13px;outline:none;
+      min-width:220px;
+    }
+    .select{min-width:180px}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;cursor:pointer;
+      font-weight:800;font-size:13px;
+      white-space:nowrap;
+    }
+    .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .btn-primary:hover{background:var(--brand-2)}
+    .btn-danger{border-color:rgba(220,38,38,.35);background:rgba(220,38,38,.06);color:#991b1b}
+    .btn-danger:hover{background:rgba(220,38,38,.10)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0;}
+    @media(max-width:950px){.kpis{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:520px){.kpis{grid-template-columns:1fr}}
+
+    .kpi{
+      border-radius:var(--radius);
+      padding:14px;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+    .kpi .label{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
+    .kpi .val{font-size:18px;font-weight:900;margin-top:6px}
+    .kpi .hint{font-size:12px;color:var(--muted);margin-top:4px}
+    .kpi.blue{border:1px solid rgba(37,99,235,.22);background:rgba(37,99,235,.05)}
+    .kpi.green{border:1px solid rgba(22,163,74,.25);background:rgba(22,163,74,.06)}
+    .kpi.amber{border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.07)}
+
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;vertical-align:middle}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+    .tdRight{text-align:right}
+    .tdCenter{text-align:center}
+
+    .itemRow{cursor:pointer}
+    .itemRow:hover{background:rgba(15,23,42,.02)}
+
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 10px;border-radius:999px;
+      font-size:12px;font-weight:800;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+    .badge.auction{border-color:rgba(37,99,235,.30);background:rgba(37,99,235,.06);color:#1e3a8a}
+    .badge.buynow{border-color:rgba(22,163,74,.30);background:rgba(22,163,74,.06);color:#14532d}
+
+    .thumb{
+      width:42px;height:42px;border-radius:12px;
+      background:linear-gradient(135deg, rgba(37,99,235,.12), rgba(14,165,233,.10));
+      border:1px solid rgba(37,99,235,.15);
+      overflow:hidden;
+      flex:0 0 auto;
+      display:grid;place-items:center;
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+
+    .empty{
+      padding:18px;border-radius:var(--radius);
+      border:1px dashed rgba(15,23,42,.18);
+      background:#fff;
+      text-align:center;
+      color:var(--muted);
+      margin-top:12px;
+    }
+
+    .err{
+      border:1px solid rgba(220,38,38,.25);
+      background:rgba(220,38,38,.06);
+      color:#991b1b;
+      padding:12px;border-radius:14px;
+      font-size:13px;
+      display:none;
+    }
+
+    @media print{
+      .toolbar, .btn, #topnavContainer {display:none !important;}
+      body{background:#fff}
+      .card{box-shadow:none}
+      .page{max-width:100%;padding:0}
+    }
+  </style>
+</head>
+<body>
+  <!-- TOP NAV -->
+  <link rel="stylesheet" href="/css/topnav.css">
+  <div id="topnavContainer"></div>
+  <script>
+    fetch("/topnav.html")
+      .then(res => res.text())
+      .then(html => { document.getElementById("topnavContainer").innerHTML = html; });
+  </script>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js" defer></script>
+
+  <div class="page">
+    <div class="hero">
+      <div class="heroIcon"><i class="fa-regular fa-eye"></i></div>
+
+      <div style="flex:1">
+        <h1>My Watchlist</h1>
+        <div class="muted">See items you are watching. You’ll receive updates when bids change.</div>
+
+        <div class="toolbar">
+          <input id="q" class="input" placeholder="Search by title or Product ID..." />
+          <select id="typeFilter" class="select">
+            <option value="ALL">All types</option>
+            <option value="AUCTION">Auction</option>
+            <option value="BUYNOW">Buy Now</option>
+          </select>
+
+          <button class="btn btn-primary" id="btnRefresh">
+            <i class="fa-solid fa-rotate"></i> Refresh
+          </button>
+          <button class="btn" id="btnPrint">
+            <i class="fa-solid fa-print"></i> Print
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <span class="pill info"><i class="fa-solid fa-user"></i> <strong id="pillUser">—</strong></span>
+        <span class="pill"><i class="fa-regular fa-clock"></i> <span id="pillNow">—</span></span>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi blue">
+        <div class="label"><i class="fa-regular fa-eye"></i> Total watching</div>
+        <div class="val" id="kpiTotal">—</div>
+        <div class="hint">All watchlisted items</div>
+      </div>
+      <div class="kpi green">
+        <div class="label"><i class="fa-solid fa-gavel"></i> Auctions</div>
+        <div class="val" id="kpiAuctions">—</div>
+        <div class="hint">Auction watchlist</div>
+      </div>
+      <div class="kpi amber">
+        <div class="label"><i class="fa-solid fa-cart-shopping"></i> Buy Now</div>
+        <div class="val" id="kpiBuyNow">—</div>
+        <div class="hint">Buy Now watchlist</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div style="font-weight:900;font-size:16px">Watchlist items</div>
+        <div class="pill"><i class="fa-solid fa-filter"></i> <span id="pillCount">—</span> shown</div>
+      </div>
+
+      <div id="errorBox" class="err" style="margin-top:12px;"></div>
+
+      <div style="overflow:auto;margin-top:10px;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:70px;">Item</th>
+              <th>Title</th>
+              <th style="width:110px;">Type</th>
+              <th style="width:120px;">Product ID</th>
+              <th style="width:160px;">Added</th>
+              <th class="tdRight" style="width:220px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div id="empty" class="empty" style="display:none;">
+        No items in your watchlist.
+        <a href="/index.html" style="color:var(--brand);font-weight:800;">Browse auctions</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+    const token  = localStorage.getItem('token');
+    const userId = localStorage.getItem('userid');
+
+    const state = {
+      list: [],          // raw watchlist rows
+      productsById: new Map() // product details cache
+    };
+
+    function setNow(){
+      document.getElementById("pillNow").textContent = new Date().toLocaleString();
+      document.getElementById("pillUser").textContent = localStorage.getItem("email") || userId || "—";
+    }
+
+    function showErr(msg){
+      const el = document.getElementById("errorBox");
+      if (!msg){ el.style.display="none"; el.textContent=""; return; }
+      el.style.display="block"; el.textContent = msg;
+    }
+
+    function safe(v, fb="—"){
+      if (v === null || v === undefined) return fb;
+      const s = String(v).trim();
+      return s ? s : fb;
+    }
+
+    function fmtDate(s){
+      if (!s) return "—";
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return s;
+      return d.toLocaleString();
+    }
+
+    function inferType(p){
+      // best effort based on your product DTO fields
+      const listingType = String(p?.listingType || p?.type || "").toUpperCase();
+      if (listingType.includes("BUY")) return "BUYNOW";
+      if (listingType.includes("AUCTION")) return "AUCTION";
+
+      // fallback: if auctionEnd exists => AUCTION
+      if (p?.auctionEnd || p?.auctionStart) return "AUCTION";
+      return "BUYNOW";
+    }
+
+    function badgeType(type){
+      const t = String(type||"").toUpperCase();
+      if (t === "AUCTION") return `<span class="badge auction"><i class="fa-solid fa-gavel"></i> AUCTION</span>`;
+      if (t === "BUYNOW")  return `<span class="badge buynow"><i class="fa-solid fa-cart-shopping"></i> BUY NOW</span>`;
+      return `<span class="badge"><i class="fa-regular fa-circle"></i> ${safe(t)}</span>`;
+    }
+
+    function getPrimaryImage(p){
+      const imgs = Array.isArray(p?.images) ? p.images.filter(Boolean) : [];
+      const main = p?.imageUrl ? [p.imageUrl] : [];
+      const merged = imgs.length ? imgs : main;
+      return merged[0] || "";
+    }
+
+    // ✅ WATCHLIST endpoints (from your earlier setup)
+    async function fetchMyWatchlist(){
+      if (!userId || !token) throw new Error("Not logged in");
+      const res = await fetch(`${API_BASE_URL}/watchlist/user/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error(`Fetch watchlist failed: ${res.status}`);
+      return await res.json();
+    }
+
+    async function removeFromWatchlist(productId){
+      if (!userId || !token) throw new Error("Not logged in");
+      const res = await fetch(`${API_BASE_URL}/watchlist?userId=${encodeURIComponent(userId)}&productId=${encodeURIComponent(productId)}`, {
+        method: "DELETE",
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if(!res.ok) throw new Error(`Remove failed: ${res.status}`);
+      return true;
+    }
+
+    // ✅ product endpoint (your bidding-service uses productClient.getProductById)
+    async function fetchProduct(productId){
+      // Try a few common endpoints safely:
+      const candidates = [
+        `${API_BASE_URL}/products/${productId}`,
+        `${API_BASE_URL}/products/get/${productId}`,
+        `${API_BASE_URL}/products/get/byId/${productId}`,
+        `${API_BASE_URL}/products/getProductById/${productId}`
+      ];
+
+      for (const url of candidates){
+        try{
+          const res = await fetch(url, { headers: token ? { 'Authorization': `Bearer ${token}` } : {} });
+          if (res.ok){
+            return await res.json();
+          }
+        }catch(_){}
+      }
+      // if none work, return null (UI will still show minimal rows)
+      return null;
+    }
+
+    function computeKPIs(rows){
+      const total = rows.length;
+      let auctions = 0, buynow = 0;
+      for (const r of rows){
+        const p = state.productsById.get(Number(r.productId));
+        const t = inferType(p);
+        if (t === "AUCTION") auctions++;
+        else buynow++;
+      }
+      document.getElementById("kpiTotal").textContent = total;
+      document.getElementById("kpiAuctions").textContent = auctions;
+      document.getElementById("kpiBuyNow").textContent = buynow;
+    }
+
+    function getFiltered(){
+      const q = (document.getElementById("q").value || "").trim().toLowerCase();
+      const tf = document.getElementById("typeFilter").value;
+
+      return state.list.filter(w => {
+        const pid = Number(w.productId);
+        const p = state.productsById.get(pid);
+        const title = (p?.title || "").toLowerCase();
+        const idStr = String(pid);
+
+        const matchesQ = !q || title.includes(q) || idStr.includes(q);
+        const type = inferType(p);
+        const matchesT = (tf === "ALL") || type === tf;
+
+        return matchesQ && matchesT;
+      });
+    }
+
+    function renderTable(){
+      const tbody = document.getElementById("tbody");
+      const empty = document.getElementById("empty");
+      const filtered = getFiltered();
+
+      document.getElementById("pillCount").textContent = filtered.length;
+
+      tbody.innerHTML = "";
+      if (!filtered.length){
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+
+      for (const w of filtered){
+        const pid = Number(w.productId);
+        const p = state.productsById.get(pid);
+        const title = safe(p?.title, `Product #${pid}`);
+        const type = inferType(p);
+        const addedAt = w.createdAt || w.created_at || w.addedAt;
+
+        const img = getPrimaryImage(p);
+
+        const tr = document.createElement("tr");
+        tr.className = "itemRow";
+        tr.innerHTML = `
+          <td>
+            <div class="thumb">
+              ${img ? `<img src="${img}" alt="">` : `<i class="fa-solid fa-box"></i>`}
+            </div>
+          </td>
+          <td><strong>${title}</strong></td>
+          <td>${badgeType(type)}</td>
+          <td><strong>#${pid}</strong></td>
+          <td>${fmtDate(addedAt)}</td>
+          <td class="tdRight">
+            <button class="btn" data-open="${pid}">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Open
+            </button>
+            <button class="btn btn-danger" data-remove="${pid}">
+              <i class="fa-solid fa-trash"></i> Remove
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      // wire actions
+      tbody.querySelectorAll("button[data-open]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const pid = btn.getAttribute("data-open");
+          // open product page (your site uses product-view.html)
+          window.location.href = `/product-view.html?id=${encodeURIComponent(pid)}`;
+        });
+      });
+
+      tbody.querySelectorAll("button[data-remove]").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const pid = btn.getAttribute("data-remove");
+
+          if (!confirm("Remove this item from your watchlist?")) return;
+
+          btn.disabled = true;
+          try{
+            await removeFromWatchlist(pid);
+            state.list = state.list.filter(x => String(x.productId) !== String(pid));
+            computeKPIs(state.list);
+            renderTable();
+          }catch(err){
+            console.error(err);
+            showErr("Could not remove from watchlist. Please try again.");
+          }finally{
+            btn.disabled = false;
+          }
+        });
+      });
+
+      // row click opens too
+      tbody.querySelectorAll("tr.itemRow").forEach(row => {
+        row.addEventListener("click", () => {
+          const pid = row.querySelector("td:nth-child(4) strong")?.textContent?.replace("#","") || "";
+          if (pid) window.location.href = `/product-view.html?id=${encodeURIComponent(pid)}`;
+        });
+      });
+    }
+
+    async function load(){
+      setNow();
+      showErr(null);
+
+      if (!userId || !token){
+        showErr("Please sign in to view your watchlist.");
+        document.getElementById("empty").style.display = "block";
+        return;
+      }
+
+      try{
+        const list = await fetchMyWatchlist();
+        state.list = Array.isArray(list) ? list : (list.data || []);
+
+        // Load product details for each watched item (best effort)
+        state.productsById = new Map();
+        const ids = Array.from(new Set(state.list.map(w => Number(w.productId)).filter(Boolean)));
+
+        // fetch in small batches to avoid overload
+        for (const pid of ids){
+          const p = await fetchProduct(pid);
+          if (p) state.productsById.set(Number(pid), p);
+        }
+
+        computeKPIs(state.list);
+        renderTable();
+      }catch(e){
+        console.error(e);
+        showErr("Could not load watchlist. Please check Watchlist endpoint/CORS/auth.");
+        document.getElementById("empty").style.display = "block";
+      }
+    }
+
+    document.getElementById("btnRefresh").addEventListener("click", load);
+    document.getElementById("btnPrint").addEventListener("click", () => window.print());
+    document.getElementById("q").addEventListener("input", renderTable);
+    document.getElementById("typeFilter").addEventListener("change", renderTable);
+
+    window.addEventListener("DOMContentLoaded", load);
+  </script>
+</body>
+</html>

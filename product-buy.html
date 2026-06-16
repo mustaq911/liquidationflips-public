@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Liquidation Flips</title>
+  <link href="/img/logo-small.jpg" rel="icon">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <!-- OwlCarousel2 -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+
+  <style>
+    :root{
+      --panel:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+
+      --blue:#1f3b74;
+      --blue-2:#274d9b;
+
+      --green:#1d7a59;
+      --green-2:#176248;
+
+      --shadow:0 10px 28px rgba(0,0,0,.08);
+      --shadow-soft:0 6px 18px rgba(0,0,0,.06);
+      --radius:14px;
+
+      /* Chips */
+      --chip-bg: rgba(29,122,89,.10);
+      --chip-bd: rgba(17,94,68,.35);
+      --chip-text: #0f2f25;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background: url("/img/hero-bg.jpg") top center / cover repeat-y fixed;
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    a{text-decoration:none;color:inherit}
+
+    .page{max-width:1500px;margin:0 auto;padding:18px 20px 26px}
+
+    /* --- Top strip --- */
+    .strip{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand{display:flex; align-items:center; gap:10px; min-width:220px;}
+    .brandText{line-height:1.1}
+    .brandText b{display:block;font-size:14px}
+    .brandText span{display:block;font-size:12px;color:var(--muted)}
+
+    .stripActions{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .pill{
+      border:1px solid var(--border);
+      background:#fff;
+      padding:10px 14px;
+      border-radius:10px;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .08s ease, box-shadow .12s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:40px;
+    }
+    .pill:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
+    .pill.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .pill.primary:hover{background:var(--blue-2)}
+    .pill.success{background:var(--green);border-color:var(--green);color:#fff}
+    .pill.success:hover{background:var(--green-2)}
+
+    /* --- Hero --- */
+    .hero{margin:18px 0 12px;padding:4px 2px}
+    .hero h1{
+		margin:0;
+		font-size:40px;
+		letter-spacing:-.5px;
+		
+		color: var(--green);
+		font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; 
+	}
+    .hero p{margin:6px 0 0;color:var(--muted);font-size:16px}
+
+    /* --- Filters panel --- */
+    .filters{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+      padding:14px;
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:12px;
+      align-items:end;
+    }
+    .field{grid-column:span 3}
+    .field.w4{grid-column:span 4}
+    .field.w2{grid-column:span 2}
+    .field label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+
+    select, input[type="text"]{
+      width:100%;
+      padding:11px 12px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#fff;
+      font-size:14px;
+      outline:none;
+    }
+    .searchWrap{position:relative}
+    .searchWrap i{
+      position:absolute; right:12px; top:50%;
+      transform:translateY(-50%);
+      color:#9ca3af;
+      pointer-events:none;
+    }
+    .searchWrap input{padding-right:36px}
+
+    .filtersActions{
+      grid-column:span 2;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      align-items:flex-end;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      padding:11px 14px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#fff;
+      cursor:pointer;
+      font-weight:900;
+      min-height:42px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition:transform .08s ease, box-shadow .12s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
+    .btn.apply{
+      background:var(--green);
+      border-color:var(--green);
+      color:#fff;
+    }
+    .btn.apply:hover{background:var(--green-2)}
+
+    .viewTools{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .btn.toggle.active{
+      background:rgba(29,122,89,.10);
+      border-color:rgba(29,122,89,.35);
+      color:var(--green);
+    }
+
+    .pageSizer{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+    }
+    .pageSizer select{
+      width:auto;
+      padding:10px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .metaLine{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:14px 2px 10px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* ✅ GRID = 5 items per row */
+    .grid{
+      margin-top:10px;
+      display:grid;
+      gap:18px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    @media (max-width: 1400px){ .grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+    @media (max-width: 1100px){ .grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+    @media (max-width: 780px){ .grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media (max-width: 520px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+      box-shadow:var(--shadow-soft);
+      transition:transform .12s ease, box-shadow .12s ease;
+      display:flex;
+      flex-direction:column;
+      min-height:360px;
+    }
+    .card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+
+    .thumb{position:relative;height:190px;background:#eef2f7;overflow:hidden}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
+
+    .tag{
+      position:absolute;
+      left:12px; top:12px;
+      padding:7px 10px;
+      border-radius:10px;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.5px;
+      color:#fff;
+      text-transform:uppercase;
+      background:var(--green);
+    }
+
+    .body{
+      padding:14px 14px 10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      flex:1;
+    }
+    .title2{font-size:18px;font-weight:950;line-height:1.2;margin:0;min-height:44px}
+    .submeta{color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .dot{opacity:.7}
+    .price{font-size:22px;font-weight:950;color:var(--green);margin-top:2px}
+    .footline{color:var(--muted);font-size:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:auto}
+    .actions{padding:12px 14px 14px;display:flex;gap:10px;align-items:center}
+    .actions .btn{flex:1;justify-content:center}
+    .btn.buy{
+      background:var(--green);
+      border-color:var(--green);
+      color:#fff;
+    }
+    .btn.buy:hover{background:var(--green-2)}
+
+    /* ✅ LIST VIEW */
+    .list{
+      margin-top:10px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    /* full width card */
+    .listCard{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 360px 1fr 320px;
+      gap:16px;
+      padding:14px;
+      align-items:stretch;
+    }
+
+    .listThumb{
+      position:relative;
+      background:#eef2f7;
+      border-radius:12px;
+      overflow:hidden;
+      min-height:210px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding:10px;
+    }
+
+    .listMainImg{
+      width:100%;
+      height:210px;
+      border-radius:10px;
+      overflow:hidden;
+      background:#e5e7eb;
+      border:1px solid rgba(0,0,0,.06);
+    }
+    .listMainImg img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      cursor:pointer;
+    }
+
+    .thumbStrip{
+      display:flex;
+      gap:8px;
+      overflow:auto;
+      padding-bottom:2px;
+    }
+    .thumbStrip::-webkit-scrollbar{height:8px}
+    .thumbStrip::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:10px}
+    .thumbMini{
+      width:62px;
+      height:44px;
+      border-radius:10px;
+      overflow:hidden;
+      border:2px solid transparent;
+      background:#e5e7eb;
+      flex:0 0 auto;
+      cursor:pointer;
+    }
+    .thumbMini img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumbMini.active{
+      border-color: rgba(29,122,89,.65);
+      box-shadow: 0 0 0 2px rgba(29,122,89,.15);
+    }
+
+    .listThumb .tag{
+      left:18px; top:18px;
+      position:absolute;
+      z-index:2;
+    }
+
+    .listMain{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      padding:4px 6px 4px 4px;
+      min-width:0;
+    }
+
+    .listTitle{
+      font-size:22px;
+      font-weight:950;
+      line-height:1.15;
+      margin:0;
+      letter-spacing:-.2px;
+    }
+
+    /* ✅ Chips grid */
+    .chipGrid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:10px;
+      align-items:start;
+    }
+
+    .chip{
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-bd);
+      border-radius: 12px;
+      padding: 10px 10px;
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+      min-width:0;
+    }
+    .chip i{
+      color: var(--green);
+      margin-top:2px;
+      flex:0 0 auto;
+    }
+    .chip .k{
+      font-size:12px;
+      color: var(--muted);
+      font-weight:900;
+      line-height:1.2;
+      margin:0;
+      white-space:nowrap;
+    }
+    .chip .v{
+      font-size:13px;
+      color: var(--chip-text);
+      font-weight:900;
+      line-height:1.25;
+      margin-top:3px;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .listPriceRow{
+      margin-top:auto;
+      display:flex;
+      gap:14px;
+      align-items:baseline;
+      flex-wrap:wrap;
+      padding-top:2px;
+    }
+    .listPrice{
+      font-size:28px;
+      font-weight:950;
+      color:var(--green);
+      letter-spacing:-.3px;
+    }
+    .listNote{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:900;
+    }
+
+    .listRight{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:stretch;
+      justify-content:flex-start;
+      padding:4px 6px 4px 0;
+    }
+
+    .pickupBox{
+      background: rgba(29,122,89,.08);
+      border: 1px solid rgba(10,52,38,.35);
+      border-radius: 14px;
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .pickupLine{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      color: var(--muted);
+      font-size:13px;
+      font-weight:900;
+      line-height:1.35;
+    }
+    .pickupLine i{color:var(--green);margin-top:2px}
+    .pickupLine b{color:var(--text)}
+    .listRight .btn{width:100%;justify-content:center}
+
+    /* Skeleton */
+    .skeleton{
+      background:linear-gradient(90deg,#f5f5f5,#ececec,#f5f5f5);
+      background-size:200% 100%;
+      animation:shimmer 1.2s infinite
+    }
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .card.skel .thumb{height:180px}
+    .card.skel .line{height:12px;border-radius:8px;margin:10px 14px}
+    .card.skel .line.w60{width:60%}
+    .card.skel .line.w40{width:40%}
+
+    /* Pagination */
+    .pagination{
+      margin:18px 0 6px;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      align-items:center
+    }
+    .pagination .btn{min-width:44px;justify-content:center}
+    .hidden{display:none!important}
+
+    /* Owl Carousel banners */
+    #owl-demo{display:block;margin:18px 0 20px;}
+    #owl-demo .slide{
+      display:block;
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid var(--border);
+      box-shadow:0 6px 18px rgba(0,0,0,.08);
+      background:#fff;
+    }
+    #owl-demo img{
+      width:100%;
+      height:220px;
+      object-fit:cover;
+      display:block;
+    }
+    @media(max-width:980px){ #owl-demo img{ height:180px; } }
+    @media(max-width:520px){ #owl-demo img{ height:150px; } }
+    #owl-demo .owl-nav button{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:#fff !important;
+      border:1px solid rgba(0,0,0,.1) !important;
+      box-shadow:0 6px 14px rgba(0,0,0,.15);
+    }
+    #owl-demo .owl-nav button.owl-prev{ left:-12px; }
+    #owl-demo .owl-nav button.owl-next{ right:-12px; }
+    #owl-demo .owl-nav span{ font-size:24px; }
+
+    /* Responsive */
+    @media (max-width: 1200px){
+      .listCard{grid-template-columns: 320px 1fr 300px;}
+      .chipGrid{grid-template-columns: repeat(2, minmax(0,1fr));}
+    }
+    @media (max-width: 980px){
+      .field{grid-column:span 6}
+      .field.w4{grid-column:span 12}
+      .filtersActions{grid-column:span 12; justify-content:flex-end}
+      .hero h1{font-size:32px}
+
+      .listCard{grid-template-columns: 1fr; }
+      .listRight{flex-direction:row; gap:10px; align-items:stretch}
+      .pickupBox{flex:1}
+      .listRight .btn{flex:1}
+    }
+    @media (max-width: 520px){
+      .strip{flex-direction:column; align-items:stretch}
+      .stripActions{justify-content:stretch}
+      .stripActions .pill{width:100%; justify-content:center}
+      .hero h1{font-size:28px}
+      .listRight{flex-direction:column}
+      .chipGrid{grid-template-columns: 1fr;}
+    }
+	
+	/* ✅ One clean details panel (replaces all the small chips) */
+	.detailsPanel{
+	  background: rgba(29,122,89,.08);              /* light green */
+	  border: 1px solid rgba(10,52,38,.35);         /* darker border */
+	  border-radius: 14px;
+	  padding: 12px;
+	  display: grid;
+	  grid-template-columns: 140px 1fr 140px 1fr;   /* 2 columns of label/value pairs */
+	  gap: 10px 14px;
+	  align-items: start;
+	}
+
+	/* each row item */
+	.detailsItem{
+	  display:flex;
+	  gap:10px;
+	  align-items:flex-start;
+	  min-width:0;
+	  line-height:1.35;
+	}
+
+	.detailsItem i{
+	  color: var(--green);
+	  opacity:.95;
+	  margin-top:2px;
+	  flex:0 0 auto;
+	}
+
+	/* label */
+	.detailsItem .k{
+	  font-size:12px;
+	  color: var(--muted);
+	  font-weight:900;
+	  white-space:nowrap;
+	}
+
+	/* value */
+	.detailsItem .v{
+	  font-size:13px;
+	  color: var(--text);
+	  font-weight:900;
+	  min-width:0;
+	  overflow:hidden;
+	  text-overflow:ellipsis;
+	}
+
+	/* for long address → allow wrapping */
+	.detailsItem .v.wrap{
+	  white-space:normal;
+	  overflow:visible;
+	  text-overflow:clip;
+	}
+
+	/* Responsive: stack into 1 column on smaller screens */
+	@media (max-width: 1100px){
+	  .detailsPanel{
+		grid-template-columns: 120px 1fr;
+	  }
+	}
+
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP Nav section -->
+  <link rel="stylesheet" href="/css/topnav.css">
+  <div id="topnavContainer"></div>
+
+  <!-- CONFIG + AUTH -->
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js" defer></script>
+
+  <!-- Owl init -->
+  <script>
+    jQuery(function ($) {
+      $("#owl-demo").owlCarousel({
+        loop: true,
+        margin: 18,
+        nav: true,
+        dots: false,
+        autoplay: true,
+        autoplayTimeout: 3500,
+        autoplayHoverPause: true,
+        responsive:{ 0:{ items:1 }, 600:{ items:2 }, 1000:{ items:3 } }
+      });
+    });
+  </script>
+
+  <div class="page">
+
+    <!-- Header strip -->
+    <div class="strip">
+      <a href="/product-buy.html" class="brand-link" aria-label="Go to Buy Now">
+        <div class="brand">
+          <span class="chip-logo">
+            <img src="/img/logo.jpg" alt="Liquidation Flips">
+          </span>
+          <div class="brandText">
+            <b>LIQUIDATION FLIPS</b>
+            <span>Bid Auctions • Buy Now</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="stripActions">
+        <button id="refreshBtn" class="pill">
+          <i class="fa-solid fa-rotate"></i> Show All
+        </button>
+
+        <button class="pill primary view-nav" data-target="auction">
+          <i class="fa-solid fa-gavel"></i> Auction
+        </button>
+        <button class="pill success view-nav" data-target="buynow">
+          <i class="fa-solid fa-cart-shopping"></i> Buy Now
+        </button>
+      </div>
+    </div>
+
+    <!-- owl-carousel -->
+    <div id="owl-demo" class="owl-carousel owl-theme">
+      <a class="slide" href="#"><img src="/img/slides/slide-1.jpeg" alt="Slide 1"></a>
+      <a class="slide" href="#"><img src="/img/slides/slide-2.jpeg" alt="Slide 2"></a>
+      <a class="slide" href="#"><img src="/img/slides/slide-3.jpeg" alt="Slide 3"></a>
+      <a class="slide" href="#"><img src="/img/slides/slide-4.jpeg" alt="Slide 4"></a>
+      <a class="slide" href="#"><img src="/img/slides/slide-5.jpeg" alt="Slide 5"></a>
+      <a class="slide" href="#"><img src="/img/slides/slide-6.jpeg" alt="Slide 6"></a>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1>Browse Auctions &amp; Buy-Now Deals</h1>
+      <p>Fast search. Easy filters. Clean listings.</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="field w2">
+        <label for="typeSelect">Type</label>
+        <select id="typeSelect">
+          <option value="all">Auction + Buy Now</option>
+          <option value="auction">Auction</option>
+          <option value="buynow" selected>Buy Now</option>
+        </select>
+      </div>
+
+      <div class="field w2">
+        <label for="categorySelect">Category</label>
+        <select id="categorySelect" name="categoryId"></select>
+      </div>
+
+      <div class="field w4">
+        <label for="searchBox">Search</label>
+        <div class="searchWrap">
+          <input id="searchBox" type="text" placeholder="Search items..." />
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+      </div>
+
+      <div class="field w2">
+        <label for="sortSelect">Sort</label>
+        <select id="sortSelect">
+          <option value="newlyListed">Newly listed</option>
+          <option value="priceLowHigh">Price: Low to High</option>
+          <option value="priceHighLow">Price: High to Low</option>
+        </select>
+      </div>
+
+      <div class="filtersActions">
+        <div class="viewTools">
+          <button type="button" class="btn toggle active" id="gridViewBtn" aria-pressed="true">
+            <i class="fa-solid fa-border-all"></i> Grid
+          </button>
+          <button type="button" class="btn toggle" id="listViewBtn" aria-pressed="false">
+            <i class="fa-solid fa-list"></i> List
+          </button>
+
+          <div class="pageSizer">
+            <label for="pageSizeSelect">Items</label>
+            <select id="pageSizeSelect">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+            </select>
+          </div>
+
+          <button id="applyBtn" class="btn apply"><i class="fa-solid fa-filter"></i> Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="metaLine">
+      <div><span id="metaInfo">0 items</span> <span class="dot">•</span> <span id="pageInfoInline">Page 1</span></div>
+      <div class="muted"></div>
+    </div>
+
+    <div id="grid" class="grid"></div>
+    <div id="list" class="list hidden"></div>
+
+    <div class="pagination hidden" id="pagination">
+      <button class="btn" id="prevPage"><i class="fa-solid fa-chevron-left"></i></button>
+      <span class="muted" id="pageInfo">Page 1</span>
+      <button class="btn" id="nextPage"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+
+    /* ==== Utilities & State ==== */
+    const $ = (s, r=document) => r.querySelector(s);
+    const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+    const grid = $('#grid');
+    const list = $('#list');
+    const metaInfo = $('#metaInfo');
+    const categorySelect = $('#categorySelect');
+    const sortSelect = $('#sortSelect');
+    const searchBox = $('#searchBox');
+    const pagination = $('#pagination');
+    const pageInfo = $('#pageInfo');
+    const prevPage = $('#prevPage');
+    const nextPage = $('#nextPage');
+    const applyBtn = $('#applyBtn');
+    const typeSelect = $('#typeSelect');
+    const pageInfoInline = $('#pageInfoInline');
+
+    const gridViewBtn = $('#gridViewBtn');
+    const listViewBtn = $('#listViewBtn');
+    const pageSizeSelect = $('#pageSizeSelect');
+
+    let PAGE_SIZE = 10;
+    let VIEW_MODE = 'grid';
+
+    let ALL_PRODUCTS = [];
+    let FILTERED = [];
+    let CURRENT_PAGE = 1;
+
+    // ===== Warehouse cache (by id) =====
+    let WAREHOUSE_MAP = new Map();
+
+    // ==== Helpers ====
+    function safeText(v, fallback='—'){
+      if (v === null || v === undefined) return fallback;
+      const s = String(v).trim();
+      return s ? s : fallback;
+    }
+
+    function formatPrice(x){
+      if(x==null) return '—';
+      const n = Number(x);
+      if(Number.isNaN(n)) return String(x);
+      return `$${n.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    }
+
+    function getQty(p){
+      const q = (p.availableQuantity ?? p.quantity ?? p.qty);
+      return (q === 0 || q) ? q : null;
+    }
+
+    // ✅ images come from ProductDTO.images
+    function getAllImages(p){
+      const arr = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
+      const main = p.imageUrl ? [p.imageUrl] : [];
+      // if images empty, fallback to imageUrl
+      const merged = (arr.length ? arr : main);
+      // unique
+      return Array.from(new Set(merged));
+    }
+
+    function getPrimaryImage(p){
+      const imgs = getAllImages(p);
+      return imgs[0] || 'https://via.placeholder.com/600x400?text=No+Image';
+    }
+
+    function warehouseForProduct(p){
+      const wid = (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId);
+      if (wid === null || wid === undefined) return null;
+      return WAREHOUSE_MAP.get(Number(wid)) || null;
+    }
+
+    function formatWarehouseAddress(w){
+      if(!w) return '—';
+      const parts = [
+        safeText(w.addressLine1,''),
+        safeText(w.addressLine2,''),
+        [safeText(w.city,''), safeText(w.province,'')].filter(Boolean).join(', '),
+        [safeText(w.postalCode,''), safeText(w.country,'')].filter(Boolean).join(' ')
+      ].filter(Boolean);
+      return parts.length ? parts.join(' • ') : '—';
+    }
+
+    function navigateToProduct(id){
+      window.location.href = `/product-buynow.html?id=${id}`;
+    }
+
+    // ==== Data Fetch ====
+    async function loadAllCategories(){
+      try{
+        const res = await fetch(`${API_BASE_URL}/category/get/all`);
+        if(!res.ok) throw new Error('Failed categories');
+        const listData = await res.json();
+
+        const options = `<option value="">All Categories</option>` +
+          listData.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+        categorySelect.innerHTML = options;
+
+        const lpCat = document.getElementById('lp_categorySelect');
+        if (lpCat) lpCat.innerHTML = options;
+
+      }catch(e){
+        console.error(e);
+        categorySelect.innerHTML = `<option value="">All Categories</option>`;
+      }
+    }
+
+    // ✅ Load warehouses once (so Pickup shows real name/address)
+    async function loadWarehouses(){
+      try{
+        const res = await fetch(`${API_BASE_URL}/warehouses`);
+        if(!res.ok) throw new Error('Failed warehouses');
+        const list = await res.json();
+        WAREHOUSE_MAP = new Map((Array.isArray(list)?list:[]).map(w => [Number(w.id), w]));
+      }catch(e){
+        console.warn('Warehouses not available:', e);
+        WAREHOUSE_MAP = new Map();
+      }
+    }
+
+    async function fetchAllProducts(){
+      try{
+        showSkeletons();
+        const res = await fetch(`${API_BASE_URL}/products/buynow`);
+        if(!res.ok) throw new Error('Unauthorized');
+        const data = await res.json();
+        ALL_PRODUCTS = Array.isArray(data) ? data : (data.content || []);
+        applyFilters();
+      }catch(err){
+        console.error('Failed to load products', err);
+        alert('You must be logged in to view products.');
+        window.location.href = "/index.html";
+      }
+    }
+
+    async function fetchByCategory(categoryId){
+      try{
+        showSkeletons();
+        const res = await fetch(`${API_BASE_URL}/products/get/by-category/${categoryId}`);
+        if(!res.ok) throw new Error('Unauthorized');
+        const data = await res.json();
+        ALL_PRODUCTS = Array.isArray(data) ? data : (data.content || []);
+        applyFilters();
+      }catch(err){
+        console.error('Failed to load category products', err);
+        alert('You must be logged in to view products.');
+        window.location.href = "/index.html";
+      }
+    }
+
+    // ==== Skeleton ====
+    function showSkeletons(count=12){
+      grid.innerHTML = '';
+      list.innerHTML = '';
+      grid.classList.remove('hidden');
+      list.classList.add('hidden');
+
+      for(let i=0;i<count;i++){
+        const c = document.createElement('div');
+        c.className = 'card skel';
+        c.innerHTML = `
+          <div class="thumb skeleton"></div>
+          <div class="line skeleton w60"></div>
+          <div class="line skeleton w40"></div>
+          <div class="line skeleton w60"></div>
+        `;
+        grid.appendChild(c);
+      }
+    }
+
+    // ==== GRID card ====
+    function productCardGrid(p){
+      const img = getPrimaryImage(p);
+      const title = p.title || 'Untitled';
+      const price = formatPrice(p.basePrice);
+
+      const catName =
+        (p.category && (p.category.name || p.category.title)) ||
+        p.categoryName ||
+        (p.categoryId ? `Category ${p.categoryId}` : 'OTHER');
+
+      const idText = (p.id != null) ? `ID #${p.id}` : '';
+      const qty = getQty(p);
+      const stockText = (qty == null) ? 'In stock' : (Number(qty) > 0 ? 'In stock' : 'Out of stock');
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="thumb">
+          <img src="${img}" alt="${title}" class="clickable-img"/>
+          <div class="tag">BUY NOW</div>
+        </div>
+
+        <div class="body">
+          <div class="title2" title="${title}">${title}</div>
+
+          <div class="submeta">
+            <span>${String(catName).toUpperCase()}</span>
+            ${idText ? `<span class="dot">•</span><span>${idText}</span>` : ``}
+          </div>
+
+          <div class="price">${price}</div>
+
+          <div class="footline">
+            <span>${stockText}</span>
+            <span class="dot">•</span>
+            <span>${qty == null ? 'Qty: —' : `Qty: ${qty}`}</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn buy" data-id="${p.id}">
+            <i class="fa-solid fa-bag-shopping"></i> Buy
+          </button>
+        </div>
+      `;
+
+      card.querySelector('[data-id]').addEventListener('click', () => navigateToProduct(p.id));
+      card.querySelector('.clickable-img').addEventListener('click', () => navigateToProduct(p.id));
+      return card;
+    }
+
+    // ==== LIST row with thumbnails (NO lightbox) ====
+    function productCardList(p){
+      const images = getAllImages(p);
+      const mainImg = images[0] || 'https://via.placeholder.com/600x400?text=No+Image';
+
+      const title = p.title || 'Untitled';
+      const price = formatPrice(p.basePrice);
+
+      const catName =
+        (p.category && (p.category.name || p.category.title)) ||
+        p.categoryName ||
+        (p.categoryId ? `Category ${p.categoryId}` : 'OTHER');
+
+      const idText = (p.id != null) ? `ID #${p.id}` : '—';
+      const qty = getQty(p);
+      const stockText = (qty == null) ? 'In stock' : (Number(qty) > 0 ? 'In stock' : 'Out of stock');
+      const status = safeText(p.status,'—');
+
+      const condition = safeText(p.condition || p.itemCondition || p.grade, '—');
+      const sku = safeText(p.sku || p.skuCode || p.productCode, '—');
+
+	  const wid = (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId);
+
+      const wh = warehouseForProduct(p);
+      const pickupName = wh ? safeText(wh.name) : '—';
+      const pickupAddr = wh ? formatWarehouseAddress(wh) : '—';
+
+      const row = document.createElement('div');
+      row.className = 'listCard';
+
+      const thumbItems = images.slice(0, 10).map((u, idx) => `
+        <div class="thumbMini ${idx===0?'active':''}" data-img="${u}">
+          <img src="${u}" alt="thumb ${idx+1}">
+        </div>
+      `).join('');
+
+      row.innerHTML = `
+        <div class="listThumb">
+          <div class="tag">BUY NOW</div>
+
+          <div class="listMainImg">
+            <img src="${mainImg}" alt="${title}" class="mainImg clickable-img"/>
+          </div>
+
+          ${images.length > 1 ? `<div class="thumbStrip">${thumbItems}</div>` : ``}
+        </div>
+
+        <div class="listMain">
+          <h3 class="listTitle" title="${title}">${title}</h3>
+
+          	<!-- ✅ ONE details panel for whole listMain (no individual chips) -->
+			<div class="detailsPanel">
+			  <div class="detailsItem">
+				<i class="fa-solid fa-layer-group"></i>
+				<div>
+				  <div class="k">Category</div>
+				  <div class="v">${safeText(catName).toUpperCase()}</div>
+				</div>
+			  </div>
+
+			  <div class="detailsItem">
+				<i class="fa-solid fa-hashtag"></i>
+				<div>
+				  <div class="k">Product ID</div>
+				  <div class="v">${safeText(idText)}</div>
+				</div>
+			  </div>
+
+			  <div class="detailsItem">
+				<i class="fa-solid fa-boxes-stacked"></i>
+				<div>
+				  <div class="k">Stock</div>
+				  <div class="v">${stockText}</div>
+				</div>
+			  </div>
+
+			  <div class="detailsItem">
+				<i class="fa-solid fa-scale-balanced"></i>
+				<div>
+				  <div class="k">Qty</div>
+				  <div class="v">${qty == null ? '—' : qty}</div>
+				</div>
+			  </div>
+
+			  <div class="detailsItem">
+				<i class="fa-solid fa-warehouse"></i>
+				<div>
+				  <div class="k">Pickup</div>
+				  <div class="v">${pickupName}</div>
+				</div>
+			  </div>
+
+			  <div class="detailsItem">
+				<i class="fa-solid fa-location-dot"></i>
+				<div>
+				  <div class="k">Address</div>
+				  <div class="v wrap">${pickupAddr}</div>
+				</div>
+			  </div>
+
+			  <div class="detailsItem">
+				<i class="fa-solid fa-circle-check"></i>
+				<div>
+				  <div class="k">Condition</div>
+				  <div class="v">${condition}</div>
+				</div>
+			  </div>
+
+			  <div class="detailsItem">
+				<i class="fa-solid fa-barcode"></i>
+				<div>
+				  <div class="k">SKU</div>
+				  <div class="v">${sku}</div>
+				</div>
+			  </div>
+
+			  <div class="detailsItem">
+				<i class="fa-solid fa-signal"></i>
+				<div>
+				  <div class="k">Status</div>
+				  <div class="v">${status}</div>
+				</div>
+			  </div>
+
+			  <div class="detailsItem">
+				<i class="fa-solid fa-building"></i>
+				<div>
+				  <div class="k">Warehouse ID</div>
+				  <div class="v">${wid == null ? '—' : wid}</div>
+				</div>
+			  </div>
+			</div>
+
+
+          <div class="listPriceRow">
+            <div class="listPrice">${price}</div>
+            <div class="listNote">Instant checkout</div>
+          </div>
+        </div>
+
+        <div class="listRight">
+          <div class="pickupBox">
+            <div class="pickupLine"><i class="fa-solid fa-truck-fast"></i><div>Pickup from <b>${pickupName}</b></div></div>
+            <div class="pickupLine"><i class="fa-solid fa-location-dot"></i><div>${pickupAddr}</div></div>
+          </div>
+
+          <button class="btn buy" data-id="${p.id}">
+            <i class="fa-solid fa-bag-shopping"></i> Buy
+          </button>
+        </div>
+      `;
+
+      // Buy click
+      row.querySelector('[data-id]').addEventListener('click', () => navigateToProduct(p.id));
+
+      // Image click still goes to product page (optional)
+      row.querySelector('.clickable-img').addEventListener('click', () => navigateToProduct(p.id));
+
+      // ✅ thumbnail click → swap main image (NO zoom)
+      const main = row.querySelector('.mainImg');
+      row.querySelectorAll('.thumbMini').forEach(t => {
+        t.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const url = t.getAttribute('data-img');
+          if (!url) return;
+          main.src = url;
+          row.querySelectorAll('.thumbMini').forEach(x => x.classList.remove('active'));
+          t.classList.add('active');
+        });
+      });
+
+      return row;
+    }
+
+    function setView(mode){
+      VIEW_MODE = mode;
+
+      if (mode === 'grid'){
+        grid.classList.remove('hidden');
+        list.classList.add('hidden');
+        gridViewBtn.classList.add('active');
+        listViewBtn.classList.remove('active');
+        gridViewBtn.setAttribute('aria-pressed','true');
+        listViewBtn.setAttribute('aria-pressed','false');
+      } else {
+        list.classList.remove('hidden');
+        grid.classList.add('hidden');
+        listViewBtn.classList.add('active');
+        gridViewBtn.classList.remove('active');
+        listViewBtn.setAttribute('aria-pressed','true');
+        gridViewBtn.setAttribute('aria-pressed','false');
+      }
+
+      render();
+    }
+
+    function render(){
+      const total = FILTERED.length;
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      CURRENT_PAGE = Math.min(CURRENT_PAGE, totalPages);
+
+      const start = (CURRENT_PAGE - 1) * PAGE_SIZE;
+      const pageItems = FILTERED.slice(start, start + PAGE_SIZE);
+
+      grid.innerHTML = '';
+      list.innerHTML = '';
+
+      if(pageItems.length === 0){
+        if (VIEW_MODE === 'grid'){
+          grid.innerHTML = `<div class="muted" style="grid-column:1/-1;padding:24px;text-align:center">No items found.</div>`;
+        } else {
+          list.innerHTML = `<div class="muted" style="padding:24px;text-align:center">No items found.</div>`;
+        }
+      }else{
+        if (VIEW_MODE === 'grid'){
+          pageItems.forEach(p => grid.appendChild(productCardGrid(p)));
+        } else {
+          pageItems.forEach(p => list.appendChild(productCardList(p)));
+        }
+      }
+
+      metaInfo.textContent = `${total} item${total!==1?'s':''}`;
+      pageInfoInline.textContent = `Page ${CURRENT_PAGE}`;
+
+      if(totalPages > 1){
+        pagination.classList.remove('hidden');
+        pageInfo.textContent = `Page ${CURRENT_PAGE} of ${totalPages}`;
+        prevPage.disabled = CURRENT_PAGE===1;
+        nextPage.disabled = CURRENT_PAGE===totalPages;
+      }else{
+        pagination.classList.add('hidden');
+      }
+    }
+
+    // ==== Filtering / Sorting ====
+    function applyFilters(){
+      const q = (searchBox.value||'').trim().toLowerCase();
+      const catId = categorySelect.value ? Number(categorySelect.value) : null;
+
+      FILTERED = ALL_PRODUCTS.filter(p => {
+        const matchesText = !q || (p.title && p.title.toLowerCase().includes(q));
+        const matchesCat = !catId || p.categoryId === catId || (p.category && p.category.id === catId);
+        return matchesText && matchesCat;
+      });
+
+      const sort = sortSelect.value;
+      FILTERED.sort((a,b) => {
+        if(sort==='newlyListed'){
+          const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return tb - ta;
+        }
+        if(sort==='priceLowHigh'){
+          return (Number(a.basePrice)||0) - (Number(b.basePrice)||0);
+        }
+        if(sort==='priceHighLow'){
+          return (Number(b.basePrice)||0) - (Number(a.basePrice)||0);
+        }
+        return 0;
+      });
+
+      CURRENT_PAGE = 1;
+      render();
+    }
+
+    // ==== Events ====
+    $('#refreshBtn').addEventListener('click', () => {
+      categorySelect.value = '';
+      searchBox.value = '';
+      typeSelect.value = 'buynow';
+      fetchAllProducts();
+    });
+
+    applyBtn.addEventListener('click', applyFilters);
+
+    categorySelect.addEventListener('change', async () => {
+      const val = categorySelect.value;
+      if(!val){ fetchAllProducts(); return; }
+      await fetchByCategory(val);
+    });
+
+    sortSelect.addEventListener('change', applyFilters);
+    searchBox.addEventListener('input', applyFilters);
+
+    prevPage.addEventListener('click', () => {
+      if(CURRENT_PAGE>1){ CURRENT_PAGE--; render(); }
+    });
+    nextPage.addEventListener('click', () => {
+      const totalPages = Math.max(1, Math.ceil(FILTERED.length / PAGE_SIZE));
+      if(CURRENT_PAGE<totalPages){ CURRENT_PAGE++; render(); }
+    });
+
+    gridViewBtn.addEventListener('click', () => setView('grid'));
+    listViewBtn.addEventListener('click', () => setView('list'));
+
+    pageSizeSelect.addEventListener('change', () => {
+      const v = parseInt(pageSizeSelect.value, 10);
+      PAGE_SIZE = (!Number.isNaN(v) && v > 0) ? v : 10;
+      CURRENT_PAGE = 1;
+      render();
+    });
+
+    // --- Auction / Buy Now toggle navigation ---
+    document.addEventListener('DOMContentLoaded', () => {
+      $$('.view-nav').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target;
+          if (target === 'auction') {
+            if (!location.pathname.endsWith('index.html')) window.location.href = '/index.html';
+          } else if (target === 'buynow') {
+            if (!location.pathname.endsWith('product-buy.html')) window.location.href = '/product-buy.html';
+          }
+        });
+      });
+    });
+
+    // ==== Boot ====
+    (async function init(){
+      pageSizeSelect.value = "10";
+      setView('grid');
+
+      await loadAllCategories();
+      await loadWarehouses();
+      await fetchAllProducts();
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Walbas Account Verification</title>
+  
+  <script src="/js/config.js"></script>
+  
+  <style>
+    /* Basic page styling */
+    
+    
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    /* Section wrapper */
+    .section {
+      padding: 30px 20px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Progress bar styling */
+    .progress {
+      display: flex;
+      margin-bottom: 25px;
+    }
+
+    .progress .step {
+      flex: 1;
+      padding: 10px;
+      margin-right: 6px;
+      border-radius: 4px;
+      background-color: #e0e0e0;
+      color: #333;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .progress .step:last-child {
+      margin-right: 0;
+    }
+
+    .progress .step.active {
+      background-color: #2196f3;
+      color: #fff;
+    }
+
+    .progress .step.completed {
+      background-color: #4caf50;
+      color: #fff;
+    }
+
+    /* Headings */
+    h1 {
+      font-size: 24px;
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #444;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #444;
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #666;
+      margin-top: 0;
+    }
+
+    /* Form styling */
+    form {
+      margin-top: 15px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .form-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .form-group .required {
+      color: #c00;
+      margin-right: 4px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="number"],
+    .form-group select {
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .form-note {
+      font-size: 12px;
+      color: #777;
+      margin-top: -5px;
+      margin-bottom: 20px;
+    }
+
+    .terms {
+      margin-top: 20px;
+    }
+
+    .terms label {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .terms input[type="checkbox"] {
+      margin-right: 8px;
+      margin-top: 2px;
+    }
+
+    .button-container {
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      background-color: #4caf50;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #43a047;
+    }
+
+    /* Info box used on payment page */
+    .info-box {
+      background-color: #e7f3fe;
+      border-left: 4px solid #2196f3;
+      padding: 12px 16px;
+      margin: 15px 0;
+      color: #215a89;
+      font-size: 14px;
+    }
+
+    .info-box strong {
+      font-weight: bold;
+    }
+
+    /* Phone step specific styling */
+    .otp-input {
+      padding: 8px;
+      font-size: 16px;
+      width: 220px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .phone-instructions {
+      margin-bottom: 20px;
+    }
+
+    .phone-instructions p {
+      margin-bottom: 8px;
+    }
+
+    .resend {
+      margin-top: 5px;
+      font-size: 13px;
+      color: #2196f3;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* Payment forms */
+    .payment-forms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .payment-forms .billing,
+    .payment-forms .credit-card {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .payment-forms .billing .form-row,
+    .payment-forms .credit-card .form-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .payment-forms .billing .form-group,
+    .payment-forms .credit-card .form-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 15px;
+    }
+	
+	.hidden { display: none !important; }
+    .error { color:#c00; font-size:13px; margin-top:6px; }
+
+    /* Spacing for step containers */
+    .step-page {
+      background-color: #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      padding: 25px;
+      margin-bottom: 40px;
+    }
+    
+    /*
+	 * By using .step-page as a parent selector, you ensure these styles only
+	 * apply to elements within your registration form steps.
+	 */
+	
+	.step-page .btn {
+	  /* You can now define your specific button styles here. */
+	  padding: 10px 24px;
+	  background-color: #4caf50;
+	  border: none;
+	  color: #fff;
+	  font-size: 16px;
+	  font-weight: bold;
+	  border-radius: 4px;
+	  cursor: pointer;
+	}
+	
+	.step-page .btn:hover {
+	  background-color: #43a047;
+	}
+	
+	.step-page .btn-secondary {
+	  background-color: #e0e0e0;
+	  color: #333;
+	}
+	
+	.step-page .btn-secondary:hover {
+	  background-color: #d5d5d5;
+	}
+	
+	.step-page input[type="text"],
+	.step-page input[type="email"],
+	.step-page input[type="tel"],
+	.step-page input[type="number"],
+	.step-page select {
+	  padding: 8px;
+	  font-size: 14px;
+	  border: 1px solid #ccc;
+	  border-radius: 3px;
+	  width: 100%;
+	  box-sizing: border-box;
+	}
+	
+	/* More specific error styling */
+	.step-page .error { 
+	  color: #c00; 
+	  font-size: 13px; 
+	  margin-top: 6px; 
+	}
+	
+	.step-page .hidden {
+	  display: none !important;
+	}
+	
+	.btn-secondary {
+		background-color: #e0e0e0;
+		color: #333;
+	}
+  
+	.btn-secondary:hover {
+		background-color: #d5d5d5;
+	}
+	.button-row {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+	}
+
+  </style>
+
+
+</head>
+<body>
+
+	<link rel="stylesheet" href="/css/topnav.css">
+		<div id="topnavContainer"></div>
+	<script>
+	  (async () => {
+	    const res = await fetch('topnav.html');
+	    document.getElementById('topnavContainer').innerHTML = await res.text();
+	    const username = localStorage.getItem('username');
+	    const greet = document.getElementById('greetUser');
+	    if (greet) greet.textContent = username ? `Hello, ${username}!` : 'Hello!';
+	  })();
+	</script>
+	
+  <!-- Top navigation bar
+  <div class="topnav">
+    <div class="nav-left">
+      <span class="burger">&#9776;</span>
+      <span class="brand">Liquidation Flips <span>LIQUIDATION MARKETPLACE</span></span>
+    </div>
+    <div class="nav-right">
+      <span class="greet">Hello, mustaq911!</span>
+      <a href="#">BIDS</a>
+      <a href="#">WATCHLIST</a>
+    </div>
+  </div> -->
+  
+  
+
+  <div class="section">
+    <!-- Step 1: Profile -->
+    <div class="step-page" id="step1">
+      <div class="progress">
+        <div class="step active">Profile</div>
+        <div class="step">Phone</div>
+        <div class="step">Payment</div>
+        <div class="step">Notifications</div>
+      </div>
+      <h1>Completing your account verification is quick and easy!</h1>
+      <p>Just 4 quick steps to set up your basic info, confirm your identity and set up your payment &amp; notification settings.</p>
+
+      <h2>Profile Details</h2>
+      <form>
+        <!-- <div class="form-group">
+          <label><span class="required">*</span>Username</label>
+          <input type="text" placeholder="Choose a username">
+        </div> -->
+        <div class="form-group">
+          <label><span class="required">*</span>Email</label>
+          <input type="email" id="profileEmail" placeholder="you@example.com" readonly>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label><span class="required">*</span>First Name</label>
+            <input type="text" id="firstName" placeholder="First name">
+          </div>
+          <div class="form-group">
+            <label><span class="required">*</span>Last Name</label>
+            <input type="text" id="lastName" placeholder="Last name">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label><span class="required">*</span>Primary Phone Number</label>
+            <input type="tel" id="primaryPhone" placeholder="(123) 456-7890">
+          </div>
+          <div class="form-group">
+            <label>Alternate Phone Number</label>
+            <input type="tel" placeholder="Optional">
+          </div>
+        </div>
+        <div class="form-note">
+          By proceeding you agree to receive a verification pin to confirm your phone number as part of your identity confirmation and account setup. We will not send any further account or marketing messages unless you opt-in within your notification settings page.
+        </div>
+      </form>
+      <div class="terms">
+        <h2>Terms</h2>
+        <p>Be sure to read all of the Buyer’s Info &amp; our <a href="#" style="color:#2196f3; text-decoration:underline;">Terms of Use</a> for the full details about bidding &amp; buying at Liquidation Flips.</p>
+        <label><input type="checkbox"> I agree to the Terms of Use<br><span style="font-size:13px; color:#666;">You have read the Terms &amp; Conditions and understand the policies in the Buyer's Info page.</span></label>
+        <label><input type="checkbox"> I'm over 18 years old<br><span style="font-size:13px; color:#666;">You must be at least 18 years old with a valid credit card to shop at Liquidation Flips.</span></label>
+        <label><input type="checkbox"> I understand the following policy<br><span style="font-size:13px; color:#666;">New registrants may be required to submit payment in an alternate form in accordance with our credit card security procedures. If they choose to pay their invoices online, newcomers may have their initial credit card payments refunded and they may be asked to send payment via Paypal or e‑transfer for online payments. If customers are picking up, they may be asked to pay in‑store instead of online.</span></label>
+        <label><input type="checkbox"> Sign up for our newsletter<br><span style="font-size:13px; color:#666;">Stay in the loop about upcoming auctions, hot deals, new products, and more. Don’t worry, you can unsubscribe any time.</span></label>
+      </div>
+      <div class="button-container">
+	  <!-- <button type="button" class="btn">Next</button> -->
+		<button type="button" class="btn" id="nextStep1">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Phone Verification -->
+    <div class="step-page" id="step2">
+      <div class="progress">
+        <div class="step completed">Profile</div>
+        <div class="step active">Phone</div>
+        <div class="step">Payment</div>
+        <div class="step">Notifications</div>
+      </div>
+      <h2>Your profile details are complete 
+		<span id="step2FirstName"><!-- filled by JS --></span>
+		<span id="step2LastName"><!-- filled by JS --></span>!
+	  </h2>
+      <div class="phone-instructions">
+        <p>Next we need to confirm your mobile number as part of our identity confirmation process. Doing this helps us keep bad bidders out and prices lower!</p>
+        <p>We've sent a confirmation code to your number ending in 
+			 "<strong><span id="step2PhoneLast4"><!-- filled by JS --></span></strong>", 
+			you should receive it any moment.
+		</p>
+        <p>You must use a mobile/cell phone number to verify your account. Don't have a mobile/cell phone number? <a href="#" style="color:#2196f3; text-decoration:underline;">Contact us for help!</a></p>
+      </div>
+      <form>
+        <div class="form-group" style="max-width:240px;">
+          <label>Verification Code</label>
+          <input type="text" id="otpCode" class="otp-input" placeholder="Enter code" inputmode="numeric" autocomplete="one-time-code" pattern="\d*">
+          <div id="otpError" class="error" style="display:none;">Invalid code. Try again.</div>
+          <div id="otpStatus" class="info-box" style="display:none;"></div>
+          
+        </div>
+      </form>
+      <div class="button-container">
+        <!-- <button type="button" class="btn">Next</button> -->
+		<!-- Step 2 -->
+		<button type="button" class="btn" id="nextStep2">Next</button>
+		<button type="button" class="btn btn-secondary" id="backStep2">Back</button>
+		
+      </div>
+      <div class="resend">Didn't get your pin? Resend</div>
+    </div>
+
+    <!-- Step 3: Payment Information -->
+    <div class="step-page" id="step3">
+      <div class="progress">
+        <div class="step completed">Profile</div>
+        <div class="step completed">Phone</div>
+        <div class="step active">Payment</div>
+        <div class="step">Notifications</div>
+      </div>
+      <h2>Great job 
+			<span id="step3FirstName"><!-- filled by JS --></span>
+			<span id="step3LastName"><!-- filled by JS --></span>!
+		, your phone number is confirmed!
+	  </h2>
+      <p>We also require a valid payment profile on your account, it’s quick and easy!</p>
+      <p>Below, enter your billing address and credit card information. The address must EXACTLY match your card's billing info. We'll then place a <strong>TEMPORARY $250 authorization</strong> on it to verify its validity.</p>
+      <p>Why do we require this? It helps us keep prices lower and make the auctions successful and fun for everyone, by keeping bad bidders out!</p>
+      <div class="info-box">
+        <p><strong>Please Note&nbsp;–</strong> Your credit card will experience a <em>pre‑authorization</em> hold of $1000 for <strong>each</strong> registration attempt during the validation/security check process. This is a <strong>temporary</strong> hold that will be reversed as soon as possible. Please be aware that some cards and processors will not allow us to void the transaction. In those cases your bank/provider will automatically reverse the hold within <strong>7‑10 business days</strong> – your credit card will not actually be charged.</p>
+      </div>
+      <div class="payment-forms">
+        <!-- Billing address -->
+        <div class="billing">
+          <h3>Billing Address</h3>
+          <div class="form-group">
+            <label><span class="required">*</span>Street Address</label>
+            <input id="billLine1" type="text" placeholder="Street Address">
+          </div>
+          <div class="form-group">
+            <label>Unit #</label>
+            <input id="billLine2" type="text" placeholder="Unit or Suite">
+          </div>
+          <div class="form-group">
+            <label>Country</label>
+            <select id="billCountry">
+              <option selected>Canada</option>
+              <option>United States</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>City</label>
+            <input id="billCity" type="text" placeholder="City">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Province</label>
+              <select id="billProvince">
+                  <option>Alberta</option>
+				  <option>British Columbia</option>
+				  <option>Manitoba</option>
+				  <option>New Brunswick</option>
+				  <option>Newfoundland and Labrador</option>
+				  <option>Nova Scotia</option>
+				  <option>Ontario</option>
+				  <option>Prince Edward Island</option>
+				  <option>Quebec</option>
+				  <option>Saskatchewan</option>
+				  <option>Northwest Territories</option>
+				  <option>Nunavut</option>
+				  <option>Yukon</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Postal Code</label>
+              <input id="billPostal" type="text" placeholder="A1A 1A1">
+            </div>
+          </div>
+        </div>
+        <!-- Credit card info -->
+        <div class="credit-card">
+          <h3>Credit Card Info</h3>
+          <div class="form-group">
+            <label><span class="required">*</span>Card Number</label>
+            <input id="cardNumber" type="text" placeholder="•••• •••• •••• ••••">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Month</label>
+              <select id="cardExpMonth">
+                <option value="">Month</option>
+                <option>01</option>
+                <option>02</option>
+                <option>03</option>
+                <option>04</option>
+                <option>05</option>
+                <option>06</option>
+                <option>07</option>
+                <option>08</option>
+                <option>09</option>
+                <option>10</option>
+                <option>11</option>
+                <option>12</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Year</label>
+              <select id="cardExpYear" required>
+                <option value="">Year</option>
+				  <option>2025</option>
+				  <option>2026</option>
+				  <option>2027</option>
+				  <option>2028</option>
+				  <option>2029</option>
+				  <option>2030</option>
+				  <option>2031</option>
+				  <option>2032</option>
+				  <option>2033</option>
+				  <option>2034</option>
+				  <option>2035</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>CCV</label>
+              <input id="cardCvc" type="number" placeholder="123">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="button-container">
+        <!-- <button type="button" class="btn">Next</button> -->
+		<!-- Step 3 -->
+		<button type="button" class="btn btn-secondary" id="backStep3">Back</button>
+		<button type="button" class="btn" id="nextStep3">Next</button>
+      </div>
+    </div>
+  </div>
+  <script>
+  
+  const API_BASE_URL = CONFIG.API_BASE_URL;
+  console.log("API Base URL:", API_BASE_URL);
+	
+  // --- Helpers ---
+  const qs  = (sel, root = document) => root.querySelector(sel);
+  const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  // Step containers
+  const step1 = qs('#step1');
+  const step2 = qs('#step2');
+  const step3 = qs('#step3');
+
+  // Start state: show Step 1 only
+  function showOnly(stepEl) {
+    [step1, step2, step3].forEach(s => s.classList.add('hidden'));
+    stepEl.classList.remove('hidden');
+  }
+  
+  // This is Helper method for SET valuees FName & LName & Last-4-digit-phone
+  function updateStep2Summary(firstName, lastName, phone) {
+  
+	  const last4 = (phone || '').replace(/\D/g, '').slice(-4);
+	  // Step 2
+	  qs('#step2FirstName') && (qs('#step2FirstName').textContent = firstName || '');
+	  qs('#step2LastName')  && (qs('#step2LastName').textContent  = lastName ? ` ${lastName}` : '');
+	  qs('#step2PhoneLast4')&& (qs('#step2PhoneLast4').textContent = last4 || '****');
+	  // Step 3
+	  qs('#step3FirstName') && (qs('#step3FirstName').textContent = firstName || '');
+	  qs('#step3LastName')  && (qs('#step3LastName').textContent  = lastName ? ` ${lastName}` : '');
+  }
+
+
+  // Update progress bar classes inside the visible step
+  function setProgress({profile, phone, payment}) {
+    // For whichever step is visible, set its progress bar state.
+    // We toggle classes on that step's .progress .step items based on the flags.
+    const visibleStep = [step1, step2, step3].find(s => !s.classList.contains('hidden'));
+    const steps = qsa('.progress .step', visibleStep);
+
+    // Expected order: Profile, Phone, Payment, Notifications
+    const states = [
+      profile,  // index 0
+      phone,    // index 1
+      payment   // index 2
+      // notifications is purely visual; we don’t change it here
+    ];
+
+    steps.forEach((el, idx) => {
+      el.classList.remove('active', 'completed');
+      const st = states[idx];
+      if (st === 'active')    el.classList.add('active');
+      if (st === 'completed') el.classList.add('completed');
+    });
+  }
+  
+  // Helper method to   
+    function openResumeStep(stepName) {
+	  if (stepName === 'payment') {
+		showOnly(step3);
+		setProgress({ profile: 'completed', phone: 'completed', payment: 'active' });
+		return;
+	  }
+
+	  showOnly(step1);
+	  setProgress({ profile: 'active', phone: null, payment: null });
+	}
+	
+	async function loadOnboardingUserByEmail(email) {
+	  if (!email) return null;
+
+	  try {
+		const res = await fetch(`${API_BASE_URL}/user/onboarding?email=${encodeURIComponent(email)}`);
+		if (!res.ok) return null;
+		return await res.json();
+	  } catch (e) {
+		return null;
+	  }
+	}
+
+  // --- STEP 1 validation ---
+  function validateStep1() {
+    // Basic required fields
+    const requiredInputs = [
+      // username
+      //step1.querySelector('input[placeholder="Choose a username"]'),
+      // email
+      step1.querySelector('input[placeholder="you@example.com"]'),
+      // first name
+      step1.querySelector('input[placeholder="First name"]'),
+      // last name
+      step1.querySelector('input[placeholder="Last name"]'),
+      // primary phone
+      step1.querySelector('input[placeholder="(123) 456-7890"]'),
+    ];
+
+    let ok = true;
+    requiredInputs.forEach(inp => {
+      inp.style.borderColor = '#ccc';
+      if (!inp.value.trim()) {
+        inp.style.borderColor = '#c00';
+        ok = false;
+      }
+    });
+
+    // Required checkboxes: Terms + Age + Policy
+    const checks = qsa('.terms input[type="checkbox"]', step1);
+    // order based on your markup: 0 Terms, 1 18+, 2 Policy, 3 Newsletter(optional)
+    const mustAgree = [0, 1, 2];
+    let checksOk = true;
+    mustAgree.forEach(idx => {
+      const cb = checks[idx];
+      if (cb) {
+        cb.parentElement.style.outline = 'none';
+        if (!cb.checked) {
+          cb.parentElement.style.outline = '2px solid #c00';
+          checksOk = false;
+        }
+      }
+    });
+
+    return ok && checksOk;
+  }
+
+  // --- STEP 2 OTP check (mock) ---
+  function verifyOtp() {
+
+    const otpInput = qs('#otpCode');
+    const errorBox = qs('#otpError');
+    if (!otpInput) return true; // if you didn’t add the id, skip validation
+
+    const code = otpInput.value.trim();
+    // Replace this with your real verification call.
+    // For demo: accept any 4–8 digit code, or specifically "5723"
+    const isValid = (/^\d{4,8}$/.test(code)) || code === '5723';
+    
+    
+
+    if (!isValid) {
+      errorBox.style.display = 'block';
+      otpInput.style.borderColor = '#c00';
+      return false;
+    }
+    errorBox.style.display = 'none';
+    otpInput.style.borderColor = '#ccc';
+    return true;
+  }
+
+  function resetStep2() {
+
+	  const otp = qs('#otpCode');
+	  const err = qs('#otpError');
+	  const box = qs('#otpStatus');
+	  const btnNext = qs('#nextStep2');
+	  const btnBack = qs('#backStep2');
+
+	  if (otp) { otp.value = ''; otp.style.borderColor = '#ccc'; }
+	  if (err) { err.style.display = 'none'; }
+	  if (box) {
+	    box.style.display = 'none';
+	    box.textContent = '';
+	    box.style.backgroundColor = '';
+	    box.style.borderLeft = '';
+	    box.style.color = '';
+	  }
+	  if (btnNext) btnNext.disabled = false;
+	  if (btnBack) btnBack.disabled = false;
+  }
+
+  /*** =========  NEXT STEP 1 ==========*/
+  qs('#nextStep1').addEventListener('click', async () => {
+	  if (!validateStep1()) {
+	    alert('Please complete the required fields and accept the required terms.');
+	    return;
+	  }
+
+	  // grab values
+	  /** 
+	  		Delte this part later 
+	  const userId = localStorage.getItem('userid'); // you set this at login/register */
+
+	  const email = qs('#profileEmail').value.trim();
+	  const phone = qs('#primaryPhone').value.trim();
+	  
+		
+	  //if (!userId) { alert('You must be logged in to continue.'); return; }
+	  if (!email) { alert('You must be logged in to continue.'); return; }
+	  if (!phone)  { alert('Please enter a mobile number.'); return; }
+
+	  try {
+	    //const res = await fetch(`http://localhost:8080/user/phone/start`, {
+		const res = await fetch(`${API_BASE_URL}/user/phone/start`, {
+	      method: 'POST',
+	      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	      //body: new URLSearchParams({ userId, phone }).toString()
+	      body: new URLSearchParams({ email, phone }).toString()
+	    });
+	    if (!res.ok) {
+	      const msg = await res.text();
+	      alert(msg || 'Failed to start phone verification.');
+	      return;
+	    }
+		
+		const firstName = document.querySelector('input[placeholder="First name"]').value.trim();
+		const lastName  = document.querySelector('input[placeholder="Last name"]').value.trim();
+		updateStep2Summary(firstName, lastName, phone);
+		
+	    // Move to Step 2 UI
+	    showOnly(step2);
+	    resetStep2();                      // ← clean slate when arriving on Step 2
+	    setProgress({ profile: 'completed', phone: 'active', payment: null });
+	  } catch (e) {
+	    alert('Network error. Please try again.');
+	  }
+	});
+  
+  
+  /* qs('#nextStep2').addEventListener('click', () => {
+    if (!verifyOtp()) return;
+    showOnly(step3);
+    setProgress({ profile: 'completed', phone: 'completed', payment: 'active' });
+  }); */
+  	
+  // Pressing Enter in the OTP field should behave like clicking Next
+  qs('#otpCode')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      qs('#nextStep2')?.click();   // reuse your existing NEXT STEP 2 logic
+    }
+  });
+  
+  /*** =========  NEXT STEP 2 ==========*/
+  qs('#nextStep2').addEventListener('click', async () => {
+
+	  const email = qs('#profileEmail').value.trim();
+	  const phone = qs('#primaryPhone').value.trim();
+	  const otpEl = document.getElementById('otpCode');
+	  const code  = otpEl ? otpEl.value.trim() : '';
+	  
+	  
+	  const statusBox = qs('#otpStatus');
+	  const btnNext = qs('#nextStep2');
+	  const btnBack = qs('#backStep2');
+
+	  // helpers
+	  const showStatus = (text, ok) => {
+	    if (!statusBox) return;
+	    statusBox.style.display = 'block';
+	    statusBox.textContent = text || '';
+	    // colorize
+	    statusBox.style.backgroundColor = ok ? '#e8f5e9' : '#fdecea';
+	    statusBox.style.borderLeft = ok ? '4px solid #2e7d32' : '4px solid #c62828';
+	    statusBox.style.color = ok ? '#1b5e20' : '#8a1f1f';
+	  };
+
+	  if (!code) { alert('Enter the verification code.'); return; }
+	  
+	  if (!verifyOtp()) return;
+
+	  try {
+	    const res = await fetch(`${API_BASE_URL}/user/phone/verify`, {
+	      method: 'POST',
+	      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	      body: new URLSearchParams({ email, phone, code }).toString()
+	    });
+	    
+	    let serverMsg = '';
+	    try {
+	      const data = await res.json();
+	      serverMsg = data?.message || '';
+	    } catch {
+	      serverMsg = await res.text();
+	    }
+	    
+	    if (res.ok) {
+	        // success path
+	        showStatus(serverMsg || 'OTP verified successfully.', true);
+
+	        // after 3 seconds, call showOption() if available; else proceed to Step 3
+	        setTimeout(() => {
+	          if (typeof showOption === 'function') {
+	            showOption(); // your custom method
+	          } else {
+	            showOnly(step3);
+	            setProgress({ profile: 'completed', phone: 'completed', payment: 'active' });
+	          }
+	        }, 3000);
+	      } else {
+	        // error path
+	        showStatus(serverMsg || 'Invalid code.', false);
+	      }
+	    
+	  } catch (e) {
+		  showStatus('Network error. Please try again.', false);
+	  } finally {
+		    // re-enable buttons
+		    btnNext && (btnNext.disabled = false);
+		    btnBack && (btnBack.disabled = false);
+		  }
+	});
+
+  
+  /*** =========  RESEND OTP  ==========*/
+  document.querySelector('.resend')?.addEventListener('click', async () => {
+
+	  const email  = document.querySelector('input[placeholder="you@example.com"]').value.trim();
+	  const phone  = document.querySelector('input[placeholder="(123) 456-7890"]').value.trim();
+
+	  const statusBox = qs('#otpStatus');
+	  
+	  const showStatus = (text, ok) => {
+	    if (!statusBox) return;
+	    statusBox.style.display = 'block';
+	    statusBox.textContent = text || '';
+	    // colorize
+	    statusBox.style.backgroundColor = ok ? '#e8f5e9' : '#fdecea';
+	    statusBox.style.borderLeft = ok ? '4px solid #2e7d32' : '4px solid #c62828';
+	    statusBox.style.color = ok ? '#1b5e20' : '#8a1f1f';
+	  };
+	  
+	  
+	  try {
+	    const res = await fetch(`${API_BASE_URL}/user/phone/start`, {
+	      method: 'POST',
+	      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	      body: new URLSearchParams({ email, phone }).toString()
+	    });
+	    if (!res.ok) { alert('Could not resend.'); return; }
+	    //alert('Code re-sent.');
+	    showStatus('Code re-sent.', true);
+	  } catch {
+	    //alert('Network error.');
+		showStatus('Code re-sent.', false);
+	  }
+	});
+
+  /*** =========  NEXT STEP 3 HELPER METHODS ==========*/
+  // --- helpers ---
+  const byId = (id) => document.getElementById(id);
+  const sanitizeCard = (num) => (num || '').replace(/\s|•/g, '');
+  const countryToISO2 = (val) => {
+    if (/canada/i.test(val)) return 'CA';
+    if (/united\s*states/i.test(val)) return 'US';
+    return 'CA';
+  };
+
+  function validateStep3() {
+    const required = [
+      'billLine1','billCity','billProvince','billPostal',
+      'cardNumber','cardExpMonth','cardExpYear','cardCvc'
+    ];
+    let ok = true;
+    required.forEach(id => {
+      const el = byId(id);
+      if (!el) return;
+      el.style.borderColor = '#ccc';
+      if (!String(el.value || '').trim()) {
+        el.style.borderColor = '#c00';
+        ok = false;
+      }
+    });
+    return ok;
+  }
+
+  // --- STEP 3 submit → create deposit hold ---
+  document.getElementById('nextStep3').addEventListener('click', async () => {
+    if (!validateStep3()) { alert('Please complete your billing and card details.'); return; }
+
+    // who is this for
+    const email = document.querySelector('input[placeholder="you@example.com"]').value.trim();
+    // const userId = +localStorage.getItem('userid') || null; // if your DTO uses userId
+
+    // billing
+    const billing = {
+      line1:      byId('billLine1').value.trim(),
+      line2:      byId('billLine2').value.trim(),
+      city:       byId('billCity').value.trim(),
+      state:      byId('billProvince').value.trim(),
+      postalCode: byId('billPostal').value.trim(),
+      country:    countryToISO2(byId('billCountry').value)
+    };
+
+    // card (DEV ONLY – use Stripe.js for prod)
+    const card = {
+      number:   sanitizeCard(byId('cardNumber').value),
+      expMonth: byId('cardExpMonth').value,
+      expYear:  byId('cardExpYear').value,
+      cvc:      byId('cardCvc').value
+    };
+
+    // Build CreateHoldRequest
+    const payload = {
+      email,                 // or userId
+      amount: 25000,         // $250 hold, in cents
+      currency: 'cad',
+      billing,
+      card
+      // userId                // include if your DTO expects it
+      // paymentMethodId      // (when you switch to Stripe.js)
+    };
+
+    const nextBtn = document.getElementById('nextStep3');
+    const backBtn = document.getElementById('backStep3');
+    nextBtn.disabled = true; backBtn.disabled = true; nextBtn.textContent = 'Placing hold…';
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/payments/holds`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` // if your service is secured
+        },
+        body: JSON.stringify(payload)
+      });
+
+      let bodyText = '';
+      let json; try { json = await res.json(); } catch { bodyText = await res.text(); }
+      const message = json?.message || bodyText || (res.ok ? 'Hold created.' : 'Failed to create hold.');
+
+      if (!res.ok) { alert(message); return; }
+
+      // Success → advance or finish
+      alert('Deposit hold created successfully. Your payment profile is set up.');
+      // TODO: move to Notifications step or redirect:
+      // showOnly(step4); setProgress({ profile:'completed', phone:'completed', payment:'completed' });
+      // window.location.href = '/web2/product.html';
+    } catch (e) {
+      alert('Network error while creating hold.');
+    } finally {
+      nextBtn.disabled = false; backBtn.disabled = false; nextBtn.textContent = 'Next';
+    }
+  });
+
+  
+	//STEP 2: Back → go to Step 1
+	  qs('#backStep2').addEventListener('click', () => {
+	    // hide any OTP errors and clear the code (optional)
+	    const err = qs('#otpError'); if (err) err.style.display = 'none';
+	    const otp = qs('#otpCode');  if (otp) otp.value = '';
+	
+	    resetStep2();                    // ← hide status + errors before leaving
+	    showOnly(step1);
+	    setProgress({ profile: 'active', phone: null, payment: null });
+	
+	    // optional: focus first name (or email)
+	    const first = step1.querySelector('input[placeholder="First name"]');
+	    if (first) first.focus();
+	  });
+  
+	
+	  // STEP 3: Back → go to Step 2
+	  qs('#backStep3').addEventListener('click', () => {
+		resetStep2();                    // ← hide status + errors before leaving
+	    showOnly(step2);
+	    setProgress({ profile: 'completed', phone: 'active', payment: null });
+	
+		const firstName = document.querySelector('input[placeholder="First name"]').value.trim();
+	    const lastName  = document.querySelector('input[placeholder="Last name"]').value.trim();
+	    const phone     = document.querySelector('input[placeholder="(123) 456-7890"]').value.trim();
+	    updateStep2Summary(firstName, lastName, phone);
+  
+	    // optional: focus OTP
+	    const otp = qs('#otpCode');
+	    if (otp) otp.focus();
+	  });
+  
+	
+  
+  // Initialize
+  showOnly(step1);
+  setProgress({ profile: 'active', phone: null, payment: null });
+</script>
+
+
+<script>
+  
+  // window.addEventListener('DOMContentLoaded', async () => {
+  (async function () {
+	  const params = new URLSearchParams(window.location.search);
+
+	  const verified = params.get('verified') || '';
+	  const resume   = params.get('resume') || '';
+	  const email    = params.get('email') || '';
+	  let firstName  = params.get('firstName') || '';
+	  let lastName   = params.get('lastName') || '';
+	  let phone      = '';
+
+	  const firstNameEl = document.querySelector('input[placeholder="First name"]');
+	  const lastNameEl  = document.querySelector('input[placeholder="Last name"]');
+	  const emailEl     = document.querySelector('input[placeholder="you@example.com"]');
+	  const phoneEl     = document.querySelector('input[placeholder="(123) 456-7890"]');
+
+	
+	  // if (!firstName || !lastName || resume) {
+	  
+	  if (email) {
+		
+		const user = await loadOnboardingUserByEmail(email);
+		if (user) {
+		  firstName = user.firstName || firstName;
+		  lastName  = user.lastName || lastName;
+		  phone     = user.phone || '';
+		}
+	  }
+
+	  if (firstNameEl) firstNameEl.value = firstName;
+	  if (lastNameEl)  lastNameEl.value  = lastName;
+	  if (emailEl)     emailEl.value     = email;
+	  if (phoneEl)     phoneEl.value     = phone;
+
+	  if (verified === '1') {
+		openResumeStep('profile');
+		return;
+	  }
+
+	  if (resume === 'payment') {
+		openResumeStep('payment');
+		return;
+	  }
+
+	  openResumeStep('profile');
+	
+	//});
+	})();
+	
+</script>
+
+
+</body>
+</html>

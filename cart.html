@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Cart - Liquidation Flips</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    :root {
+      --bg:#f7f7f8;
+      --panel:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --brand:#2563eb;
+      --brand-2:#1e40af;
+      --border:#e5e7eb;
+      --danger:#dc2626;
+      --success:#16a34a;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    a{text-decoration:none;color:inherit}
+
+    .page{
+      max-width:1200px;
+      margin:0 auto;
+      padding:20px;
+    }
+
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+    .header-title{
+      font-size:26px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .header-sub{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+    .chip{
+      background:#eaf6ff;
+      color:#075985;
+      border-radius:999px;
+      padding:6px 10px;
+      border:1px solid #cde9ff;
+      font-size:12px;
+      font-weight:600;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+    }
+    @media(max-width:900px){
+      .layout{grid-template-columns:1fr;}
+    }
+
+    .card{
+      background:var(--panel);
+      border-radius:14px;
+      border:1px solid var(--border);
+      padding:16px;
+      box-shadow:0 16px 40px rgba(15,23,42,0.08);
+    }
+
+    .card h3{
+      margin:0 0 10px 0;
+      font-size:18px;
+	  font-weight: 800;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    th,td{
+      border-bottom:1px solid var(--border);
+      padding:8px 6px;
+      text-align:left;
+      vertical-align:middle;
+    }
+    th{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--muted);
+    }
+
+    .cart-product{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .cart-product img{
+      width:48px;
+      height:48px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      object-fit:cover;
+    }
+    .cart-product-title{font-weight:600;font-size:14px;}
+    .cart-product-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+    .qty-actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .qty-control{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#f9fafb;
+      padding:2px 6px;
+      gap:2px;
+    }
+    .qty-btn{
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      width:22px;
+      height:22px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      color:#4b5563;
+    }
+    .qty-value{
+      min-width:18px;
+      text-align:center;
+      font-size:13px;
+      font-weight:600;
+    }
+    .btn-remove{
+      border:none;
+      background:transparent;
+      color:var(--danger);
+      font-size:12px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:4px 6px;
+      border-radius:999px;
+    }
+    .btn-remove:hover{background:#fef2f2;}
+
+    .stock-hint{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+    .stock-low{color:#b45309;font-weight:500;}
+
+    .totals-row{
+      display:flex;
+      justify-content:space-between;
+      margin:6px 0;
+      font-size:14px;
+    }
+    .totals-label{color:var(--muted);}
+    .totals-value{font-weight:700;}
+    .totals-grand{
+      font-size:18px;
+      font-weight:800;
+      margin-top:6px;
+    }
+
+    .btn{
+      padding:10px 14px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:#fff;
+      cursor:pointer;
+      font-weight:600;
+      font-size:14px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn-primary{
+      background:var(--brand);
+      color:#fff;
+      border-color:var(--brand);
+    }
+    .btn-primary:hover{background:var(--brand-2);}
+    .btn-ghost{
+      background:transparent;
+    }
+    .btn-block{
+      width:100%;
+      justify-content:center;
+      text-align:center;
+    }
+    .btn-row{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:10px;
+    }
+    @media(min-width:700px){
+      .btn-row{
+        flex-direction:row;
+        justify-content:space-between;
+      }
+      .btn-row .btn-block{width:auto;}
+    }
+
+    .notice{
+      margin-top:10px;
+      background:#fff8e1;
+      border-radius:10px;
+      border:1px solid #f7e09b;
+      padding:10px;
+      font-size:13px;
+      color:#7a5d00;
+    }
+
+    .cart-empty{
+      padding:24px;
+      text-align:center;
+      background:var(--panel);
+      border-radius:12px;
+      box-shadow:0 14px 36px rgba(15,23,42,0.06);
+      margin-top:12px;
+      font-size:14px;
+    }
+
+    .error-msg{
+      color:var(--danger);
+      font-size:13px;
+      margin-top:6px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Shared Topnav -->
+  <link rel="stylesheet" href="/css/topnav.css">
+  <div id="topnavContainer"></div>
+
+  <div class="page">
+    <div class="header">
+      <div>
+        <div class="header-title">My Cart</div>
+        <div class="header-sub">Review items in your cart before checkout.</div>
+      </div>
+      <div class="chip">
+        <i class="fa-solid fa-receipt"></i>
+        Cart <span id="cartIdChip">—</span>
+      </div>
+    </div>
+
+    <div id="cartContainer"></div>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js" defer></script>
+
+  <script>
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+    const token  = localStorage.getItem('token');
+    const userId = localStorage.getItem('userid');
+    const stockCache = {}; // productId -> stock
+
+    function fmt(n){
+      if(n == null) return '$0.00';
+      const x = Number(n);
+      return '$' + x.toLocaleString(undefined,
+        {minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+
+    async function loadCart() {
+      if (!userId || !token) {
+        document.getElementById('cartContainer').innerHTML =
+          '<div class="cart-empty">Please sign in to view your cart.</div>';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/orders/cart/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          document.getElementById('cartContainer').innerHTML =
+            '<div class="cart-empty">Failed to load cart.</div>';
+          return;
+        }
+        const data = await res.json();
+		
+		
+        renderCart(data);
+      } catch (e) {
+        console.error(e);
+        document.getElementById('cartContainer').innerHTML =
+          '<div class="cart-empty">Error loading cart.</div>';
+      }
+    }
+
+    function renderCart(order) {
+      const container = document.getElementById('cartContainer');
+
+      if (!order.items || order.items.length === 0) {
+        container.innerHTML =
+          '<div class="cart-empty">Your cart is empty. <a href="/index.html">Continue shopping</a>.</div>';
+        return;
+      }
+	  
+
+      document.getElementById('cartIdChip').textContent = order.id ?? '—';
+
+      const rows = order.items.map(it => `
+        <tr data-item-id="${it.orderItemId}">
+          <td>
+            <div class="cart-product">
+              ${it.productImageUrl ? `<img src="${it.productImageUrl}" alt="">` : ''}
+              <div>
+                <div class="cart-product-title">${it.productTitle || 'Product'}</div>
+                <div class="cart-product-sub">ITEM ID: ${it.productId}</div>
+                <div id="stock-${it.orderItemId}" class="stock-hint"></div>
+              </div>
+            </div>
+          </td>
+          <td>${fmt(it.unitPrice)}</td>
+          <td>${fmt(it.lineTotal)}</td>
+          <td style="text-align:right;">
+            <div class="qty-actions">
+              <div class="qty-control">
+                <button class="qty-btn"
+                        onclick="changeQty(event, ${order.userId}, ${it.orderItemId}, ${it.productId}, -1)">
+                  <i class="fa-solid fa-minus"></i>
+                </button>
+                <span id="qty-${it.orderItemId}" class="qty-value">${it.quantity}</span>
+                <button class="qty-btn"
+                        onclick="changeQty(event, ${order.userId}, ${it.orderItemId}, ${it.productId}, 1)">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
+              <button class="btn-remove"
+                      onclick="removeItem(${order.userId}, ${it.orderItemId})">
+                <i class="fa-regular fa-trash-can"></i>
+                Remove
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="layout">
+          <section class="card">
+            <h3>Order Summary</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th style="width:100px;">Unit</th>
+                  <th style="width:120px;">Line total</th>
+                  <th style="width:190px;text-align:right;">Qty &amp; actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+          </section>
+
+          <section class="card">
+            <h3>Payment</h3>
+            <div class="totals-row">
+              <div class="totals-label">Subtotal</div>
+              <div class="totals-value">${fmt(order.subtotal)}</div>
+            </div>
+            <div class="totals-row">
+              <div class="totals-label">Estimated taxes</div>
+              <div class="totals-value">${fmt(order.tax)}</div>
+            </div>
+            <div class="totals-row">
+              <div class="totals-label">Fees</div>
+              <div class="totals-value">${fmt(order.fees || 0)}</div>
+            </div>
+            <div class="totals-grand">
+              Total: <span>${fmt(order.totalAmount)}</span>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-primary btn-block"
+                      onclick="startCheckout(${order.id})">
+                <i class="fa-solid fa-credit-card"></i>
+                Proceed to Checkout
+              </button>
+              <button class="btn btn-ghost btn-block"
+                      onclick="continueShopping()">
+                <i class="fa-solid fa-cart-shopping"></i>
+                Continue Shopping
+              </button>
+            </div>
+
+            <div class="notice">
+              Items in your cart are reserved for a limited time. Please
+              complete payment promptly to avoid losing availability.
+            </div>
+            <div id="cartError" class="error-msg"></div>
+          </section>
+        </div>
+      `;
+    }
+
+    async function getStock(productId) {
+      if (stockCache[productId] != null) return stockCache[productId];
+      try {
+        const res = await fetch(`${API_BASE_URL}/products/${productId}/stock`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return Infinity;
+        const json = await res.json();
+        const available = json.availableStock ?? json.stock ?? json.quantity ?? Infinity;
+        stockCache[productId] = available;
+        return available;
+      } catch (e) {
+        console.error(e);
+        return Infinity;
+      }
+    }
+
+    async function changeQty(e, userId, orderItemId, productId, delta) {
+      e.preventDefault();
+	  
+      const qtyEl = document.getElementById(`qty-${orderItemId}`);
+	  
+      if (!qtyEl) return;
+	
+      let current = parseInt(qtyEl.textContent, 10) || 1;
+
+      if (delta > 0) {
+        const available = await getStock(productId);
+        if (isFinite(available) && current >= available) {
+          alert('You have reached the available stock for this item.');
+          return;
+        }
+      }
+
+      const newQty = Math.max(1, current + delta);
+      if (newQty === current) return;
+
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}/orders/cart/${userId}/items/${orderItemId}/quantity`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type':'application/json',
+              'Authorization':`Bearer ${token}`
+            },
+            body: JSON.stringify({ quantity:newQty })
+          }
+        );
+        if (!res.ok) {
+          alert('Failed to update quantity.');
+          return;
+        }
+        const order = await res.json();
+        renderCart(order);
+      } catch (e) {
+        console.error(e);
+        alert('Error updating quantity.');
+      }
+    }
+
+    async function removeItem(userId, orderItemId) {
+      if (!confirm('Remove this item from your cart?')) return;
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}/orders/cart/${userId}/items/${orderItemId}`,
+          {
+            method:'DELETE',
+            headers:{'Authorization':`Bearer ${token}`}
+          }
+        );
+        if (!res.ok) {
+          alert('Failed to remove item.');
+          return;
+        }
+        const order = await res.json();
+        renderCart(order);
+      } catch (e) {
+        console.error(e);
+        alert('Error removing item.');
+      }
+    }
+
+    function continueShopping() {
+      window.location.href = '/index.html';
+    }
+
+	let checkoutBusy = false;
+	
+    // 🟦 Create PaymentIntent server-side and go to Stripe payment page
+    async function startCheckout(orderId) {
+      
+	  const errEl = document.getElementById('cartError');
+      errEl.textContent = '';
+	  
+	  if (checkoutBusy) return;
+	  checkoutBusy = true;
+
+	  const btn = document.querySelector('button[onclick^="startCheckout"]');
+	  if (btn) btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/payments/intent`, {
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'Authorization':`Bearer ${token}`
+          },
+          body: JSON.stringify({ orderId })
+        });
+        if (!res.ok) {
+          const txt = await res.text();
+          console.error('intent error', txt);
+          errEl.textContent = 'Unable to start payment. Please try again.';
+          return;
+        }
+        const data = await res.json();
+		
+		// ✅ if already paid, go directly to success page
+		if (data.alreadyPaid === true) {
+		  sessionStorage.setItem('stripeOrderId', data.orderId);
+		  sessionStorage.setItem('stripePaymentIntentId', data.paymentIntentId || '');
+		  window.location.href = '/payment-success.html';
+		  return;
+		}
+		
+        // normal flow -> go to checkout page
+		sessionStorage.setItem('stripeClientSecret', data.clientSecret);
+		sessionStorage.setItem('stripeOrderId', data.orderId);
+		sessionStorage.setItem('stripePaymentIntentId', data.paymentIntentId || '');
+		window.location.href = '/checkout-payment.html';
+		
+      } catch (e) {
+        console.error(e);
+        errEl.textContent = 'Error starting payment. Please try again.';
+      } finally {
+		checkoutBusy = false;
+		if (btn) btn.disabled = false;
+	  }
+    }
+
+    window.addEventListener('auth:ready', loadCart);
+  </script>
+</body>
+</html>

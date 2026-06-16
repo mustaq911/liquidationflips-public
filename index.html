@@ -1,0 +1,2409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Liquidation Flips</title>
+  <link href="/img/logo-small.jpg" rel="icon">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <!-- OwlCarousel2 -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+
+  <style>
+    :root{
+      --panel:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+
+      --blue:#1f3b74;
+      --blue-2:#274d9b;
+
+      --green:#1d7a59;
+      --green-2:#176248;
+
+      --primary:#1f3b74;
+      --primary-2:#274d9b;
+
+      --shadow:0 10px 28px rgba(0,0,0,.08);
+      --shadow-soft:0 6px 18px rgba(0,0,0,.06);
+      --radius:14px;
+
+      /* Details Panel */
+      --chip-bg: rgba(29,122,89,.10);
+      --chip-bd: rgba(17,94,68,.35);
+      --chip-text: #0f2f25;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;
+      background: url("/img/hero-bg.jpg") top center / cover repeat-y fixed;
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    a{text-decoration:none;color:inherit}
+
+    .page{max-width:1500px;margin:0 auto;padding:18px 20px 26px}
+
+    /* --- Top strip --- */
+    .strip{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand{display:flex; align-items:center; gap:10px; min-width:220px;}
+    .brandText{line-height:1.1}
+    .brandText b{display:block;font-size:14px}
+    .brandText span{display:block;font-size:12px;color:var(--muted)}
+
+    .stripActions{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+    .pill{
+      border:1px solid var(--border);
+      background:#fff;
+      padding:10px 14px;
+      border-radius:10px;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .08s ease, box-shadow .12s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:40px;
+    }
+    .pill:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
+    .pill.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .pill.primary:hover{background:var(--primary-2)}
+    .pill.success{background:var(--green);border-color:var(--green);color:#fff}
+    .pill.success:hover{background:var(--green-2)}
+
+    /* --- Hero --- */
+    .hero{margin:18px 0 12px;padding:4px 2px}
+    .hero h1{
+      margin:0;
+      font-size:40px;
+      letter-spacing:-.5px;
+      color: var(--blue);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+    .hero p{margin:6px 0 0;color:var(--muted);font-size:16px}
+
+    /* --- Filters panel --- */
+    .filters{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+      padding:14px;
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:12px;
+      align-items:end;
+    }
+
+    .field{grid-column:span 3}
+    .field.w4{grid-column:span 4}
+    .field.w2{grid-column:span 2}
+    .field label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+
+    select, input[type="text"]{
+      width:100%;
+      padding:11px 12px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#fff;
+      font-size:14px;
+      outline:none;
+    }
+
+    .searchWrap{position:relative}
+    .searchWrap i{
+      position:absolute; right:12px; top:50%;
+      transform:translateY(-50%);
+      color:#9ca3af;
+      pointer-events:none;
+    }
+    .searchWrap input{padding-right:36px}
+
+    .filtersActions{
+      grid-column:span 2;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      align-items:flex-end;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      padding:11px 14px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#fff;
+      cursor:pointer;
+      font-weight:900;
+      min-height:42px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition:transform .08s ease, box-shadow .12s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
+
+    .btn.apply{
+      background:var(--primary);
+      border-color:var(--primary);
+      color:#fff;
+    }
+    .btn.apply:hover{background:var(--primary-2)}
+
+    /* View toggle + Page size */
+    .viewTools{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .btn.toggle.active{
+      background:rgba(31,59,116,.10);
+      border-color:rgba(31,59,116,.35);
+      color:var(--primary);
+    }
+
+    .pageSizer{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+    }
+    .pageSizer select{
+      width:auto;
+      padding:10px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .metaLine{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:14px 2px 10px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .dot{opacity:.7}
+
+    /* ✅ GRID = same as BuyNow (5 per row) */
+    .grid{
+      margin-top:10px;
+      display:grid;
+      gap:18px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    @media (max-width: 1400px){ .grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+    @media (max-width: 1100px){ .grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+    @media (max-width: 780px){ .grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media (max-width: 520px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+      box-shadow:var(--shadow-soft);
+      transition:transform .12s ease, box-shadow .12s ease;
+      display:flex;
+      flex-direction:column;
+      min-height:380px;
+    }
+    .card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+
+    .thumb{position:relative;height:190px;background:#eef2f7;overflow:hidden}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
+
+    .tag{
+      position:absolute;
+      left:12px; top:12px;
+      padding:7px 10px;
+      border-radius:10px;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.5px;
+      color:#fff;
+      text-transform:uppercase;
+      background:var(--primary);
+    }
+
+    /* remove overlay countdown from thumbnail */
+    .countdown{ display:none !important; }
+
+    .body{
+      padding:14px 14px 10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      flex:1;
+    }
+
+    .title2{
+      font-size:18px;
+      font-weight:950;
+      line-height:1.2;
+      margin:0;
+      min-height:44px;
+    }
+
+    .submeta{
+      color:var(--muted);
+      font-size:12px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .price{
+      font-size:22px;
+      font-weight:950;
+      color:var(--primary);
+      margin-top:2px;
+    }
+
+    .footline{
+      color:var(--muted);
+      font-size:12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top:auto;
+    }
+
+    .actions{
+      padding:12px 14px 14px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .actions .btn{flex:1;justify-content:center}
+    .btn.primaryAction{
+      background:var(--primary);
+      border-color:var(--primary);
+      color:#fff;
+    }
+    .btn.primaryAction:hover{background:var(--primary-2)}
+
+    /* ✅ Quick Bid button */
+    .btn.quickBid{
+      background: rgba(31,59,116,.10);
+      border-color: rgba(31,59,116,.35);
+      color: var(--primary);
+    }
+    .btn.quickBid:hover{
+      background: rgba(31,59,116,.16);
+    }
+    .qbMsg{
+      margin-top:8px;
+      font-size:12px;
+      font-weight:900;
+      color: var(--muted);
+      text-align:center;
+    }
+    .qbMsg.ok{ color:#0f7a3d; }
+    .qbMsg.err{ color:#c1121f; }
+
+    /* ✅ LIST VIEW */
+    .list{
+      margin-top:10px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .listCard{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 360px 1fr 320px;
+      gap:16px;
+      padding:14px;
+      align-items:stretch;
+    }
+
+    .listThumb{
+      position:relative;
+      background:#eef2f7;
+      border-radius:12px;
+      overflow:hidden;
+      min-height:210px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding:10px;
+    }
+
+    .listMainImg{
+      width:100%;
+      height:210px;
+      border-radius:10px;
+      overflow:hidden;
+      background:#e5e7eb;
+      border:1px solid rgba(0,0,0,.06);
+    }
+    .listMainImg img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      cursor:pointer;
+    }
+
+    .thumbStrip{
+      display:flex;
+      gap:8px;
+      overflow:auto;
+      padding-bottom:2px;
+    }
+    .thumbStrip::-webkit-scrollbar{height:8px}
+    .thumbStrip::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:10px}
+
+    .thumbMini{
+      width:62px;
+      height:44px;
+      border-radius:10px;
+      overflow:hidden;
+      border:2px solid transparent;
+      background:#e5e7eb;
+      flex:0 0 auto;
+      cursor:pointer;
+    }
+    .thumbMini img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumbMini.active{
+      border-color: rgba(31,59,116,.70);
+      box-shadow: 0 0 0 2px rgba(31,59,116,.15);
+    }
+
+    .listThumb .tag{left:18px; top:18px; position:absolute; z-index:2;}
+    .listThumb .countdown{right:18px; bottom:18px; position:absolute; z-index:2; display:inline-flex !important;}
+
+    .listMain{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      padding:4px 6px 4px 4px;
+      min-width:0;
+    }
+
+    .listTitle{
+      font-size:22px;
+      font-weight:950;
+      line-height:1.15;
+      margin:0;
+      letter-spacing:-.2px;
+    }
+
+    .detailsPanel{
+      background: rgba(31,59,116,.10);
+      border: 1px solid rgba(31,59,116,.35);
+      color: var(--primary);
+      border-radius: 14px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 140px 1fr 140px 1fr;
+      gap: 10px 14px;
+      align-items: start;
+    }
+    .detailsItem{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      min-width:0;
+      line-height:1.35;
+    }
+    .detailsItem i{
+      color: var(--blue);
+      opacity:.95;
+      margin-top:2px;
+      flex:0 0 auto;
+    }
+    .detailsItem .k{
+      font-size:12px;
+      color: var(--muted);
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .detailsItem .v{
+      font-size:13px;
+      color: var(--blue);
+      font-weight:900;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .detailsItem .v.wrap{
+      white-space:normal;
+      overflow:visible;
+      text-overflow:clip;
+    }
+    @media (max-width: 1100px){
+      .detailsPanel{ grid-template-columns: 120px 1fr; }
+    }
+
+    .listPriceRow{
+      margin-top:auto;
+      display:flex;
+      gap:14px;
+      align-items:baseline;
+      flex-wrap:wrap;
+      padding-top:2px;
+    }
+    .listPrice{
+      font-size:28px;
+      font-weight:950;
+      color:var(--primary);
+      letter-spacing:-.3px;
+    }
+    .listNote{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:900;
+    }
+
+    .listRight{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:stretch;
+      justify-content:flex-start;
+      padding:4px 6px 4px 0;
+    }
+
+    .pickupBox{
+      background: rgba(31,59,116,.10);
+      border: 1px solid rgba(31,59,116,.35);
+      border-radius: 14px;
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .pickupLine{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      color: var(--muted);
+      font-size:13px;
+      font-weight:900;
+      line-height:1.35;
+    }
+    .pickupLine i{color:var(--blue);margin-top:2px}
+    .pickupLine b{color:var(--text)}
+    .listRight .btn{width:100%;justify-content:center}
+
+    /* Skeleton */
+    .skeleton{
+      background:linear-gradient(90deg,#f5f5f5,#ececec,#f5f5f5);
+      background-size:200% 100%;
+      animation:shimmer 1.2s infinite
+    }
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .card.skel .thumb{height:180px}
+    .card.skel .line{height:12px;border-radius:8px;margin:10px 14px}
+    .card.skel .line.w60{width:60%}
+    .card.skel .line.w40{width:40%}
+
+    /* Pagination */
+    .pagination{
+      margin:18px 0 6px;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      align-items:center
+    }
+    .pagination .btn{min-width:44px;justify-content:center}
+    .hidden{display:none!important}
+
+    /* Owl Carousel banners */
+    #owl-demo{display:block;margin:18px 0 20px;}
+    #owl-demo .slide{
+      display:block;
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid var(--border);
+      box-shadow:0 6px 18px rgba(0,0,0,.08);
+      background:#fff;
+    }
+    #owl-demo img{
+      width:100%;
+      height:220px;
+      object-fit:cover;
+      display:block;
+    }
+    @media(max-width:980px){ #owl-demo img{ height:180px; } }
+    @media(max-width:520px){ #owl-demo img{ height:150px; } }
+    #owl-demo .owl-nav button{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:#fff !important;
+      border:1px solid rgba(0,0,0,.1) !important;
+      box-shadow:0 6px 14px rgba(0,0,0,.15);
+    }
+    #owl-demo .owl-nav button.owl-prev{ left:-12px; }
+    #owl-demo .owl-nav button.owl-next{ right:-12px; }
+    #owl-demo .owl-nav span{ font-size:24px; }
+
+    /* Responsive */
+    @media (max-width: 1200px){
+      .listCard{grid-template-columns: 320px 1fr 300px;}
+    }
+    @media (max-width: 980px){
+      .field{grid-column:span 6}
+      .field.w4{grid-column:span 12}
+      .filtersActions{grid-column:span 12; justify-content:flex-end}
+      .hero h1{font-size:32px}
+
+      .listCard{grid-template-columns: 1fr; }
+      .listRight{flex-direction:row; gap:10px; align-items:stretch}
+      .pickupBox{flex:1}
+      .listRight .btn{flex:1}
+    }
+    @media (max-width: 520px){
+      .strip{flex-direction:column; align-items:stretch}
+      .stripActions{justify-content:stretch}
+      .stripActions .pill{width:100%; justify-content:center}
+      .hero h1{font-size:28px}
+      .listRight{flex-direction:column}
+      .detailsPanel{grid-template-columns: 1fr;}
+    }
+
+    /* ✅ Auction time box */
+    .timeBox{
+      background: rgba(31,59,116,.10);
+      border: 1px solid rgba(31,59,116,.35);
+      border-radius: 14px;
+      padding: 12px;
+      height:70px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+
+    .timeLine{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      color: var(--blue);
+      font-size:16px;
+      font-weight:900;
+      line-height:1.2;
+      text-align:center;
+    }
+    .timeLine i{color:var(--blue);margin-top:2px}
+    .timeLine b{color:var(--text)}
+
+    /* ✅ Bid + Watchlist equal width */
+    .btn.watchBtn{
+      flex:1;
+      width:100%;
+      padding:11px 14px;
+      justify-content:center;
+      background:#fff;
+      border-color: rgba(31,59,116,.35);
+      color: var(--primary);
+      gap:8px;
+    }
+
+    .btn.watchBtn:hover{
+      background: rgba(31,59,116,.10);
+    }
+
+    .btn.watchBtn.active{
+      background: rgba(29,122,89,.10);
+      border-color: rgba(29,122,89,.35);
+      color: var(--green);
+    }
+
+    /* ✅ WON frame + badge */
+    .card.wonFrame{
+      border: 3px solid rgba(29,122,89,.85);
+      box-shadow: 0 10px 28px rgba(29,122,89,.18);
+    }
+
+    .listCard.wonFrame{
+      border: 2px solid rgba(29,122,89,.85);
+      box-shadow: 0 10px 28px rgba(29,122,89,.18);
+    }
+
+    .wonBadge{
+      position:absolute;
+      right:12px;
+      top:12px;
+      z-index:3;
+      padding:7px 10px;
+      border-radius:10px;
+      font-weight:950;
+      font-size:12px;
+      letter-spacing:.4px;
+      color:#fff;
+      text-transform:uppercase;
+      background: var(--green);
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .listThumb .wonBadge{
+      right:18px;
+      top:18px;
+    }
+
+    /* ✅ small inline countdown badge used in LIST (grid keeps hidden) */
+    .countdownBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 10px;
+      border-radius:10px;
+      font-weight:900;
+      font-size:12px;
+      color:#fff;
+      background:rgba(31,59,116,.95);
+      box-shadow:0 8px 18px rgba(0,0,0,.12);
+      white-space:nowrap;
+    }
+	
+	
+	/*  Coming-soon Flag */
+	.tag.comingSoonTag {
+	  background: #f59e0b;
+	  color: #111827;
+	}
+
+	.comingSoonNote {
+	  background: rgba(245,158,11,.14);
+	  border: 1px solid rgba(245,158,11,.45);
+	  color: #92400e;
+	  border-radius: 12px;
+	  padding: 10px 12px;
+	  font-size: 13px;
+	  font-weight: 900;
+	  text-align: center;
+	}
+	
+	
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP Nav section -->
+  <link rel="stylesheet" href="/css/topnav.css">
+  <div id="topnavContainer"></div>
+
+  <!-- CONFIG + AUTH -->
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js" defer></script>
+
+  <!-- Owl init -->
+  <script>
+	/*  Not ncessary : 19th May 2026
+    jQuery(function ($) {
+      $("#owl-demo").owlCarousel({
+        loop: true,
+        margin: 18,
+        nav: true,
+        dots: false,
+        autoplay: true,
+        autoplayTimeout: 3500,
+        autoplayHoverPause: true,
+        responsive:{ 0:{ items:1 }, 600:{ items:2 }, 1000:{ items:3 } }
+      });
+    });*/
+	
+	async function loadBanners() {
+	  const carousel = document.getElementById("owl-demo");
+
+	  try {
+		const res = await fetch(`${API_BASE_URL}/banners/active?ts=${Date.now()}`, {
+		  cache: "no-store"
+		});
+
+		if (!res.ok) {
+		  throw new Error("Failed to load banners");
+		}
+
+		const banners = await res.json();
+
+		if (!Array.isArray(banners) || banners.length === 0) {
+		  carousel.innerHTML = `
+			<a class="slide" href="#">
+			  <img src="/img/slides/slide-1.jpeg" alt="Default Slide">
+			</a>
+		  `;
+		} else {
+		  carousel.innerHTML = banners.map((b, index) => {
+			const href = b.linkUrl && b.linkUrl.trim() !== "" ? b.linkUrl : "#";
+			const title = b.title || `Banner ${index + 1}`;
+
+			return `
+			  <a class="slide" href="${href}">
+				<img src="${b.imageUrl}" alt="${title}">
+			  </a>
+			`;
+		  }).join("");
+		}
+
+		initBannerCarousel();
+
+	  } catch (err) {
+		console.error("Banner load failed", err);
+
+		carousel.innerHTML = `
+		  <a class="slide" href="#">
+			<img src="/img/slides/slide-1.jpeg" alt="Default Slide">
+		  </a>
+		`;
+
+		initBannerCarousel();
+	  }
+	}
+
+	function initBannerCarousel() {
+	  const $carousel = jQuery("#owl-demo");
+
+	  if ($carousel.hasClass("owl-loaded")) {
+		$carousel.trigger("destroy.owl.carousel");
+		$carousel.removeClass("owl-loaded");
+		$carousel.find(".owl-stage-outer").children().unwrap();
+	  }
+
+	  $carousel.owlCarousel({
+		loop: true,
+		margin: 18,
+		nav: true,
+		dots: false,
+		autoplay: true,
+		autoplayTimeout: 3500,
+		autoplayHoverPause: true,
+		responsive: {
+		  0: { items: 1 },
+		  600: { items: 2 },
+		  1000: { items: 3 }
+		}
+	  });
+	}
+	
+  </script>
+
+  <div class="page">
+
+    <!-- Header strip -->
+    <div class="strip">
+      <a href="/index.html" class="brand-link" aria-label="Go to Browse Auctions">
+        <div class="brand">
+          <span class="chip-logo">
+            <img src="/img/logo.jpg" alt="Liquidation Flips">
+          </span>
+          <div class="brandText">
+            <b>LIQUIDATION FLIPS</b>
+            <span>Bid Auctions • Buy Now</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="stripActions">
+        <button id="refreshBtn" class="pill">
+          <i class="fa-solid fa-rotate"></i> Show All
+        </button>
+
+        <button class="pill primary view-nav" data-target="auction">
+          <i class="fa-solid fa-gavel"></i> Auction
+        </button>
+        <button class="pill success view-nav" data-target="buynow">
+          <i class="fa-solid fa-cart-shopping"></i> Buy Now
+        </button>
+      </div>
+    </div>
+
+    <!-- owl-carousel -->
+    <div id="owl-demo" class="owl-carousel owl-theme">
+      <!-- <a class="slide" href="#"><img src="/img/slides/slide-1.jpeg" alt="Slide 1"></a>
+      <a class="slide" href="#"><img src="/img/slides/slide-2.jpeg" alt="Slide 2"></a>
+      <a class="slide" href="#"><img src="/img/slides/slide-3.jpeg" alt="Slide 3"></a>
+      <a class="slide" href="#"><img src="/img/slides/slide-4.jpeg" alt="Slide 4"></a>
+      <a class="slide" href="#"><img src="/img/slides/slide-5.jpeg" alt="Slide 5"></a>
+      <a class="slide" href="#"><img src="/img/slides/slide-6.jpeg" alt="Slide 6"></a> -->
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1>Browse Auctions &amp; Buy-Now Deals</h1>
+      <p>Fast search. Easy filters. Clean listings.</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="field w2">
+        <label for="typeSelect">Type</label>
+        <select id="typeSelect">
+          <option value="all">Auction + Buy Now</option>
+          <option value="auction" selected>Auction</option>
+          <option value="buynow">Buy Now</option>
+        </select>
+      </div>
+
+      <div class="field w2">
+        <label for="categorySelect">Category</label>
+        <select id="categorySelect" name="categoryId"></select>
+      </div>
+
+      <div class="field w4">
+        <label for="searchBox">Search</label>
+        <div class="searchWrap">
+          <input id="searchBox" type="text" placeholder="Search items..." />
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+      </div>
+
+      <div class="field w2">
+        <label for="sortSelect">Sort</label>
+        <select id="sortSelect">
+          <option value="endingSoon">Ending soon</option>
+          <option value="newlyListed">Newly listed</option>
+          <option value="priceLowHigh">Bid: Low to High</option>
+          <option value="priceHighLow">Bid: High to Low</option>
+        </select>
+      </div>
+
+      <div class="filtersActions">
+        <div class="viewTools">
+          <button type="button" class="btn toggle active" id="gridViewBtn" aria-pressed="true">
+            <i class="fa-solid fa-border-all"></i> Grid
+          </button>
+          <button type="button" class="btn toggle" id="listViewBtn" aria-pressed="false">
+            <i class="fa-solid fa-list"></i> List
+          </button>
+
+          <div class="pageSizer">
+            <label for="pageSizeSelect">Items</label>
+            <select id="pageSizeSelect">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+            </select>
+          </div>
+
+          <button id="applyBtn" class="btn apply"><i class="fa-solid fa-filter"></i> Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="metaLine">
+      <div><span id="metaInfo">0 items</span> <span class="dot">•</span> <span id="pageInfoInline">Page 1</span></div>
+      <div class="muted" id="wsStatus"></div>
+    </div>
+
+    <div id="grid" class="grid"></div>
+    <div id="list" class="list hidden"></div>
+
+    <div class="pagination hidden" id="pagination">
+      <button class="btn" id="prevPage"><i class="fa-solid fa-chevron-left"></i></button>
+      <span class="muted" id="pageInfo">Page 1</span>
+      <button class="btn" id="nextPage"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SockJS / STOMP (for live updates on index) -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+  <script>
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+
+    /* ==== Utilities & State ==== */
+    const $ = (s, r=document) => r.querySelector(s);
+    const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+    const grid = $('#grid');
+    const list = $('#list');
+    const metaInfo = $('#metaInfo');
+    const categorySelect = $('#categorySelect');
+    const sortSelect = $('#sortSelect');
+    const searchBox = $('#searchBox');
+    const pagination = $('#pagination');
+    const pageInfo = $('#pageInfo');
+    const prevPage = $('#prevPage');
+    const nextPage = $('#nextPage');
+    const applyBtn = $('#applyBtn');
+    const typeSelect = $('#typeSelect');
+    const pageInfoInline = $('#pageInfoInline');
+
+    const gridViewBtn = $('#gridViewBtn');
+    const listViewBtn = $('#listViewBtn');
+    const pageSizeSelect = $('#pageSizeSelect');
+
+    const wsStatus = $('#wsStatus');
+
+    let PAGE_SIZE = 10;
+    let VIEW_MODE = 'grid';
+
+    let ALL_PRODUCTS = [];
+    let FILTERED = [];
+    let CURRENT_PAGE = 1;
+
+    // ✅ Warehouse cache (same as BuyNow)
+    let WAREHOUSE_MAP = new Map();
+
+    // ==== Helpers ====
+    function safeText(v, fallback='—'){
+      if (v === null || v === undefined) return fallback;
+      const s = String(v).trim();
+      return s ? s : fallback;
+    }
+
+    function formatPrice(x){
+      if(x==null) return '—';
+      const n = Number(x);
+      if(Number.isNaN(n)) return String(x);
+      return `$${n.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    }
+
+    function timeLeft(endIso){
+      if(!endIso) return null;
+      const end = new Date(endIso).getTime();
+      const now = Date.now();
+      const diff = end - now;
+      if(diff <= 0) return 'Ended';
+      const d = Math.floor(diff/86400000);
+      const h = Math.floor((diff%86400000)/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      return (d>0?`${d}d `:'') + (h>0?`${h}h `:'') + `${m}m`;
+    }
+
+    function timeLeftLabelSeconds(endIso){
+      if(!endIso) return '—';
+      const end = new Date(endIso).getTime();
+      const now = Date.now();
+      const diff = end - now;
+      if (diff <= 0) return 'Ended';
+      const d = Math.floor(diff/86400000);
+      const h = Math.floor((diff%86400000)/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      const s = Math.floor((diff%60000)/1000);
+      if (d>0) return `${d}d ${h}h ${m}m`;
+      if (h>0) return `${h}h ${m}m ${s}s`;
+      return `${m}m ${s}s`;
+    }
+
+    // Helper method for WON-ITEM-FRAME
+    function hasWon(p){
+      const myId = localStorage.getItem('userid');
+      if (!myId) return false;
+      return (p.wonUserId != null) && (String(p.wonUserId) === String(myId));
+    }
+
+    // ✅ Helper method for WON-Quickbid-button hover
+    // ✅ hover wiring that can be removed later
+	function getQbLabelSpan(btn) {
+	  return btn ? btn.querySelector('[data-bind="quickBidText"]') : null;
+	}
+
+	function setQuickBidLabelFromAmount(btn) {
+	  const label = getQbLabelSpan(btn);
+	  if (!btn || !label) return;
+	  const amt = Number(btn.dataset.amount || 0);
+	  label.textContent = amt ? `Quick Bid ${formatPrice(amt)}` : 'Quick Bid';
+	}
+
+	function wireWonHover(btn, msg = "🏆 You are currently winning this item.") {
+	  if (!btn) return;
+	  if (btn._wonHoverWired) return;
+
+	  const label = getQbLabelSpan(btn);
+	  if (!label) return;
+
+	  const onEnter = () => {
+		btn._wonHoverActive = true;
+		label.textContent = msg;
+	  };
+
+	  const onLeave = () => {
+		btn._wonHoverActive = false;
+		// ✅ ALWAYS restore from latest dataset.amount (websocket value)
+		setQuickBidLabelFromAmount(btn);
+	  };
+
+	  btn._wonHoverWired = true;
+	  btn._wonHoverEnter = onEnter;
+	  btn._wonHoverLeave = onLeave;
+
+	  btn.addEventListener("mouseenter", onEnter);
+	  btn.addEventListener("mouseleave", onLeave);
+	}
+	
+	// ✅ hover Un-wiring for loose Items
+	function unwireWonHover(btn) {
+	  if (!btn || !btn._wonHoverWired) return;
+
+	  btn.removeEventListener("mouseenter", btn._wonHoverEnter);
+	  btn.removeEventListener("mouseleave", btn._wonHoverLeave);
+
+	  btn._wonHoverWired = false;
+	  btn._wonHoverEnter = null;
+	  btn._wonHoverLeave = null;
+	  btn._wonHoverActive = false;
+
+	  // ✅ when unwired, ensure label is correct
+	  setQuickBidLabelFromAmount(btn);
+	}
+
+    // ✅ Login check (only logged-in users see Quick Bid)
+    function isLoggedIn(){
+      const t = localStorage.getItem('token');
+      const u = localStorage.getItem('userid');
+      return !!(t && u);
+    }
+
+    // ✅ Cache increments by highest amount
+    const INCREMENT_CACHE = new Map();
+
+    async function getNextMinBid(highestAmount){
+      const highest = Number(highestAmount) || 0;
+
+      if (INCREMENT_CACHE.has(highest)) return INCREMENT_CACHE.get(highest);
+
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/bids/increment?amount=${highest}`, {
+        headers: token ? { "Authorization": `Bearer ${token}` } : {}
+      });
+
+      if(!res.ok) throw new Error('increment_failed');
+
+      const ct = res.headers.get('content-type') || '';
+      const inc = ct.includes('application/json') ? await res.json() : parseFloat(await res.text());
+
+      if(!Number.isFinite(inc)) throw new Error('bad_increment');
+
+      const out = { inc, minAllowed: highest + inc };
+      INCREMENT_CACHE.set(highest, out);
+      return out;
+    }
+
+    // ============================
+    // ✅ Shared Quick Bid Validation
+    // ============================
+    function showQbMessage(el, text, type = "info", autoHideMs = 0) {
+      if (!el) return;
+      el.classList.remove('hidden');
+      el.className = 'qbMsg'; // reset
+      if (type === "ok") el.classList.add('ok');
+      if (type === "err") el.classList.add('err');
+      el.textContent = text;
+
+      if (autoHideMs > 0) {
+        setTimeout(() => el.classList.add('hidden'), autoHideMs);
+      }
+    }
+
+    function isAuctionEnded(auctionEndIso) {
+      if (!auctionEndIso) return false;
+      const end = new Date(auctionEndIso).getTime();
+      if (Number.isNaN(end)) return false;
+      return Date.now() >= end;
+    }
+
+    async function validateQuickBidOrThrow(p, minAllowed, qbMsgEl) {
+      const token  = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+      if (!token || !userid) {
+        showQbMessage(qbMsgEl, "🔒 Please log in to place a bid.", "err", 4000);
+        if (typeof window.openLoginModal === 'function') window.openLoginModal();
+        throw new Error("not_logged_in");
+      }
+
+      if (isAuctionEnded(p.auctionEnd)) {
+        showQbMessage(qbMsgEl, "⏰ This auction has ended.", "err", 4000);
+        throw new Error("auction_ended");
+      }
+
+      if (p.wonUserId != null && String(p.wonUserId) === String(userid)) {
+        showQbMessage(qbMsgEl, "⚠️ You are already the highest bidder.", "err", 4000);
+        throw new Error("already_highest_bidder");
+      }
+
+      const amt = Number(minAllowed);
+      if (!Number.isFinite(amt) || amt <= 0) {
+        showQbMessage(qbMsgEl, "❌ Invalid bid amount.", "err", 4000);
+        throw new Error("bad_amount");
+      }
+    }
+
+    // ✅ Place Quick BID
+    async function placeQuickBid(productId, bidAmount){
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+      if(!token || !userid) throw new Error('not_logged_in');
+
+      const res = await fetch(`${API_BASE_URL}/bids`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: parseInt(productId),
+          userId: parseInt(userid),
+          bidAmount: Number(bidAmount)
+        })
+      });
+
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error(t || 'bid_failed');
+      }
+      return await res.json();
+    }
+
+    // ✅ Watchlist API
+    async function addToWatchlist(productId){
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+      if(!token || !userid) throw new Error('not_logged_in');
+
+      const res = await fetch(`${API_BASE_URL}/watchlist`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId: parseInt(userid),
+          productId: parseInt(productId)
+        })
+      });
+
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error(t || 'watchlist_add_failed');
+      }
+      return await res.json();
+    }
+
+    async function removeFromWatchlist(productId){
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+      if(!token || !userid) throw new Error('not_logged_in');
+
+      const res = await fetch(`${API_BASE_URL}/watchlist?userId=${parseInt(userid)}&productId=${parseInt(productId)}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error(t || 'watchlist_remove_failed');
+      }
+      return true;
+    }
+
+    // ✅ Local cache so UI can toggle immediately (no extra GET needed)
+    const WATCHED_SET = new Set();
+
+    async function loadMyWatchlist(){
+      if(!isLoggedIn()) return;
+
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+      try{
+        const res = await fetch(`${API_BASE_URL}/watchlist/user/${parseInt(userid)}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if(!res.ok) return;
+
+        const data = await res.json();
+        (Array.isArray(data) ? data : []).forEach(w => {
+          if(w && w.productId != null) WATCHED_SET.add(Number(w.productId));
+        });
+      }catch(e){
+        console.warn('watchlist load failed', e);
+      }
+    }
+
+    // ✅ images come from ProductDTO.images (fallback to imageUrl)
+    function getAllImages(p){
+      const arr = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
+      const main = p.imageUrl ? [p.imageUrl] : [];
+      const merged = (arr.length ? arr : main);
+      return Array.from(new Set(merged));
+    }
+
+    function getPrimaryImage(p){
+      const imgs = getAllImages(p);
+      return imgs[0] || 'https://via.placeholder.com/600x400?text=No+Image';
+    }
+
+    function warehouseForProduct(p){
+      const wid = (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId);
+      if (wid === null || wid === undefined) return null;
+      return WAREHOUSE_MAP.get(Number(wid)) || null;
+    }
+
+    function formatWarehouseAddress(w){
+      if(!w) return '—';
+      const parts = [
+        safeText(w.addressLine1,''),
+        safeText(w.addressLine2,''),
+        [safeText(w.city,''), safeText(w.province,'')].filter(Boolean).join(', '),
+        [safeText(w.postalCode,''), safeText(w.country,'')].filter(Boolean).join(' ')
+      ].filter(Boolean);
+      return parts.length ? parts.join(' • ') : '—';
+    }
+
+    function navigateToProduct(id){
+      window.location.href = `/product-view.html?id=${id}`;
+    }
+
+    // ==== Data Fetch ====
+    async function loadAllCategories(){
+      try{
+        const res = await fetch(`${API_BASE_URL}/category/get/all`);
+        if(!res.ok) throw new Error('Failed categories');
+        const listData = await res.json();
+
+        const options = `<option value="">All Categories</option>` +
+          listData.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+        categorySelect.innerHTML = options;
+
+        const lpCat = document.getElementById('lp_categorySelect');
+        if (lpCat) lpCat.innerHTML = options;
+
+      }catch(e){
+        console.error(e);
+        categorySelect.innerHTML = `<option value="">All Categories</option>`;
+      }
+    }
+
+    // ✅ Load warehouses once (same as BuyNow)
+    async function loadWarehouses(){
+      try{
+        const res = await fetch(`${API_BASE_URL}/warehouses`);
+        if(!res.ok) throw new Error('Failed warehouses');
+        const list = await res.json();
+        WAREHOUSE_MAP = new Map((Array.isArray(list)?list:[]).map(w => [Number(w.id), w]));
+      }catch(e){
+        console.warn('Warehouses not available:', e);
+        WAREHOUSE_MAP = new Map();
+      }
+    }
+
+    async function fetchAllProducts(){
+      try{
+        showSkeletons();
+        const res = await fetch(`${API_BASE_URL}/products/get/allAuctionOngoin`);
+        if(!res.ok) throw new Error('Unauthorized');
+        const data = await res.json();
+        ALL_PRODUCTS = Array.isArray(data) ? data : (data.content || []);
+        applyFilters();
+      }catch(err){
+        console.error('Failed to load products', err);
+        alert('You must be logged in to view products.');
+        window.location.href = "/index.html";
+      }
+    }
+
+    async function fetchByCategory(categoryId){
+      try{
+        showSkeletons();
+        const res = await fetch(`${API_BASE_URL}/products/get/allAuctionOngoin?categoryId=${categoryId}`);
+        if(!res.ok) throw new Error('Unauthorized');
+        const data = await res.json();
+        ALL_PRODUCTS = Array.isArray(data) ? data : (data.content || []);
+        applyFilters();
+      }catch(err){
+        console.error('Failed to load category products', err);
+        alert('You must be logged in to view products.');
+        window.location.href = "/index.html";
+      }
+    }
+
+    // ==== Skeleton ====
+    function showSkeletons(count=12){
+      grid.innerHTML = '';
+      list.innerHTML = '';
+      grid.classList.remove('hidden');
+      list.classList.add('hidden');
+
+      for(let i=0;i<count;i++){
+        const c = document.createElement('div');
+        c.className = 'card skel';
+        c.innerHTML = `
+          <div class="thumb skeleton"></div>
+          <div class="line skeleton w60"></div>
+          <div class="line skeleton w40"></div>
+          <div class="line skeleton w60"></div>
+        `;
+        grid.appendChild(c);
+      }
+    }
+	
+	// Updating the DOM - for - ALL_PRODUCTS
+	function getLatestProduct(pid){
+	  return ALL_PRODUCTS.find(x => String(x.id) === String(pid)) || null;
+	}
+
+    // ========= LIVE DOM BINDINGS =========
+    // We will update these on WebSocket events + a 1-second ticker.
+    function updateDomForProduct(pid, patch){
+      // Update in-memory model
+      const idxAll = ALL_PRODUCTS.findIndex(x => String(x.id) === String(pid));
+      if (idxAll >= 0) ALL_PRODUCTS[idxAll] = { ...ALL_PRODUCTS[idxAll], ...patch };
+
+      const idxF = FILTERED.findIndex(x => String(x.id) === String(pid));
+      if (idxF >= 0) FILTERED[idxF] = { ...FILTERED[idxF], ...patch };
+
+      // Update visible DOM nodes (grid + list)
+      const nodes = document.querySelectorAll(`[data-pid="${pid}"]`);
+      nodes.forEach(node => {
+        // Auction end dataset
+        if (patch.auctionEnd) node.dataset.auctionEnd = patch.auctionEnd;
+
+        // highest bid
+        if (patch.highestBid != null){
+          const v = formatPrice(patch.highestBid);
+          node.querySelectorAll(`[data-bind="highestBid"]`).forEach(el => el.textContent = v);
+          node.querySelectorAll(`[data-bind="currentBid"]`).forEach(el => el.textContent = v);
+        }
+
+        // won user id
+        if (patch.wonUserId !== undefined){
+          node.dataset.wonUserId = (patch.wonUserId == null ? '' : String(patch.wonUserId));
+		  applyWonUi(node, pid, patch.wonUserId);
+        }
+
+        // quick bid min allowed
+        if (patch.nextMinumBid != null){
+		
+		  /** Delete Later  
+          node.querySelectorAll(`[data-bind="quickBidText"]`).forEach(el => {
+            el.textContent = `Quick Bid ${formatPrice(patch.nextMinumBid)}`;
+          });
+          node.querySelectorAll(`[data-bind="quickBidBtn"]`).forEach(btn => {
+            btn.dataset.amount = String(Number(patch.nextMinumBid) || 0);
+            // keep enabled unless won already
+            if (!btn.dataset.wonLocked) btn.disabled = false;
+          });
+		  */
+		  node.querySelectorAll(`[data-bind="quickBidBtn"]`).forEach(btn => {
+			  btn.dataset.amount = String(Number(patch.nextMinumBid) || 0);
+
+			  // keep enabled unless won already
+			  if (!btn.dataset.wonLocked) btn.disabled = false;
+
+			  // ✅ If user is hovering the WON button, DON'T overwrite the hover message
+			  if (btn.dataset.wonLocked && btn._wonHoverActive) return;
+
+			  // ✅ Otherwise, always set label from latest amount
+			  setQuickBidLabelFromAmount(btn);
+		  });
+		  
+		  
+        }
+      });
+
+      // Also refresh time labels quickly after auctionEnd patch
+      if (patch.auctionEnd) tickAllCountdowns();
+    }
+
+	/** ==  ApplyWonUI ==> Winning-Frame Embeded == */ 
+	function applyWonUi(containerNode, pid, wonUserId){
+	
+	  const myId = localStorage.getItem('userid');
+	  const iWon = (myId && wonUserId != null && String(wonUserId) === String(myId));
+
+	  // frame
+	  containerNode.classList.toggle('wonFrame', !!iWon);
+
+	  // badge
+	  let badge = containerNode.querySelector('.wonBadge');
+	  if (iWon){
+		if (!badge){
+		  badge = document.createElement('div');
+		  badge.className = 'wonBadge';
+		  badge.innerHTML = `<i class="fa-solid fa-trophy"></i> Won`;
+		  const thumb = containerNode.querySelector('.thumb') || containerNode.querySelector('.listThumb') || containerNode;
+		  thumb.appendChild(badge);
+		}
+	  } else {
+		if (badge) badge.remove();
+	  }
+
+	  // quick bid
+	  const qbBtn = containerNode.querySelector(`[data-bind="quickBidBtn"]`);
+	  const qbMsg = containerNode.querySelector(`[data-bind="qbMsg"]`);
+
+	  if (!qbBtn) return;
+
+	  if (iWon){
+		// ✅ lock + wire hover
+		qbBtn.disabled = true;
+		qbBtn.dataset.wonLocked = "1";
+		qbBtn.classList.remove('hidden');
+		qbBtn.title = "You already won / currently winning";
+
+		// store the normal label BEFORE we start swapping it on hover
+		// qbBtn.dataset.normalHtml = qbBtn.dataset.normalHtml || qbBtn.innerHTML;
+
+		wireWonHover(qbBtn, "🏆 You are currently winning this item.");
+		if (!qbBtn._wonHoverActive) setQuickBidLabelFromAmount(qbBtn);
+
+	  } else {
+		// ✅ unlock + IMPORTANT: remove hover handlers + restore label
+		delete qbBtn.dataset.wonLocked;
+		unwireWonHover(qbBtn);
+
+		/*restore normal label (Quick Bid $amount)
+		const label = qbBtn.querySelector('[data-bind="quickBidText"]');
+		if (label && qbBtn.dataset.normalLabel) {
+		  label.textContent = qbBtn.dataset.normalLabel;
+		} else if (label && qbBtn.dataset.amount) {
+		  label.textContent = `Quick Bid ${formatPrice(qbBtn.dataset.amount)}`;
+		}*/
+
+		
+		qbBtn.disabled = !isLoggedIn();
+		qbBtn.title = "";
+		
+		// ✅ restore label from latest amount
+		setQuickBidLabelFromAmount(qbBtn);
+	  }
+	}
+
+    // ========= 1s ticker to update all time-left fields =========
+    let countdownTicker = null;
+    function tickAllCountdowns(){
+      document.querySelectorAll('[data-auction-end]').forEach(el => {
+        const endIso = el.getAttribute('data-auction-end');
+        const label = timeLeftLabelSeconds(endIso);
+
+        // list time left in details panel
+        const tl = el.querySelector('[data-bind="timeLeft"]');
+        if (tl) tl.textContent = label;
+
+        // list timeBox
+        const tl2 = el.querySelector('[data-bind="timeBoxLeft"]');
+        if (tl2) tl2.textContent = label;
+
+        // list overlay badge
+        const lb = el.querySelector('[data-bind="leftBadge"]');
+        if (lb) lb.textContent = label;
+      });
+    }
+
+    function startCountdownTicker(){
+      if (countdownTicker) return;
+      countdownTicker = setInterval(tickAllCountdowns, 1000);
+      tickAllCountdowns();
+    }
+
+    // ========= WebSocket live updates for index (per visible product) =========
+    let stompClient = null;
+    const SUBS = new Map(); // pid -> subscription
+
+    function connectSocketIndex(){
+      try{
+        const socket = new SockJS(`${API_BASE_URL}/ws/auction`);
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        wsStatus.textContent = "Live: connecting…";
+
+        stompClient.connect({}, () => {
+          wsStatus.textContent = "Live: connected";
+          syncSubscriptionsForVisible();
+        }, () => {
+          wsStatus.textContent = "Live: reconnecting…";
+          setTimeout(connectSocketIndex, 5000);
+        });
+      }catch(e){
+        console.warn('socket failed', e);
+        wsStatus.textContent = "Live: unavailable";
+      }
+    }
+
+    function ensureSubscribed(pid){
+      if (!stompClient || !stompClient.connected) return;
+      if (SUBS.has(pid)) return;
+
+      const sub = stompClient.subscribe(`/topic/auction.${pid}`, frame => {
+        const evt = JSON.parse(frame.body || "{}");
+
+        // Build patch from event keys you already use in product-view.html
+        const patch = {};
+        if (evt.highestBid != null) patch.highestBid = evt.highestBid;
+        if (evt.wonUserId !== undefined) patch.wonUserId = (evt.wonUserId ?? null);
+        if (evt.auctionEnd) patch.auctionEnd = evt.auctionEnd;
+
+        // You use evt.nextMinumBid in product-view
+        if (evt.nextMinumBid != null) patch.nextMinumBid = Number(evt.nextMinumBid) || 0;
+
+        // Apply
+        updateDomForProduct(pid, patch);
+
+        // Also: when highest changes but nextMinumBid not sent, we can recompute min bid
+        // (optional, safe fallback)
+        if (patch.highestBid != null && (evt.nextMinumBid == null) && isLoggedIn()){
+          getNextMinBid(patch.highestBid)
+            .then(({ minAllowed }) => updateDomForProduct(pid, { nextMinumBid: minAllowed }))
+            .catch(() => {});
+        }
+      });
+
+      SUBS.set(pid, sub);
+    }
+
+    function unsubscribeMissing(keepSet){
+      for (const [pid, sub] of SUBS.entries()){
+        if (!keepSet.has(String(pid))){
+          try{ sub.unsubscribe(); }catch(e){}
+          SUBS.delete(pid);
+        }
+      }
+    }
+
+    function syncSubscriptionsForVisible(){
+      if (!stompClient || !stompClient.connected) return;
+
+      // subscribe only for visible page items
+      const visibleIds = new Set();
+      document.querySelectorAll('[data-pid]').forEach(el => {
+        // only those actually visible in DOM (current mode)
+        const isHidden = el.classList.contains('hidden') || el.closest('.hidden');
+        if (!isHidden) visibleIds.add(String(el.getAttribute('data-pid')));
+      });
+
+      visibleIds.forEach(pid => ensureSubscribed(pid));
+      unsubscribeMissing(visibleIds);
+    }
+	
+	function isComingSoon(p) {
+	  return Boolean(p?.comingSoon);
+	}
+
+    // ==== GRID card ====
+    function productCardGrid(p){
+      const img = getPrimaryImage(p);
+      const title = p.title || 'Untitled';
+	  
+	  const comingSoon = isComingSoon(p);
+	  
+	  // alert('comingSoon '+comingSoon);
+
+      // Auction current bid
+      const currentBid = (p.highestBid != null ? p.highestBid : p.basePrice);
+      const current = formatPrice(currentBid);
+
+      const catName =
+        (p.category && (p.category.name || p.category.title)) ||
+        p.categoryName ||
+        (p.categoryId ? `Category ${p.categoryId}` : 'OTHER');
+
+      const idText = (p.id != null) ? `ID #${p.id}` : '';
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.setAttribute('data-pid', p.id);
+      card.setAttribute('data-auction-end', p.auctionEnd || '');
+      card.dataset.wonUserId = (p.wonUserId == null ? '' : String(p.wonUserId));
+
+      if (hasWon(p)) card.classList.add('wonFrame');
+
+      card.innerHTML = `
+        <div class="thumb">
+          <img src="${img}" alt="${title}" class="clickable-img"/>
+          <div class="tag ${comingSoon ? 'comingSoonTag' : ''}">
+			${comingSoon ? 'COMING SOON' : 'AUCTION'}
+		  </div>
+          ${hasWon(p) ? `<div class="wonBadge"><i class="fa-solid fa-trophy"></i> Won</div>` : ``}
+        </div>
+
+        <div class="body">
+          <div class="title2" title="${title}">${title}</div>
+
+          <div class="submeta">
+            <span>${String(catName).toUpperCase()}</span>
+            ${idText ? `<span class="dot">•</span><span>${idText}</span>` : ``}
+          </div>
+
+          <div class="price" data-bind="currentBid">${current}</div>
+
+		  ${
+			comingSoon
+			? ``
+			: `
+			  <div class="footline">
+				<span>Current bid</span>
+				<span class="dot">•</span>
+				<span>Time left: <b data-bind="timeLeft">${timeLeftLabelSeconds(p.auctionEnd)}</b></span>
+			  </div>
+			`
+		  }
+		  
+        </div>
+
+        <div class="actions" style="flex-direction:column;">
+		  ${
+			comingSoon
+			  ? `
+				<div class="comingSoonNote">
+				  <i class="fa-regular fa-clock"></i> Coming Soon
+				</div>
+			  `
+			  : `
+				<div style="display:flex; gap:10px; width:100%;">
+				  <button class="btn primaryAction" data-id="${p.id}" style="flex:1;">
+					<i class="fa-solid fa-gavel"></i> Bid
+				  </button>
+
+				  <button class="btn watchBtn hidden" data-watch="${p.id}" type="button" title="Watchlist">
+					<i class="fa-regular fa-eye"></i> Watch
+				  </button>
+				</div>
+
+				<button class="btn quickBid hidden" data-bind="quickBidBtn" data-qb="${p.id}" type="button">
+				  <i class="fa-solid fa-bolt"></i> <span data-bind="quickBidText">Quick Bid</span>
+				</button>
+
+				<div class="qbMsg hidden" data-bind="qbMsg" data-qbm="${p.id}"></div>
+			  `
+		  }
+		</div>
+      `;
+
+      // card.querySelector('[data-id]').addEventListener('click', () => navigateToProduct(p.id));
+	  const bidBtn = card.querySelector('[data-id]');
+	  if (bidBtn) {
+	    bidBtn.addEventListener('click', () => navigateToProduct(p.id));
+	  }
+      card.querySelector('.clickable-img').addEventListener('click', () => navigateToProduct(p.id));
+
+      // ✅ Quick Bid wiring (GRID) - UPDATED with validation
+	  
+	  if (comingSoon) {
+	    card.querySelector('.clickable-img').addEventListener('click', () => navigateToProduct(p.id));
+	    return card;
+	  }
+	  
+      const qbBtn = card.querySelector(`[data-qb="${p.id}"]`);
+      const qbMsg = card.querySelector(`[data-qbm="${p.id}"]`);
+
+      if (hasWon(p) && qbBtn) {
+        qbBtn.disabled = true;
+        qbBtn.classList.remove('hidden');
+        qbBtn.dataset.wonLocked = "1";
+        wireWonHover(qbBtn);
+        qbBtn.title = "You already won this item";
+      }
+
+      if (isLoggedIn() && qbBtn && qbMsg) {
+        qbBtn.classList.remove('hidden');
+        qbBtn.disabled = true;
+
+        const highest = (p.highestBid != null ? p.highestBid : p.basePrice);
+
+        qbBtn.querySelector('[data-bind="quickBidText"]').textContent = 'Quick Bid (loading…)';
+
+        getNextMinBid(highest)
+          .then(({ minAllowed }) => {
+            if (!qbBtn.dataset.wonLocked) qbBtn.disabled = false;
+            qbBtn.dataset.amount = String(minAllowed);
+            qbBtn.querySelector('[data-bind="quickBidText"]').textContent = `Quick Bid ${formatPrice(minAllowed)}`;
+          })
+          .catch(() => {
+            qbBtn.disabled = true;
+            qbBtn.querySelector('[data-bind="quickBidText"]').textContent = `Quick Bid unavailable`;
+          });
+
+        qbBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (qbBtn.dataset.wonLocked) return;
+
+          const amt = Number(qbBtn.dataset.amount || 0);
+          if (!amt) return;
+
+          showQbMessage(qbMsg, 'Placing bid…', 'info');
+
+          try{
+            // await validateQuickBidOrThrow(p, amt, qbMsg);
+			
+			const latest = getLatestProduct(p.id) || p;
+			await validateQuickBidOrThrow(latest, amt, qbMsg);
+
+            const prod = await placeQuickBid(p.id, amt);
+
+            if (prod?.isAutoOutbid && String(prod.isAutoOutbid).trim() !== "") {
+              showQbMessage(qbMsg, prod.isAutoOutbid, 'err', 10000);
+            } else {
+              showQbMessage(qbMsg, '✅ Bid placed!', 'ok', 2500);
+            }
+
+          }catch(err){
+            if (err?.message && !["not_logged_in","auction_ended","already_highest_bidder","bad_amount"].includes(err.message)) {
+              showQbMessage(qbMsg, '❌ ' + (err.message || 'Bid failed'), 'err', 4000);
+            }
+          }
+        });
+      } else {
+        qbBtn?.classList.add('hidden');
+        qbMsg?.classList.add('hidden');
+      }
+
+      // ✅ Watchlist wiring (GRID)
+      const watchBtn = card.querySelector(`[data-watch="${p.id}"]`);
+
+      if (isLoggedIn() && watchBtn) {
+        watchBtn.classList.remove('hidden');
+
+        // set initial state
+        if (WATCHED_SET.has(Number(p.id))) watchBtn.classList.add('active');
+
+        watchBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+
+          try{
+            if (WATCHED_SET.has(Number(p.id))) {
+              await removeFromWatchlist(p.id);
+              WATCHED_SET.delete(Number(p.id));
+              watchBtn.classList.remove('active');
+            } else {
+              await addToWatchlist(p.id);
+              WATCHED_SET.add(Number(p.id));
+              watchBtn.classList.add('active');
+            }
+          }catch(err){
+            alert('Watchlist failed: ' + (err?.message || 'error'));
+          }
+        });
+      } else {
+        watchBtn?.classList.add('hidden');
+      }
+
+      // Apply won UI once on build
+      applyWonUi(card, p.id, p.wonUserId);
+
+      return card;
+    }
+
+    // ==== LIST row ====
+    function productCardList(p){
+      const images = getAllImages(p);
+      const mainImg = images[0] || 'https://via.placeholder.com/600x400?text=No+Image';
+
+      const title = p.title || 'Untitled';
+	  
+	  const comingSoon = isComingSoon(p); // ✅ ADD THIS
+
+      // Auction current bid
+      const currentBid = (p.highestBid != null ? p.highestBid : p.basePrice);
+      const current = formatPrice(currentBid);
+
+      const catName =
+        (p.category && (p.category.name || p.category.title)) ||
+        p.categoryName ||
+        (p.categoryId ? `Category ${p.categoryId}` : 'OTHER');
+
+      const idText = (p.id != null) ? `ID #${p.id}` : '—';
+      const left = timeLeftLabelSeconds(p.auctionEnd);
+      const status = safeText(p.status,'—');
+
+      const wid = (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId);
+
+      const wh = warehouseForProduct(p);
+      const pickupName = wh ? safeText(wh.name) : '—';
+      const pickupAddr = wh ? formatWarehouseAddress(wh) : '—';
+
+      const thumbItems = images.slice(0, 10).map((u, idx) => `
+        <div class="thumbMini ${idx===0?'active':''}" data-img="${u}">
+          <img src="${u}" alt="thumb ${idx+1}">
+        </div>
+      `).join('');
+
+      const row = document.createElement('div');
+      row.className = 'listCard';
+      row.setAttribute('data-pid', p.id);
+      row.setAttribute('data-auction-end', p.auctionEnd || '');
+      row.dataset.wonUserId = (p.wonUserId == null ? '' : String(p.wonUserId));
+
+      if (hasWon(p)) row.classList.add('wonFrame');
+
+      row.innerHTML = `
+        <div class="listThumb">
+          <div class="tag ${comingSoon ? 'comingSoonTag' : ''}">
+		    ${comingSoon ? 'COMING SOON' : 'AUCTION'}
+		  </div>
+          ${hasWon(p) ? `<div class="wonBadge"><i class="fa-solid fa-trophy"></i> Won</div>` : ``}
+
+          ${
+			  comingSoon
+				? ``
+				: `
+				  <div class="countdownBadge" style="position:absolute; right:18px; bottom:18px; z-index:2;">
+					<i class="fa-regular fa-clock"></i> <span data-bind="leftBadge">${left}</span>
+				  </div>
+				`
+		  }
+
+          <div class="listMainImg">
+            <img src="${mainImg}" alt="${title}" class="mainImg clickable-img"/>
+          </div>
+
+          ${images.length > 1 ? `<div class="thumbStrip">${thumbItems}</div>` : ``}
+        </div>
+
+        <div class="listMain">
+          <h3 class="listTitle" title="${title}">${title}</h3>
+
+          <div class="detailsPanel">
+            <div class="detailsItem">
+              <i class="fa-solid fa-layer-group"></i>
+              <div>
+                <div class="k">Category</div>
+                <div class="v">${safeText(catName).toUpperCase()}</div>
+              </div>
+            </div>
+
+            <div class="detailsItem">
+              <i class="fa-solid fa-hashtag"></i>
+              <div>
+                <div class="k">Product ID</div>
+                <div class="v">${safeText(idText)}</div>
+              </div>
+            </div>
+
+            ${
+			  comingSoon
+				? ``
+				: `
+				  <div class="detailsItem">
+					<i class="fa-solid fa-money-bill-wave"></i>
+					<div>
+					  <div class="k">Current Bid</div>
+					  <div class="v" data-bind="highestBid">${current}</div>
+					</div>
+				  </div>
+
+				  <div class="detailsItem">
+					<i class="fa-regular fa-clock"></i>
+					<div>
+					  <div class="k">Time Left</div>
+					  <div class="v" data-bind="timeLeft">${left}</div>
+					</div>
+				  </div>
+				`
+			}
+
+            <div class="detailsItem">
+              <i class="fa-solid fa-warehouse"></i>
+              <div>
+                <div class="k">Pickup</div>
+                <div class="v">${pickupName}</div>
+              </div>
+            </div>
+
+            <div class="detailsItem">
+              <i class="fa-solid fa-location-dot"></i>
+              <div>
+                <div class="k">Address</div>
+                <div class="v wrap">${pickupAddr}</div>
+              </div>
+            </div>
+
+            <div class="detailsItem">
+              <i class="fa-solid fa-signal"></i>
+              <div>
+                <div class="k">Status</div>
+                <div class="v">${status}</div>
+              </div>
+            </div>
+
+            <div class="detailsItem">
+              <i class="fa-solid fa-building"></i>
+              <div>
+                <div class="k">Warehouse ID</div>
+                <div class="v">${wid == null ? '—' : wid}</div>
+              </div>
+            </div>
+          </div>
+
+			${
+			  comingSoon
+				? ``
+				: `
+				  <div class="listPriceRow">
+					<div class="listPrice" data-bind="currentBid">${current}</div>
+					<div class="listNote">Current bid</div>
+				  </div>
+				`
+			}
+			
+        </div>
+
+        <div class="listRight">
+          
+		  
+		  <div class="pickupBox">
+            <div class="pickupLine"><i class="fa-solid fa-truck-fast"></i><div>Pickup from <b>${pickupName}</b></div></div>
+            <div class="pickupLine"><i class="fa-solid fa-location-dot"></i><div>${pickupAddr}</div></div>
+          </div>
+
+          ${
+		  comingSoon
+			? `
+			  <div class="comingSoonNote">
+				<i class="fa-regular fa-clock"></i> Coming Soon
+			  </div>
+			`
+			: `
+			  <div style="display:flex; gap:10px; width:100%;">
+				<button class="btn primaryAction" data-id="${p.id}" style="flex:1;">
+				  <i class="fa-solid fa-gavel"></i> Bid
+				</button>
+
+				<button class="btn watchBtn hidden" data-watch="${p.id}" type="button" title="Watchlist">
+				  <i class="fa-regular fa-eye"></i> Watch
+				</button>
+			  </div>
+
+			  <button class="btn quickBid hidden" data-bind="quickBidBtn" data-qb="${p.id}" type="button">
+				<i class="fa-solid fa-bolt"></i> <span data-bind="quickBidText">Quick Bid</span>
+			  </button>
+
+			  <div class="qbMsg hidden" data-bind="qbMsg" data-qbm="${p.id}"></div>
+
+			  <div class="timeBox">
+				<div class="timeLine">
+				  <i class="fa-solid fa-stopwatch"></i>
+				  <div>Auction Ends In : <b data-bind="timeBoxLeft">${left}</b></div>
+				</div>
+			  </div>
+			`
+		  }
+		  
+		  
+        </div>
+      `;
+
+      // Bid/View click
+      const bidBtn = row.querySelector('[data-id]');
+	  if (bidBtn) {
+		  bidBtn.addEventListener('click', () => navigateToProduct(p.id));
+	  }
+		
+      row.querySelector('.clickable-img').addEventListener('click', () => navigateToProduct(p.id));
+
+      // ✅ thumbnail click → swap main image (NO zoom)
+      const main = row.querySelector('.mainImg');
+      row.querySelectorAll('.thumbMini').forEach(t => {
+        t.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const url = t.getAttribute('data-img');
+          if (!url) return;
+          main.src = url;
+          row.querySelectorAll('.thumbMini').forEach(x => x.classList.remove('active'));
+          t.classList.add('active');
+        });
+      });
+
+	  // After thumbnail before Quick Bid wiring
+	  if (comingSoon) {
+	    return row;
+	  }
+	  
+	  
+      // ✅ Quick Bid wiring (LIST) - UPDATED with validation
+      const qbBtn = row.querySelector(`[data-qb="${p.id}"]`);
+      const qbMsg = row.querySelector(`[data-qbm="${p.id}"]`);
+
+      if (hasWon(p) && qbBtn) {
+        qbBtn.disabled = true;
+        qbBtn.classList.remove('hidden');
+        qbBtn.dataset.wonLocked = "1";
+        wireWonHover(qbBtn);
+        qbBtn.title = "You already won this item";
+      }
+
+      if (isLoggedIn() && qbBtn && qbMsg) {
+        qbBtn.classList.remove('hidden');
+        qbBtn.disabled = true;
+
+        const highest = (p.highestBid != null ? p.highestBid : p.basePrice);
+
+        qbBtn.querySelector('[data-bind="quickBidText"]').textContent = 'Quick Bid (loading…)';
+
+        getNextMinBid(highest)
+          .then(({ minAllowed }) => {
+            if (!qbBtn.dataset.wonLocked) qbBtn.disabled = false;
+            qbBtn.dataset.amount = String(minAllowed);
+            qbBtn.querySelector('[data-bind="quickBidText"]').textContent = `Quick Bid ${formatPrice(minAllowed)}`;
+          })
+          .catch(() => {
+            qbBtn.disabled = true;
+            qbBtn.querySelector('[data-bind="quickBidText"]').textContent = `Quick Bid unavailable`;
+          });
+
+        qbBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (qbBtn.dataset.wonLocked) return;
+
+          const amt = Number(qbBtn.dataset.amount || 0);
+          if (!amt) return;
+
+          showQbMessage(qbMsg, 'Placing bid…', 'info');
+
+          try{
+            
+			
+			// await validateQuickBidOrThrow(p, amt, qbMsg);
+			
+			const latest = getLatestProduct(p.id) || p;
+			await validateQuickBidOrThrow(latest, amt, qbMsg);
+
+            const prod = await placeQuickBid(p.id, amt);
+
+            if (prod?.isAutoOutbid && String(prod.isAutoOutbid).trim() !== "") {
+              showQbMessage(qbMsg, prod.isAutoOutbid, 'err', 10000);
+            } else {
+              showQbMessage(qbMsg, '✅ Bid placed!', 'ok', 2500);
+            }
+
+          }catch(err){
+            if (err?.message && !["not_logged_in","auction_ended","already_highest_bidder","bad_amount"].includes(err.message)) {
+              showQbMessage(qbMsg, '❌ ' + (err.message || 'Bid failed'), 'err', 4000);
+            }
+          }
+        });
+      } else {
+        qbBtn?.classList.add('hidden');
+        qbMsg?.classList.add('hidden');
+      }
+
+      // ✅ Watchlist wiring (LIST)
+      const watchBtn = row.querySelector(`[data-watch="${p.id}"]`);
+
+      if (isLoggedIn() && watchBtn) {
+        watchBtn.classList.remove('hidden');
+
+        if (WATCHED_SET.has(Number(p.id))) watchBtn.classList.add('active');
+
+        watchBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+
+          try{
+            if (WATCHED_SET.has(Number(p.id))) {
+              await removeFromWatchlist(p.id);
+              WATCHED_SET.delete(Number(p.id));
+              watchBtn.classList.remove('active');
+            } else {
+              await addToWatchlist(p.id);
+              WATCHED_SET.add(Number(p.id));
+              watchBtn.classList.add('active');
+            }
+          }catch(err){
+            alert('Watchlist failed: ' + (err?.message || 'error'));
+          }
+        });
+      } else {
+        watchBtn?.classList.add('hidden');
+      }
+
+      // Apply won UI once on build
+      applyWonUi(row, p.id, p.wonUserId);
+
+      return row;
+    }
+
+    function setView(mode){
+      VIEW_MODE = mode;
+
+      if (mode === 'grid'){
+        grid.classList.remove('hidden');
+        list.classList.add('hidden');
+        gridViewBtn.classList.add('active');
+        listViewBtn.classList.remove('active');
+        gridViewBtn.setAttribute('aria-pressed','true');
+        listViewBtn.setAttribute('aria-pressed','false');
+      } else {
+        list.classList.remove('hidden');
+        grid.classList.add('hidden');
+        listViewBtn.classList.add('active');
+        gridViewBtn.classList.remove('active');
+        listViewBtn.setAttribute('aria-pressed','true');
+        gridViewBtn.setAttribute('aria-pressed','false');
+      }
+
+      render();
+    }
+
+    function render(){
+      const total = FILTERED.length;
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      CURRENT_PAGE = Math.min(CURRENT_PAGE, totalPages);
+
+      const start = (CURRENT_PAGE - 1) * PAGE_SIZE;
+      const pageItems = FILTERED.slice(start, start + PAGE_SIZE);
+
+      grid.innerHTML = '';
+      list.innerHTML = '';
+
+      if(pageItems.length === 0){
+        if (VIEW_MODE === 'grid'){
+          grid.innerHTML = `<div class="muted" style="grid-column:1/-1;padding:24px;text-align:center">No items found.</div>`;
+        } else {
+          list.innerHTML = `<div class="muted" style="padding:24px;text-align:center">No items found.</div>`;
+        }
+      }else{
+        if (VIEW_MODE === 'grid'){
+          pageItems.forEach(p => grid.appendChild(productCardGrid(p)));
+        } else {
+          pageItems.forEach(p => list.appendChild(productCardList(p)));
+        }
+      }
+
+      metaInfo.textContent = `${total} item${total!==1?'s':''}`;
+      pageInfoInline.textContent = `Page ${CURRENT_PAGE}`;
+
+      if(totalPages > 1){
+        pagination.classList.remove('hidden');
+        pageInfo.textContent = `Page ${CURRENT_PAGE} of ${totalPages}`;
+        prevPage.disabled = CURRENT_PAGE===1;
+        nextPage.disabled = CURRENT_PAGE===totalPages;
+      }else{
+        pagination.classList.add('hidden');
+      }
+
+      // ✅ after DOM updated: subscribe to visible items + refresh countdown
+      syncSubscriptionsForVisible();
+      tickAllCountdowns();
+    }
+
+    // ==== Filtering / Sorting ====
+    function applyFilters(){
+      const q = (searchBox.value||'').trim().toLowerCase();
+      const catId = categorySelect.value ? Number(categorySelect.value) : null;
+
+      FILTERED = ALL_PRODUCTS.filter(p => {
+        const matchesText = !q || (p.title && p.title.toLowerCase().includes(q));
+        const matchesCat = !catId || p.categoryId === catId || (p.category && p.category.id === catId);
+        return matchesText && matchesCat;
+      });
+
+      const sort = sortSelect.value;
+      FILTERED.sort((a,b) => {
+        if(sort==='endingSoon'){
+          const ta = a.auctionEnd ? new Date(a.auctionEnd).getTime() : Infinity;
+          const tb = b.auctionEnd ? new Date(b.auctionEnd).getTime() : Infinity;
+          return ta - tb;
+        }
+        if(sort==='newlyListed'){
+          const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return tb - ta;
+        }
+        if(sort==='priceLowHigh'){
+          const ca = (a.highestBid != null ? a.highestBid : a.basePrice);
+          const cb = (b.highestBid != null ? b.highestBid : b.basePrice);
+          return (Number(ca)||0) - (Number(cb)||0);
+        }
+        if(sort==='priceHighLow'){
+          const ca = (a.highestBid != null ? a.highestBid : a.basePrice);
+          const cb = (b.highestBid != null ? b.highestBid : b.basePrice);
+          return (Number(cb)||0) - (Number(ca)||0);
+        }
+        return 0;
+      });
+
+      CURRENT_PAGE = 1;
+      render();
+    }
+
+    // ==== Events ====
+    $('#refreshBtn').addEventListener('click', () => {
+      categorySelect.value = '';
+      searchBox.value = '';
+      typeSelect.value = 'auction';
+      fetchAllProducts();
+    });
+
+    applyBtn.addEventListener('click', applyFilters);
+
+    categorySelect.addEventListener('change', async () => {
+      const val = categorySelect.value;
+      if(!val){ fetchAllProducts(); return; }
+      await fetchByCategory(val);
+    });
+
+    sortSelect.addEventListener('change', applyFilters);
+    searchBox.addEventListener('input', applyFilters);
+
+    prevPage.addEventListener('click', () => {
+      if(CURRENT_PAGE>1){ CURRENT_PAGE--; render(); }
+    });
+    nextPage.addEventListener('click', () => {
+      const totalPages = Math.max(1, Math.ceil(FILTERED.length / PAGE_SIZE));
+      if(CURRENT_PAGE<totalPages){ CURRENT_PAGE++; render(); }
+    });
+
+    gridViewBtn.addEventListener('click', () => setView('grid'));
+    listViewBtn.addEventListener('click', () => setView('list'));
+
+    pageSizeSelect.addEventListener('change', () => {
+      const v = parseInt(pageSizeSelect.value, 10);
+      PAGE_SIZE = (!Number.isNaN(v) && v > 0) ? v : 10;
+      CURRENT_PAGE = 1;
+      render();
+    });
+
+    // --- Auction / Buy Now toggle navigation ---
+    document.addEventListener('DOMContentLoaded', () => {
+      $$('.view-nav').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target;
+          if (target === 'auction') {
+            if (!location.pathname.endsWith('index.html')) window.location.href = '/index.html';
+          } else if (target === 'buynow') {
+            if (!location.pathname.endsWith('product-buy.html')) window.location.href = '/product-buy.html';
+          }
+        });
+      });
+    });
+
+    // ==== Boot ====
+    (async function init(){
+      pageSizeSelect.value = "10";
+      setView('grid');
+	  
+	   // ✅ Load homepage banners first
+	  await loadBanners();
+
+      await loadAllCategories();
+      await loadWarehouses();
+      await loadMyWatchlist();
+      await fetchAllProducts();
+
+      // ✅ Start 1s countdown updates
+      startCountdownTicker();
+
+      // ✅ Start websocket + subscribe to visible products
+      connectSocketIndex();
+    })();
+  </script>
+
+  <script>
+    /* ===== Leftpanel wiring (optional) ===== */
+    function wireLeftPanelFilters() {
+      const lpType = document.getElementById('lp_typeSelect');
+      const lpCat  = document.getElementById('lp_categorySelect');
+      const lpApply= document.getElementById('lp_applyBtn');
+
+      if (!lpType && !lpCat) return;
+
+      function syncPageToPanel(){
+        if (lpType) lpType.value = typeSelect.value;
+        if (lpCat)  lpCat.value  = categorySelect.value;
+      }
+
+      async function syncPanelToPageAndApply(){
+        if (lpType) typeSelect.value = lpType.value;
+        if (lpCat)  categorySelect.value = lpCat.value;
+
+        const val = categorySelect.value;
+        if (!val) await fetchAllProducts();
+        else await fetchByCategory(val);
+
+        applyFilters();
+      }
+
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.burger')) syncPageToPanel();
+      });
+
+      lpType?.addEventListener('change', syncPanelToPageAndApply);
+
+      lpCat?.addEventListener('change', async () => {
+        categorySelect.value = lpCat.value;
+        const val = categorySelect.value;
+        if (!val) await fetchAllProducts();
+        else await fetchByCategory(val);
+      });
+
+      lpApply?.addEventListener('click', syncPanelToPageAndApply);
+
+      syncPageToPanel();
+    }
+
+    window.addEventListener("leftpanel:ready", () => {
+      wireLeftPanelFilters();
+    });
+  </script>
+  
+  <script>
+  window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('openLogin') === 'true') {
+      // Wait until auth.js initializes modal
+      const tryOpen = () => {
+        if (typeof window.openLoginModal === 'function') {
+          window.openLoginModal();
+
+          // Clean URL (remove query param)
+          window.history.replaceState({}, document.title, "/index.html");
+        } else {
+          setTimeout(tryOpen, 100); // retry until ready
+        }
+      };
+
+      tryOpen();
+    }
+  });
+</script>
+
+</body>
+</html>

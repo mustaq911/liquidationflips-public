@@ -1,0 +1,90 @@
+<!-- leftpanel.html -->
+<aside class="side-panel" id="sidePanel" aria-hidden="true">
+  <div class="side-header">
+    <div class="side-title">
+      <i class="fa-solid fa-filter"></i>
+      <span>Filters</span>
+    </div>
+    <button class="side-close" id="sideCloseBtn" aria-label="Close filters">×</button>
+  </div>
+
+  <div class="side-filters-grid">
+
+    <!-- Type -->
+    <section class="filter-card card-blue wide">
+      <div class="card-head">
+        <i class="fa-solid fa-tags"></i>
+        <h4>Type</h4>
+      </div>
+      <div class="field">
+        <label for="typeSelect">Auction / Buy Now</label>
+        <select id="lp_typeSelect">
+          <option value="all">Auction + Buy Now</option>
+          <option value="auction" selected>Auction</option>
+          <option value="buynow">Buy Now</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Category -->
+    <section class="filter-card card-green wide">
+      <div class="card-head">
+        <i class="fa-solid fa-layer-group"></i>
+        <h4>Category</h4>
+      </div>
+      <div class="field">
+        <label for="categorySelect">Choose category</label>
+        <select id="lp_categorySelect" name="categoryId"></select>
+      </div>
+    </section>
+
+    <!-- Warehouse Location (NEW) -->
+    <section class="filter-card card-orange wide">
+      <div class="card-head">
+        <i class="fa-solid fa-warehouse"></i>
+        <h4>Warehouse</h4>
+      </div>
+      <div class="field">
+        <label for="warehouseSelect">Location</label>
+        <select id="lp_warehouseSelect" name="warehouseId">
+		  <option value="all" selected>All locations</option>
+		</select>
+	  </div>
+    </section>
+
+    <!-- Search -->
+    <section class="filter-card card-purple wide">
+      <div class="card-head">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <h4>Search</h4>
+      </div>
+      <div class="field">
+        <label for="searchBox">Keyword</label>
+        <div class="searchWrap">
+          <input id="searchBox" type="text" placeholder="Search items..." />
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sort -->
+    <section class="filter-card card-red wide">
+      <div class="card-head">
+        <i class="fa-solid fa-arrow-up-wide-short"></i>
+        <h4>Sort</h4>
+      </div>
+      <div class="field">
+        <label for="sortSelect">Sort by</label>
+        <select id="sortSelect">
+          <option value="endingSoon">Ending soon</option>
+          <option value="newlyListed">Newly listed</option>
+          <option value="priceLowHigh">Price: Low to High</option>
+          <option value="priceHighLow">Price: High to Low</option>
+        </select>
+      </div>
+    </section>
+
+  </div>
+</aside>
+
+<div class="side-overlay" id="sideOverlay" aria-hidden="true"></div>

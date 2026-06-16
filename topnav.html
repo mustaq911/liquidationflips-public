@@ -1,0 +1,116 @@
+<div class="topnav">
+  <div class="nav-left">
+    <span class="burger" id="navToggle" aria-label="Menu" role="button" tabindex="0">&#9776;</span>
+
+    <a href="/index.html" class="brand-link" aria-label="Go to Browse Auctions">
+      <span class="brand">
+        <img src="/img/logo2.jpeg"
+             alt="Liquidation Flips"
+             style="max-height: 70px; width: auto; display: block;">
+      </span>
+    </a>
+  </div>
+
+  <div class="nav-right" id="navRight">
+
+    <div class="user-menu hidden" id="userMenu">
+      <span class="chip">
+        <a href="#" id="cartLink" class="cart-icon">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span id="cartCount" class="cart-count">0</span>
+          <span>&nbsp;&nbsp;</span>
+        </a>
+
+        <span class="greet" id="greetUser">Hello, <strong id="userEmailShort">User</strong></span>
+        <i class="fa fa-caret-down"></i>
+
+        <div class="user-dropdown hidden" id="userDropdown">
+          <a href="/my-bids.html" id="bidsLink">
+            <i class="fa-solid fa-gavel"></i>
+            My Bids
+            <span class="badge" id="ongoingBidCount">0</span>
+          </a>
+
+          <a href="/orders.html" id="ordersLink">
+            <i class="fa-solid fa-bag-shopping"></i>
+            My Orders
+          </a>
+
+          <a href="/watchlist.html" id="watchLink">
+            <i class="fa-regular fa-heart"></i>
+            Watchlist
+          </a>
+
+          <a href="/cart.html" id="cartMenuLink">
+            <i class="fa-solid fa-cart-shopping"></i>
+            My Cart
+          </a>
+
+          <a href="#" id="signOutLinkDrop">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Sign Out
+          </a>
+        </div>
+      </span>
+    </div>
+
+    <a href="#" id="signInLink">
+      <span class="chip">SIGN IN / REGISTER</span>
+    </a>
+
+    <div id="authOverlay" class="modal-overlay hidden"></div>
+    <div id="authModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <button class="modal-close" id="authClose" aria-label="Close">×</button>
+      <h2 id="authTitle">Welcome back!</h2>
+
+      <form id="authForm" autocomplete="on">
+        <label class="field">
+          <span>Username or Email</span>
+          <input type="email" id="authEmail" placeholder="you@example.com" required />
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+          <div class="pw-wrap">
+            <input type="password" id="authPassword" placeholder="••••••••" required />
+            <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show/Hide password">👁</button>
+          </div>
+        </label>
+
+        <div class="row">
+          <a class="muted" href="#" id="forgotLink">Forgot your password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="authSubmit">LOG IN</button>
+        <div id="authMsg" class="auth-msg hidden" role="alert" aria-live="polite"></div>
+
+        <div class="row small">
+          Don’t have an account yet? <a href="/register.html">Sign up here.</a>
+        </div>
+      </form>
+    </div>
+
+    <div id="fpOverlay" class="modal-overlay hidden"></div>
+    <div id="fpModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="fpTitle">
+      <button class="modal-close" id="fpClose" aria-label="Close">×</button>
+      <h2 id="fpTitle">Forgot password</h2>
+
+      <form id="fpForm" autocomplete="on">
+        <label class="field">
+          <span>Email</span>
+          <input type="email" id="fpEmail" placeholder="you@example.com" required />
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-block" id="fpSubmit">
+          Send reset link
+        </button>
+
+        <div id="fpMsg" class="auth-msg hidden" role="alert" aria-live="polite"></div>
+
+        <div class="row small">
+          Remembered it? <a href="#" id="fpBackToLogin">Back to login</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

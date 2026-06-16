@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Bids - Tabs</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    :root{
+      --bg:#f7f7f8; --panel:#ffffff; --text:#111827; --muted:#6b7280;
+      --brand:#2563eb; --brand2:#1e40af; --border:#e5e7eb;
+      --shadow:0 10px 28px rgba(0,0,0,.08);
+      --radius:14px;
+
+      --green-bg:#ecfdf3; --green-b:#bbf7d0; --green-t:#166534;
+      --red-bg:#fef2f2;   --red-b:#fecaca;   --red-t:#b91c1c;
+      --orange-bg: rgba(251,146,60,.18); --orange-b: rgba(251,146,60,.45); --orange-t:#9a3412;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    a{text-decoration:none;color:inherit}
+
+    .page{max-width:1400px;margin:0 auto;padding:18px 18px 26px}
+
+    .top{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .top h1{margin:0;font-size:22px;font-weight:950}
+    .sub{margin-top:6px;color:var(--muted);font-size:13px;font-weight:800}
+    .chip{
+      background:#eaf6ff;
+      color:#075985;
+      border:1px solid #cde9ff;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+
+    /* Tabs */
+    .tabs{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .tabButtons{display:flex; gap:8px; flex-wrap:wrap}
+    .tabBtn{
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:950;
+      font-size:13px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .tabBtn.active{
+      background:var(--brand);
+      border-color:var(--brand);
+      color:#fff;
+    }
+    .tabCount{
+      background:rgba(255,255,255,.25);
+      border:1px solid rgba(255,255,255,.35);
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:950;
+    }
+    .searchWrap{
+      flex:1 1 320px;
+      display:flex;
+      justify-content:flex-end;
+    }
+    .searchWrap input{
+      width:min(520px,100%);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:850;
+      outline:none;
+    }
+    .searchWrap input:focus{
+      border-color:rgba(37,99,235,.45);
+      box-shadow:0 0 0 4px rgba(37,99,235,.12);
+    }
+
+    /* Table shell */
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:auto; /* mobile scroll */
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+      min-width:1100px; /* keep horizontal like your screenshot */
+    }
+    thead{background:#f9fafb}
+    th,td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      vertical-align:middle;
+      white-space:nowrap;
+    }
+    th{
+      color:var(--muted);
+      font-weight:950;
+      font-size:12px;
+    }
+    tbody tr.dataRow:hover{background:#fafafa}
+    tbody tr.dataRow{cursor:pointer}
+
+    /* Thumbnail */
+    .thumbCell{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:340px;
+    }
+    .thumb{
+      width:44px;
+      height:44px;
+      border-radius:10px;
+      overflow:hidden;
+      border:1px solid var(--border);
+      background:#f1f3f6;
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .lotText{min-width:0}
+    .lotTitle{
+      font-weight:950;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:260px;
+    }
+    .lotMeta{
+      margin-top:3px;
+      color:var(--muted);
+      font-weight:800;
+      font-size:12px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:260px;
+    }
+
+    /* Pills */
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-weight:950;
+      font-size:11px;
+      border:1px solid var(--border);
+      white-space:nowrap;
+    }
+    .pill.ongoing{background:var(--green-bg); border-color:var(--green-b); color:var(--green-t)}
+    .pill.completed{background:var(--red-bg); border-color:var(--red-b); color:var(--red-t)}
+    .pill.winning{background:var(--green-bg); border-color:var(--green-b); color:var(--green-t)}
+    .pill.outbid{background:var(--orange-bg); border-color:var(--orange-b); color:var(--orange-t)}
+    .pill.won{background:var(--green-bg); border-color:var(--green-b); color:var(--green-t)}
+    .pill.lost{background:var(--red-bg); border-color:var(--red-b); color:var(--red-t)}
+
+    /* Expand row */
+    tr.expandRow td{
+      padding:0;
+      background:#fff;
+    }
+    .expandBox{
+      border-top:1px solid var(--border);
+      padding:12px;
+      background:#fff;
+    }
+    .expandHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      /* margin-bottom:10px; */
+    }
+    .expandHeader h3{
+      margin:0;
+      font-size:14px;
+      font-weight:950;
+      color:var(--text);
+    }
+    .btn{
+      padding:8px 12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#fff;
+      cursor:pointer;
+      font-weight:900;
+      font-size:12px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn-primary{
+      background:var(--brand);
+      border-color:var(--brand);
+      color:#fff;
+    }
+    .btn-primary:hover{background:var(--brand2); border-color:var(--brand2)}
+
+    .innerTableWrap{
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:auto;
+      background:#fff;
+    }
+    .innerTable{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+      min-width:700px;
+    }
+    .innerTable thead{background:#f9fafb}
+    .innerTable th,.innerTable td{
+      padding:8px 10px;
+      border-bottom:1px solid var(--border);
+      white-space:nowrap;
+      text-align:left;
+    }
+    .empty{
+      padding:28px 14px;
+      text-align:center;
+      color:var(--muted);
+      font-weight:850;
+    }
+	
+	.btn-sm{
+	  padding:6px 10px;
+	  font-size:12px;
+	  border-radius:10px;
+	}
+	
+	/* Make expanded area layout */
+	.expandBox{
+	  width:75%;
+	  max-width:75%;
+	  display:flex;
+	  flex-direction:column;
+	  gap:3px;
+	  margin:0 auto; 
+	  /*  align-items:center;   ✅ center everything horizontally */
+	}
+
+	/* ✅ Reduce bid table width to 75% */
+	.innerTableWrap{
+	  width:100%;
+	  max-width:100%;
+	  overflow:auto; /* safe if content is wide */
+	  margin:0 auto;        /* ✅ center */
+	}
+
+	/* Keep table nice */
+	.innerTable{
+	  width:100%;
+	  border-collapse:collapse;
+	}
+
+	/* ✅ Pager below table */
+	.innerPager{
+	  width:100%;
+	  max-width:100%;
+	  display:flex;
+	  justify-content:flex-end;  /* ✅ push to right */
+	  align-items:center;
+	  gap:10px;
+	}
+
+	.innerPager .pager-info{
+	  font-size:12px;
+	  color:var(--muted);
+	  font-weight:900;
+	}
+
+	/* ===== Mobile responsive ===== */
+	@media (max-width: 900px){
+	  .innerTableWrap,
+	  .innerPager{
+		width:100%;
+		max-width:100%;
+	  }
+
+	  .innerPager{
+		justify-content:flex-end;
+	  }
+	}
+	
+	a.btn.btn-pay {
+	  background: #16a34a;
+	  border-color: #16a34a;
+	  color: #fff;
+	  margin-left: 6px;
+	}
+
+	a.btn.btn-pay:hover {
+	  background: #15803d;
+	  border-color: #15803d;
+	}
+	
+  </style>
+</head>
+
+<body>
+  <!-- Shared Topnav -->
+  <link rel="stylesheet" href="/css/topnav.css">
+  <div id="topnavContainer"></div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/auth.js" defer></script>
+
+  <div class="page">
+    <div class="top">
+      <div>
+        <h1>My Bids</h1>
+        <div class="sub">Ongoing Bids (Winning/Outbid), Won, and Lost — click a row to expand bid history.</div>
+      </div>
+      <div class="chip">
+        <i class="fa-regular fa-circle-user"></i>
+        <span id="chipUser">Guest</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tabButtons">
+        <button class="tabBtn active" data-tab="ongoing">
+          Ongoing Bids <span class="tabCount" id="countOngoing">0</span>
+        </button>
+        <button class="tabBtn" data-tab="won">
+          Won <span class="tabCount" id="countWon">0</span>
+        </button>
+        <button class="tabBtn" data-tab="lost">
+          Lost <span class="tabCount" id="countLost">0</span>
+        </button>
+      </div>
+
+      <div class="searchWrap">
+        <input id="q" type="search" placeholder="Search by title, lot id, category…" />
+      </div>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Lot</th>
+            <th>Status</th>
+            <th>Result</th>
+            <th>Your Max Bid</th>
+            <th>Highest Bid</th>
+            <th>Ends</th>
+            <th>Time Left</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="8" class="empty"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+
+    const token  = localStorage.getItem("token");
+    const userId = localStorage.getItem("userid");
+    const username = localStorage.getItem("username");
+
+    const chipUser = document.getElementById("chipUser");
+    const rowsEl = document.getElementById("rows");
+    const qEl = document.getElementById("q");
+
+    const countOngoing = document.getElementById("countOngoing");
+    const countWon = document.getElementById("countWon");
+    const countLost = document.getElementById("countLost");
+
+    let activeTab = "ongoing";
+    let RAW = [];
+
+    const fmtMoney = (x) => {
+      if (x == null) return '$—';
+      const n = Number(x);
+      return Number.isNaN(n) ? '$—' : `$${n.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    };
+    const fmtDateTime = (iso) => {
+      if (!iso) return '—';
+      try { return new Date(iso).toLocaleString(); } catch(e){ return iso; }
+    };
+
+
+
+	/* =====  Helper Pagination => Expand - Bid Table ====== */
+	function initExpandBidPagination(expandRootEl, bids, rowsPerPage = 5) {
+	
+	  const tbody    = expandRootEl.querySelector(".innerTbody");
+	  const prevBtn  = expandRootEl.querySelector(".pager-prev");
+	  const nextBtn  = expandRootEl.querySelector(".pager-next");
+	  const infoSpan = expandRootEl.querySelector(".pager-info");
+
+	  if (!tbody || !prevBtn || !nextBtn || !infoSpan) return;
+
+	  const sorted = (Array.isArray(bids) ? bids : [])
+		.slice()
+		.sort((a,b) => new Date(b.bidTime) - new Date(a.bidTime));
+
+	  const totalPages = Math.max(1, Math.ceil(sorted.length / rowsPerPage));
+	  let currentPage  = 1;
+
+	  const fmtMoney = (x) => {
+		if (x == null) return '$—';
+		const n = Number(x);
+		return Number.isNaN(n) ? '$—' : `$${n.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+	  };
+	  const fmtDateTime = (iso) => {
+		if (!iso) return '—';
+		try { return new Date(iso).toLocaleString(); } catch(e){ return iso; }
+	  };
+
+	  function renderPage() {
+		tbody.innerHTML = "";
+
+		const start = (currentPage - 1) * rowsPerPage;
+		const pageItems = sorted.slice(start, start + rowsPerPage);
+
+		if (pageItems.length === 0) {
+		  tbody.innerHTML = `<tr><td colspan="4" style="padding:12px;color:var(--muted);font-weight:800;">No bids found.</td></tr>`;
+		} else {
+		  pageItems.forEach(b => {
+			const tr = document.createElement("tr");
+			tr.innerHTML = `
+			  <td>${fmtMoney(b.bidAmount)}</td>
+			  <td>${b.userId ?? "—"}</td>
+			  <td>${b.username || "—"}</td>
+			  <td>${fmtDateTime(b.bidTime)}</td>
+			`;
+			tbody.appendChild(tr);
+		  });
+		}
+
+		infoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
+		prevBtn.disabled = (currentPage === 1);
+		nextBtn.disabled = (currentPage === totalPages);
+	  }
+
+	  prevBtn.onclick = (e) => {
+		e.stopPropagation();
+		if (currentPage > 1) { currentPage--; renderPage(); }
+	  };
+	  nextBtn.onclick = (e) => {
+		e.stopPropagation();
+		if (currentPage < totalPages) { currentPage++; renderPage(); }
+	  };
+
+	  renderPage();
+	}
+
+    function timeLeftLabel(endIso){
+      if(!endIso) return '—';
+      const end = new Date(endIso).getTime();
+      const now = Date.now();
+      const diff = end - now;
+      if (diff <= 0) return 'Ended';
+      const d = Math.floor(diff/86400000);
+      const h = Math.floor((diff%86400000)/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      const s = Math.floor((diff%60000)/1000);
+      if (d>0) return `${d}d ${h}h ${m}m`;
+      if (h>0) return `${h}h ${m}m ${s}s`;
+      return `${m}m ${s}s`;
+    }
+
+    function isCompleted(product){
+      const st = (product.status || "").toString().toUpperCase();
+      if (st.includes("COMPLETED") || st.includes("ENDED")) return true;
+      return timeLeftLabel(product.auctionEnd) === "Ended";
+    }
+
+    function getMyMaxBid(bids){
+      if (!Array.isArray(bids)) return 0;
+      return bids.reduce((max,b) => Math.max(max, Number(b.bidAmount || 0)), 0);
+    }
+
+    function isMineWinner(product){
+      return (userId && product.wonUserId != null && String(product.wonUserId) === String(userId));
+    }
+
+    // For display result
+    function getResult(product){
+      const done = isCompleted(product);
+      const mine = isMineWinner(product);
+      if (done) return mine ? "WON" : "LOST";
+      return mine ? "WINNING" : "OUTBID";
+    }
+
+    // For tab grouping
+    function getTab(product){
+      const done = isCompleted(product);
+      if (!done) return "ongoing";
+      return isMineWinner(product) ? "won" : "lost";
+    }
+
+    function pillStatus(product){
+      const done = isCompleted(product);
+      return done
+        ? `<span class="pill completed"><i class="fa-solid fa-flag-checkered"></i> COMPLETED</span>`
+        : `<span class="pill ongoing"><i class="fa-solid fa-bolt"></i> ONGOING</span>`;
+    }
+
+    function pillResult(product){
+      const r = getResult(product);
+      if (r === "WINNING") return `<span class="pill winning"><i class="fa-solid fa-trophy"></i> WINNING</span>`;
+      if (r === "OUTBID")  return `<span class="pill outbid"><i class="fa-solid fa-triangle-exclamation"></i> OUTBID</span>`;
+      if (r === "WON")     return `<span class="pill won"><i class="fa-solid fa-trophy"></i> WON</span>`;
+      return `<span class="pill lost"><i class="fa-solid fa-xmark"></i> LOST</span>`;
+    }
+
+    // --- expand/collapse (only one open at a time) ---
+    function closeAllExpands(){
+      document.querySelectorAll("tr.expandRow").forEach(tr => tr.remove());
+      document.querySelectorAll("tr.dataRow").forEach(tr => tr.dataset.open = "0");
+    }
+
+    function render(){
+      const q = (qEl.value || "").trim().toLowerCase();
+
+      const ongoing = RAW.filter(e => getTab(e.product) === "ongoing");
+      const won = RAW.filter(e => getTab(e.product) === "won");
+      const lost = RAW.filter(e => getTab(e.product) === "lost");
+
+      countOngoing.textContent = ongoing.length;
+      countWon.textContent = won.length;
+      countLost.textContent = lost.length;
+
+      const list = (activeTab === "ongoing") ? ongoing : (activeTab === "won") ? won : lost;
+
+      const filtered = list.filter(e => {
+        if (!q) return true;
+        const p = e.product || {};
+        const hay = [
+          p.title, p.id, p.categoryName,
+          (p.category && p.category.name)
+        ].filter(Boolean).join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+
+      closeAllExpands();
+
+      if (filtered.length === 0){
+        rowsEl.innerHTML = `<tr><td colspan="8" class="empty">No rows for this tab / search.</td></tr>`;
+        return;
+      }
+
+      rowsEl.innerHTML = filtered.map((entry, idx) => {
+        const p = entry.product || {};
+        const bids = entry.bids || [];
+        const myMax = getMyMaxBid(bids);
+        const img = p.imageUrl || "https://via.placeholder.com/80x80?text=No+Img";
+        const cat = (p.category && p.category.name) || p.categoryName || "—";
+        const ends = fmtDateTime(p.auctionEnd);
+        const left = timeLeftLabel(p.auctionEnd);
+		
+		
+		const showPayButton = activeTab === "won" &&
+								entry.paymentRequired === true && entry.orderId != null;
+
+		const payButton = showPayButton
+		  ? `
+			<a class="btn btn-pay" href="/checkout.html?orderId=${entry.orderId}" onclick="event.stopPropagation()">
+			  <i class="fa-solid fa-credit-card"></i> Pay
+			</a>
+		  `
+		  : "";
+
+        return `
+          <tr class="dataRow" data-index="${idx}" data-open="0">
+            <td>
+              <div class="thumbCell">
+                <div class="thumb"><img src="${img}" alt="thumb"></div>
+                <div class="lotText">
+                  <div class="lotTitle" title="${(p.title||"").replace(/"/g,'&quot;')}">${p.title || "Untitled"}</div>
+                  <div class="lotMeta">${cat} • Lot #${p.id ?? "—"}</div>
+                </div>
+              </div>
+            </td>
+            <td>${pillStatus(p)}</td>
+            <td>${pillResult(p)}</td>
+            <td><strong>${fmtMoney(myMax)}</strong></td>
+            <td><strong>${fmtMoney(p.highestBid)}</strong></td>
+            <td>${ends}</td>
+            <td><strong>${left}</strong></td>
+            <td>
+              <a class="btn btn-primary" href="/product-view.html?id=${p.id}" onclick="event.stopPropagation()">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> View
+              </a>
+			  ${payButton}
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      // wire row clicks after paint
+      document.querySelectorAll("tr.dataRow").forEach((tr) => {
+        tr.addEventListener("click", () => {
+          const idx = Number(tr.dataset.index);
+          const entry = filtered[idx];
+          toggleExpand(tr, entry);
+        });
+      });
+    }
+
+    function toggleExpand(rowTr, entry){
+	  const open = rowTr.dataset.open === "1";
+	  closeAllExpands();
+	  if (open) return;
+
+	  rowTr.dataset.open = "1";
+
+	  const p = entry.product || {};
+	  const bids = Array.isArray(entry.bids) ? entry.bids : [];
+
+	  const expandTr = document.createElement("tr");
+	  expandTr.className = "expandRow";
+	  expandTr.innerHTML = `
+	  <td colspan="8">
+		<div class="expandBox">
+		  <div class="expandHeader">
+			<h3><i class="fa-solid fa-list"></i> Bid History (Lot #${p.id ?? "—"})</h3>
+
+			<!-- keep collapse button here -->
+			<button class="btn" type="button" id="collapseBtn">
+			  <i class="fa-solid fa-chevron-up"></i> Close
+			</button>
+		  </div>
+
+		  <div class="innerTableWrap">
+			<table class="innerTable">
+			  <thead>
+				<tr>
+				  <th>Bid Amount</th>
+				  <th>User ID</th>
+				  <th>User Name</th>
+				  <th>Bid Time</th>
+				</tr>
+			  </thead>
+			  <tbody class="innerTbody"></tbody>
+			</table>
+		  </div>
+
+		  <!-- ✅ Pagination moved BELOW table -->
+		  <div class="innerPager">
+			<button class="btn btn-sm pager-prev" type="button">Prev</button>
+			<span class="pager-info"></span>
+			<button class="btn btn-sm pager-next" type="button">Next</button>
+		  </div>
+
+		</div>
+	  </td>
+	`;
+
+	  // insert right after clicked row
+	  rowTr.parentNode.insertBefore(expandTr, rowTr.nextSibling);
+
+	  // Wire collapse
+	  expandTr.querySelector("#collapseBtn")?.addEventListener("click", (e) => {
+		e.stopPropagation();
+		closeAllExpands();
+	  });
+
+	  // ✅ init pagination for this expanded bid table
+	  initExpandBidPagination(expandTr, bids, 5);
+	}
+
+    function wireTabs(){
+      document.querySelectorAll(".tabBtn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".tabBtn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          activeTab = btn.dataset.tab;
+          render();
+        });
+      });
+    }
+
+    async function load(){
+      chipUser.textContent = username || "Guest";
+
+      if (!token || !userId){
+        rowsEl.innerHTML = `<tr><td colspan="8" class="empty">Please log in to view this page.</td></tr>`;
+        if (typeof window.openLoginModal === "function") window.openLoginModal();
+        return;
+      }
+
+      try{
+        const res = await fetch(`${API_BASE_URL}/bids/my-bids/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(await res.text());
+
+        const data = await res.json();
+        RAW = Array.isArray(data) ? data : [];
+        render();
+
+      }catch(e){
+        console.error("Load failed:", e);
+        rowsEl.innerHTML = `<tr><td colspan="8" class="empty">Failed to load. Check console.</td></tr>`;
+      }
+    }
+
+    wireTabs();
+    qEl.addEventListener("input", render);
+    load();
+  </script>
+</body>
+</html>
