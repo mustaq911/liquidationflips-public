@@ -8,16 +8,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  
-  /*   background: url("/img/hero-bg.jpg") top center no-repeat;  */
-  
-  /*✅ repeat vertically so no white space */
-  background-image: url("/img/hero-bg.jpg");
-  background-repeat: repeat-y;          /* repeat only top-to-bottom */
-  background-position: top center;
-  background-size: auto;                /* keep original size */
-  
-  
+  background: #fff;                     /* plain white background site-wide */
   color: var(--text);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }

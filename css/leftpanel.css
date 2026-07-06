@@ -18,8 +18,7 @@
   width: 360px;
   max-width: 88vw;
   height: 100vh;
-  /* background: var(--lp-bg); */
-  background-image: url("/img/hero-bg.jpg");
+  background: var(--lp-bg);
   color: var(--lp-text);
   box-shadow: var(--lp-shadow);
   transform: translateX(-110%);
@@ -193,11 +192,11 @@
 }
 
 /* Color themes (left border + icon background) */
-.card-blue::before{ background: #2563eb; }
+.card-blue::before{ background: #1F8B57; }
 .card-blue .card-head i{ 
 		border: 1px solid rgba(14,165,233,.25);
 		background: rgba(14,165,233,.06);
-		color:#2563eb;
+		color:#1F8B57;
 	}
 
 .card-green::before{ background: #16a34a; }
@@ -219,8 +218,8 @@
 
 .card-purple::before{ background: #7c3aed; }
 .card-purple .card-head i{ 
-		border: 1px solid rgba(37,99,235,.22);
-		background: rgba(37,99,235,.05);
+		border: 1px solid rgba(31,139,87,.22);
+		background: rgba(31,139,87,.05);
 		color: #7c3aed;
 	}
 

@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Walbas Account Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account Verification - Liquidation Flips</title>
   
   <script src="/js/config.js"></script>
   
@@ -311,12 +312,13 @@
 	}
 
   </style>
+  <link rel="stylesheet" href="/css/topnav.css">
+  <link rel="stylesheet" href="/css/account-pages.css">
 
 
 </head>
 <body>
 
-	<link rel="stylesheet" href="/css/topnav.css">
 		<div id="topnavContainer"></div>
 	<script>
 	  (async () => {
@@ -994,7 +996,7 @@
       alert('Deposit hold created successfully. Your payment profile is set up.');
       // TODO: move to Notifications step or redirect:
       // showOnly(step4); setProgress({ profile:'completed', phone:'completed', payment:'completed' });
-      // window.location.href = '/web2/product.html';
+      // window.location.href = '/index.html';
     } catch (e) {
       alert('Network error while creating hold.');
     } finally {

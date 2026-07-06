@@ -8,12 +8,12 @@
 
   <style>
     :root {
-      --bg:#f7f7f8;
+      --bg:#EAF0EC;
       --panel:#ffffff;
       --text:#111827;
       --muted:#6b7280;
-      --brand:#2563eb;
-      --brand-2:#1e40af;
+      --brand:#1F8B57;
+      --brand-2:#177045;
       --border:#e5e7eb;
       --danger:#dc2626;
       --success:#16a34a;
@@ -277,7 +277,7 @@
   </div>
 
   <script src="/js/config.js"></script>
-  <script src="/js/auth.js" defer></script>
+  <script src="/js/auth.js?v=2" defer></script>
 
   <script>
     const API_BASE_URL = CONFIG.API_BASE_URL;
@@ -457,7 +457,7 @@
       if (delta > 0) {
         const available = await getStock(productId);
         if (isFinite(available) && current >= available) {
-          alert('You have reached the available stock for this item.');
+          LF.toast('You have reached the available stock for this item.', 'error');
           return;
         }
       }
@@ -478,14 +478,14 @@
           }
         );
         if (!res.ok) {
-          alert('Failed to update quantity.');
+          LF.toast('Failed to update quantity.', 'error');
           return;
         }
         const order = await res.json();
         renderCart(order);
       } catch (e) {
         console.error(e);
-        alert('Error updating quantity.');
+        LF.toast('Error updating quantity.', 'error');
       }
     }
 
@@ -500,14 +500,14 @@
           }
         );
         if (!res.ok) {
-          alert('Failed to remove item.');
+          LF.toast('Failed to remove item.', 'error');
           return;
         }
         const order = await res.json();
         renderCart(order);
       } catch (e) {
         console.error(e);
-        alert('Error removing item.');
+        LF.toast('Error removing item.', 'error');
       }
     }
 
@@ -527,7 +527,8 @@
 	  checkoutBusy = true;
 
 	  const btn = document.querySelector('button[onclick^="startCheckout"]');
-	  if (btn) btn.disabled = true;
+	  const stopBusy = LF.busy(btn, 'Starting checkout…');
+	  let redirecting = false;
 
       try {
         const res = await fetch(`${API_BASE_URL}/payments/intent`, {
@@ -550,22 +551,25 @@
 		if (data.alreadyPaid === true) {
 		  sessionStorage.setItem('stripeOrderId', data.orderId);
 		  sessionStorage.setItem('stripePaymentIntentId', data.paymentIntentId || '');
+		  redirecting = true;
 		  window.location.href = '/payment-success.html';
 		  return;
 		}
-		
+
         // normal flow -> go to checkout page
 		sessionStorage.setItem('stripeClientSecret', data.clientSecret);
 		sessionStorage.setItem('stripeOrderId', data.orderId);
 		sessionStorage.setItem('stripePaymentIntentId', data.paymentIntentId || '');
+		redirecting = true;
 		window.location.href = '/checkout-payment.html';
-		
+
       } catch (e) {
         console.error(e);
         errEl.textContent = 'Error starting payment. Please try again.';
       } finally {
 		checkoutBusy = false;
-		if (btn) btn.disabled = false;
+		// Stay busy through the redirect; otherwise restore the button.
+		if (!redirecting) stopBusy();
 	  }
     }
 

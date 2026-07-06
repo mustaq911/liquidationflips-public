@@ -1,67 +1,168 @@
-<!-- Footer Start -->
-    <div class="container-fluid bg-dark text-light mt-5 py-5">
-        <div class="container py-5">
-            <div class="row g-5">
-                <div class="col-lg-3 col-md-6">
-                    <h4 class="d-inline-block text-primary text-uppercase border-bottom border-5 border-secondary mb-4">Get In Touch</h4>
-                    <p class="mb-4">
-						<strong>WALBAS Direct Goods</strong> 
-						Welcome to our Appliance and Electronics Haven on WALBAS! 
-						Discover a world of unbeatable deals and top-tier brands 
-						at your fingertips!
-					</p>
-                    <p class="mb-2"><i class="fa fa-map-marker-alt text-primary me-3"></i>19 Kenview Blvd #33, Brampton, ON L6T 5G6</p>
-                    <p class="mb-2"><i class="fa fa-envelope text-primary me-3"></i>info@Liquidationflips.ca</p>
-                    <!-- <p class="mb-0"><i class="fa fa-phone-alt text-primary me-3"></i>+1 (647) 444-7340</p> -->
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h4 class="d-inline-block text-primary text-uppercase border-bottom border-5 border-secondary mb-4">Quick Links</h4>
-                    <div class="d-flex flex-column justify-content-start">
-                        <a class="text-light mb-2" href="#"><i class="fa fa-angle-right me-2"></i>Home</a>
-                        <a class="text-light mb-2" href="#"><i class="fa fa-angle-right me-2"></i>About Us</a>
-                        <a class="text-light mb-2" href="#"><i class="fa fa-angle-right me-2"></i>Our Services</a>
-                        <a class="text-light mb-2" href="#"><i class="fa fa-angle-right me-2"></i>Meet The Team</a>
-                        <a class="text-light mb-2" href="#"><i class="fa fa-angle-right me-2"></i>Latest Blog</a>
-                        <a class="text-light" href="#"><i class="fa fa-angle-right me-2"></i>Contact Us</a>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h4 class="d-inline-block text-primary text-uppercase border-bottom border-5 border-secondary mb-4">Popular Links</h4>
-                    <div class="d-flex flex-column justify-content-start">
-                        <a class="text-light mb-2" href="#"><i class="fa fa-angle-right me-2"></i>Home</a>
-                        <a class="text-light mb-2" href="#"><i class="fa fa-angle-right me-2"></i>About Us</a>
-                        <a class="text-light mb-2" href="#"><i class="fa fa-angle-right me-2"></i>Our Services</a>
-                        <a class="text-light mb-2" href="#"><i class="fa fa-angle-right me-2"></i>Meet The Team</a>
-                        <a class="text-light mb-2" href="#"><i class="fa fa-angle-right me-2"></i>Latest Blog</a>
-                        <a class="text-light" href="#"><i class="fa fa-angle-right me-2"></i>Contact Us</a>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <h4 class="d-inline-block text-primary text-uppercase border-bottom border-5 border-secondary mb-4">Newsletter</h4>
-                    <form action="">
-                        <div class="input-group">
-                            <input type="text" class="form-control p-3 border-0" placeholder="Your Email Address">
-                            <button class="btn btn-primary">Sign Up</button>
-                        </div>
-                    </form>
-                    <h6 class="text-primary text-uppercase mt-4 mb-3">Follow Us</h6>
-                    <div class="d-flex">
-                        <a class="btn btn-lg btn-primary btn-lg-square rounded-circle me-2" href="#"><i class="fab fa-twitter"></i></a>
-                        <a class="btn btn-lg btn-primary btn-lg-square rounded-circle me-2" href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a class="btn btn-lg btn-primary btn-lg-square rounded-circle me-2" href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a class="btn btn-lg btn-primary btn-lg-square rounded-circle" href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!--
+  Site footer (dark #16202e, green accent #1f8b57). Injected into an isolated
+  shadow DOM by /js/auth.js (initFooter); styles are scoped here. Web fonts
+  loaded in the main document are available inside the shadow tree.
+
+  Layout: 4 link columns (Brand / Shop / Categories / Company) + a full-width
+  "subscribe" band above the copyright bar.
+
+  ⚠️ BACKEND NOT READY YET:
+    - The newsletter/subscribe form is NOT wired — it does nothing on submit.
+    - The Categories column is static (design binds a live categoriesList).
+    - Social links point to "#".
+  Connect these once the corresponding backend endpoints exist.
+-->
+<style>
+  .lf-footer {
+    --accent: #1f8b57;
+    background: #16202e;
+    color: #aeb6c0;
+    margin-top: 48px;
+    font-family: 'Hanken Grotesk', system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .lf-footer a { text-decoration: none; transition: color .18s ease, opacity .18s ease, filter .18s ease; }
+
+  .lf-top {
+    max-width: 1400px; margin: 0 auto; padding: 56px 28px 40px;
+    display: grid; grid-template-columns: 1.8fr 1fr 1fr 1.1fr; gap: 44px;
+  }
+  .lf-brandrow { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .lf-wordmark { font-weight: 800; font-size: 15px; color: #fff; }
+  .lf-wordmark span { color: var(--accent); }
+  .lf-blurb { font-size: 14px; line-height: 1.65; color: #8b94a1; margin: 0 0 18px; max-width: 300px; }
+  .lf-contact { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: #aeb6c0; margin-bottom: 8px; }
+  .lf-contact:last-child { margin-bottom: 0; }
+  .lf-contact svg { flex-shrink: 0; }
+  .lf-contact a { color: #aeb6c0; }
+  .lf-contact a:hover { color: #fff; }
+
+  .lf-col h4 {
+    font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: #fff;
+    margin: 0 0 16px; font-weight: 700;
+  }
+  .lf-col a.lf-flink { display: block; color: #8b94a1; font-size: 14px; margin-bottom: 11px; }
+  .lf-col a.lf-flink:last-child { margin-bottom: 0; }
+  .lf-col a.lf-flink:hover { color: var(--accent); }
+
+  /* Subscribe band (moved to the bottom, above the copyright) */
+  .lf-subscribe { border-top: 1px solid #243246; }
+  .lf-sub-inner { max-width: 1400px; margin: 0 auto; padding: 26px 28px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .lf-sub-h { font-size: 16px; font-weight: 800; color: #fff; }
+  .lf-sub-p { font-size: 13.5px; color: #8b94a1; margin: 4px 0 0; }
+  .lf-sub-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .lf-newsform { display: flex; background: #243246; border: 1px solid #324258; border-radius: 9px; padding: 4px; gap: 5px; min-width: 288px; }
+  .lf-newsform input { flex: 1; border: none; background: transparent; color: #fff; font-family: inherit; font-size: 13.5px; padding: 9px 12px; outline: none; }
+  .lf-newsform input::placeholder { color: #6b7686; }
+  .lf-newsform button { border: none; background: var(--accent); color: #fff; font-weight: 700; font-size: 13px; padding: 0 18px; border-radius: 7px; cursor: pointer; font-family: inherit; }
+  .lf-newsform button:hover { opacity: .9; }
+  .lf-social { display: flex; gap: 9px; }
+  .lf-social a { width: 36px; height: 36px; border-radius: 8px; background: #243246; display: flex; align-items: center; justify-content: center; color: #aeb6c0; }
+  .lf-social a:hover { color: #fff; filter: brightness(1.15); }
+
+  .lf-bottom { border-top: 1px solid #243246; }
+  .lf-bottom-inner { max-width: 1400px; margin: 0 auto; padding: 20px 28px; font-size: 13px; color: #6b7686; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .lf-bottom-inner .lf-legal { display: flex; gap: 18px; }
+  .lf-bottom-inner .lf-legal a { color: #6b7686; }
+  .lf-bottom-inner .lf-legal a:hover { color: #aeb6c0; }
+
+  @media (max-width: 900px) { .lf-top { grid-template-columns: 1fr 1fr; gap: 36px; } }
+  @media (max-width: 620px) {
+    .lf-sub-inner { flex-direction: column; align-items: flex-start; }
+    .lf-newsform { width: 100%; min-width: 0; }
+    .lf-sub-right { width: 100%; justify-content: space-between; }
+    .lf-bottom-inner { justify-content: center; text-align: center; }
+  }
+  @media (max-width: 560px) { .lf-top { grid-template-columns: 1fr; gap: 30px; padding: 44px 22px 32px; } }
+</style>
+
+<footer class="lf-footer">
+  <div class="lf-top">
+    <!-- Brand -->
+    <div class="lf-col">
+      <div class="lf-brandrow">
+        <svg width="30" height="30" viewBox="0 0 240 240" aria-hidden="true">
+          <rect width="240" height="240" rx="54" fill="#243246"></rect>
+          <g transform="translate(38.6 48.6) scale(0.714)">
+            <path fill="#FFFFFF" d="M16 18 L58 10 L58 150 L150 150 L128 190 L16 190 Z"></path>
+            <path fill="#22A06B" d="M68 10 L178 10 L162 46 L104 46 L104 74 L150 74 L150 58 L212 96 L150 134 L150 118 L104 118 L68 118 Z"></path>
+          </g>
+        </svg>
+        <span class="lf-wordmark">Liquidation <span>Flips</span></span>
+      </div>
+      <p class="lf-blurb">Canada's marketplace for wholesale lots, customer returns and overstock. Bid live or buy now, shipped fast coast to coast.</p>
+      <div class="lf-contact">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7686" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+        19 Kenview Blvd #33, Brampton, ON L6T 5G6
+      </div>
+      <div class="lf-contact">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7686" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg>
+        <a href="mailto:info@liquidationflips.ca">info@liquidationflips.ca</a>
+      </div>
     </div>
-    <div class="container-fluid bg-dark text-light border-top border-secondary py-4">
-        <div class="container">
-            <div class="row g-5">
-                <div class="col-md-6 text-center text-md-start">
-                    <p class="mb-md-0">&copy; <a class="text-primary" href="#">WALBAS Direct Goods</a>. All Rights Reserved.</p>
-                </div>
-            </div>
-        </div>
+
+    <!-- Shop -->
+    <div class="lf-col">
+      <h4>Shop</h4>
+      <a class="lf-flink" href="/index.html">All Inventory</a>
+      <a class="lf-flink" href="/index.html?type=auction">Live Auctions</a>
+      <a class="lf-flink" href="/index.html?type=buynow">Buy Now Deals</a>
+      <a class="lf-flink" href="/how-it-works.html">How It Works</a>
     </div>
-    <!-- Footer End -->
+
+    <!-- Categories (TODO(backend): static — bind to /category/get/all when ready) -->
+    <div class="lf-col">
+      <h4>Categories</h4>
+      <a class="lf-flink" href="/index.html">Electronics</a>
+      <a class="lf-flink" href="/index.html">Apparel</a>
+      <a class="lf-flink" href="/index.html">Appliances</a>
+      <a class="lf-flink" href="/index.html">Home &amp; Kitchen</a>
+      <a class="lf-flink" href="/index.html">Tools</a>
+    </div>
+
+    <!-- Company / help -->
+    <div class="lf-col">
+      <h4>Company</h4>
+      <a class="lf-flink" href="/support.html">Support</a>
+      <a class="lf-flink" href="/terms.html">Terms &amp; Conditions</a>
+      <a class="lf-flink" href="/agreement.html">User &amp; Purchase Agreement</a>
+      <a class="lf-flink" href="/register.html">Create account</a>
+      <a class="lf-flink" href="/index.html?login=1">Sign in</a>
+    </div>
+  </div>
+
+  <!-- Subscribe band -->
+  <div class="lf-subscribe">
+    <div class="lf-sub-inner">
+      <div class="lf-sub-copy">
+        <div class="lf-sub-h">Stay in the loop</div>
+        <p class="lf-sub-p">New lots and ending-soon alerts, straight to your inbox.</p>
+      </div>
+      <div class="lf-sub-right">
+        <!-- TODO(backend): newsletter subscribe is NOT wired yet. The form does
+             nothing (onsubmit returns false). Connect it to the subscribe API /
+             email service once the backend endpoint is ready. -->
+        <form class="lf-newsform" onsubmit="return false;">
+          <input type="email" placeholder="Your email address" aria-label="Email address">
+          <button type="submit">Sign Up</button>
+        </form>
+        <!-- TODO(backend): point social links to the real profiles -->
+        <div class="lf-social">
+          <a href="#" aria-label="Twitter"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.8c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4 4 0 00-6.9 3.7A11.4 11.4 0 013.6 4.6a4 4 0 001.2 5.4c-.6 0-1.2-.2-1.8-.5v.1a4 4 0 003.2 4 4 4 0 01-1.8.1 4 4 0 003.7 2.8A8 8 0 012 18.6a11.3 11.3 0 006.3 1.8c7.5 0 11.6-6.2 11.6-11.6v-.5c.8-.6 1.5-1.3 2-2.1z"></path></svg></a>
+          <a href="#" aria-label="Facebook"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M13 22v-8h2.7l.4-3H13V9.1c0-.9.3-1.5 1.6-1.5H16V5c-.3 0-1.2-.1-2.3-.1-2.3 0-3.7 1.4-3.7 3.9V11H7.5v3H10v8z"></path></svg></a>
+          <a href="#" aria-label="LinkedIn"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6.9 8.5V19H3.6V8.5h3.3zM5.2 3.5a1.9 1.9 0 110 3.8 1.9 1.9 0 010-3.8zM20.4 19h-3.3v-5.6c0-1.4-.5-2.3-1.7-2.3-.9 0-1.5.6-1.7 1.2-.1.2-.1.5-.1.8V19H10.3s.1-9.5 0-10.5h3.3v1.5c.4-.7 1.2-1.7 3-1.7 2.2 0 3.8 1.4 3.8 4.5z"></path></svg></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="lf-bottom">
+    <div class="lf-bottom-inner">
+      <span>© WALBAS Direct Goods. All rights reserved.</span>
+      <span class="lf-legal">
+        <a href="/terms.html">Terms</a>
+        <a href="/agreement.html">Purchase Agreement</a>
+      </span>
+    </div>
+  </div>
+</footer>

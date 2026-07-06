@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Walbas Account Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account Verification - Liquidation Flips</title>
 
   <script src="/js/config.js"></script>
+  <script src="/js/ui.js"></script>
   <script src="https://js.stripe.com/v3/"></script>
 
   <!-- Canada Post AddressComplete -->
@@ -253,14 +255,13 @@
 
     .payment-forms {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 20px;
       margin-top: 20px;
     }
 
     .payment-forms .address-panel {
-      flex: 1;
-      min-width: 320px;
+      width: 100%;
       border: 1px solid #eee;
       border-radius: 6px;
       padding: 16px;
@@ -278,14 +279,15 @@
     .address-search-note {
       font-size: 12px;
       color: #777;
-      margin-top: -8px;
+      margin-top: 6px;
       margin-bottom: 10px;
     }
   </style>
+  <link rel="stylesheet" href="/css/topnav.css">
+  <link rel="stylesheet" href="/css/account-pages.css">
 </head>
 <body>
 
-<link rel="stylesheet" href="/css/topnav.css">
 <div id="topnavContainer"></div>
 
 <script>
@@ -355,6 +357,8 @@
       <label><input type="checkbox"> I understand the following policy</label>
       <label><input type="checkbox"> Sign up for our newsletter</label>
     </div>
+
+    <div id="profileStatus" class="status-box"></div>
 
     <div class="button-container">
       <button type="button" class="btn" id="nextStep1">Next</button>
@@ -509,17 +513,21 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="form-group" style="margin-top:20px;">
-      <label><span class="required">*</span>Name on Card</label>
-      <input type="text" id="cardholderName" placeholder="Full name">
-    </div>
+      <div class="address-panel">
+        <h3>Payment Details</h3>
 
-    <div class="form-group">
-      <label><span class="required">*</span>Card Details</label>
-      <div id="card-element" class="stripe-box"></div>
-      <div id="cardErrors" class="error"></div>
+        <div class="form-group">
+          <label><span class="required">*</span>Name on Card</label>
+          <input type="text" id="cardholderName" placeholder="Full name">
+        </div>
+
+        <div class="form-group">
+          <label><span class="required">*</span>Card Details</label>
+          <div id="card-element" class="stripe-box"></div>
+          <div id="cardErrors" class="error"></div>
+        </div>
+      </div>
     </div>
 
     <div class="button-container button-row">
@@ -599,8 +607,16 @@
   }
 
   function showStatusBox(el, text, ok) {
+    if (!el) return;
     el.className = 'status-box ' + (ok ? 'ok' : 'bad');
     el.textContent = text;
+    if (el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function clearStatusBox(el) {
+    if (!el) return;
+    el.className = 'status-box';
+    el.textContent = '';
   }
 
   function validateStep1() {
@@ -771,8 +787,9 @@
   }
 
   qs('#nextStep1').addEventListener('click', async () => {
+    clearStatusBox(qs('#profileStatus'));
     if (!validateStep1()) {
-      alert('Please complete the required fields and accept the required terms.');
+      showStatusBox(qs('#profileStatus'), 'Please complete the required fields and accept the required terms.', false);
       return;
     }
 
@@ -781,6 +798,7 @@
     const firstName = qs('#firstName').value.trim();
     const lastName = qs('#lastName').value.trim();
 
+    const stopBusy = LF.busy(qs('#nextStep1'), 'Sending code…');
     try {
       const res = await fetch(`${API_BASE_URL}/user/phone/start`, {
         method: 'POST',
@@ -790,7 +808,7 @@
 
       if (!res.ok) {
         const msg = await res.text();
-        alert(msg || 'Failed to start phone verification.');
+        showStatusBox(qs('#profileStatus'), msg || 'Failed to start phone verification.', false);
         return;
       }
 
@@ -799,7 +817,9 @@
       setProgress({ profile: 'completed', phone: 'active', payment: null });
 
     } catch (e) {
-      alert('Network error. Please try again.');
+      showStatusBox(qs('#profileStatus'), 'Network error. Please try again.', false);
+    } finally {
+      stopBusy();
     }
   });
 
@@ -810,10 +830,11 @@
     const statusBox = qs('#otpStatus');
 
     if (!code) {
-      alert('Enter the verification code.');
+      showStatusBox(statusBox, 'Enter the verification code.', false);
       return;
     }
 
+    const stopBusy = LF.busy(qs('#nextStep2'), 'Verifying…');
     try {
       const res = await fetch(`${API_BASE_URL}/user/phone/verify`, {
         method: 'POST',
@@ -887,6 +908,8 @@
 
     } catch (e) {
       showStatusBox(statusBox, 'Network error. Please try again.', false);
+    } finally {
+      stopBusy();
     }
   });
 
@@ -895,6 +918,7 @@
     const phone = qs('#primaryPhone').value.trim();
     const statusBox = qs('#otpStatus');
 
+    const stopBusy = LF.busy(qs('#resendOtp'), 'Sending…');
     try {
       const res = await fetch(`${API_BASE_URL}/user/phone/start`, {
         method: 'POST',
@@ -911,6 +935,8 @@
 
     } catch (e) {
       showStatusBox(statusBox, 'Network error while resending.', false);
+    } finally {
+      stopBusy();
     }
   });
 
@@ -937,8 +963,8 @@
       copyBillingToShipping();
     }
 
-    qs('#nextStep3').disabled = true;
-    qs('#nextStep3').textContent = 'Authorizing...';
+    let redirecting = false;
+    const stopBusy = LF.busy(qs('#nextStep3'), 'Authorizing…');
     qs('#cardErrors').textContent = '';
 
     try {
@@ -1003,12 +1029,30 @@
         }
 
         showStatusBox(holdStatusBox, 'Deposit hold authorized successfully. Registration payment step completed.', true);
-        
+
 		// alert('Deposit hold authorized successfully.');
+
+		// Keep the user signed in after registration instead of bouncing them
+		// to the login modal. If the confirm step handed back a fresh token,
+		// persist it; otherwise rely on the session created earlier in signup.
+		if (confirmData?.token) {
+		  localStorage.setItem('token', confirmData.token);
+		  const u = confirmData.user || {};
+		  localStorage.setItem('userid', String(u.id ?? u.userId ?? state.userId ?? ''));
+		  localStorage.setItem('username', u.username || u.email || qs('#profileEmail').value.trim());
+		}
+
+		const alreadyLoggedIn = !!localStorage.getItem('token') && !!localStorage.getItem('userid');
+
+		redirecting = true;
 		setTimeout(() => {
-		  window.location.href = '/index.html?login=1&registered=1';
+		  // Logged in → land on the homepage signed in. Only fall back to the
+		  // login prompt if we somehow have no session at all.
+		  window.location.href = alreadyLoggedIn
+		    ? '/index.html?registered=1'
+		    : '/index.html?login=1&registered=1';
 		}, 1200);
-		
+
         return;
       }
 
@@ -1017,8 +1061,8 @@
     } catch (e) {
       showStatusBox(holdStatusBox, 'Network or Stripe error during hold authorization.', false);
     } finally {
-      qs('#nextStep3').disabled = false;
-      qs('#nextStep3').textContent = 'Authorize Hold';
+      // Stay busy through the success redirect; otherwise restore the button.
+      if (!redirecting) stopBusy();
     }
   });
 

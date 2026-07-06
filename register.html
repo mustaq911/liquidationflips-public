@@ -2,19 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Create Your Free Account - MZAAD</title>
+  <title>Create Your Free Account - Liquidation Flips</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <link rel="stylesheet" href="/css/topnav.css">
   <script src="/js/config.js"></script>
+  <script src="/js/ui.js"></script>
 
   <style>
     :root{
-      --bg:#f7f7f8;
+      --bg:#EAF0EC;
       --panel:#ffffff;
       --text:#1f2937;
       --muted:#6b7280;
-      --brand:#2563eb;
+      --brand:#1F8B57;
       --success:#22c55e;
       --danger:#dc2626;
       --border:#e5e7eb;
@@ -39,7 +40,7 @@
       width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;
       outline:0;transition:border-color .15s ease, box-shadow .15s ease;background:#fff;
     }
-    input:focus{border-color:#c7d2fe;box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+    input:focus{border-color:#c7d2fe;box-shadow:0 0 0 4px rgba(31,139,87,.15)}
     .pw-wrap{position:relative}
     .pw-toggle{
       position:absolute;right:6px;top:50%;transform:translateY(-50%);
@@ -66,6 +67,7 @@
     .input-error{border-color:var(--danger);box-shadow:0 0 0 4px rgba(220, 38, 38, 0.15)}
     .hidden{display:none !important}
   </style>
+  <link rel="stylesheet" href="/css/account-pages.css">
 </head>
 <body>
   <div id="topnavContainer"></div>
@@ -112,7 +114,7 @@
         <button id="submitBtn" class="btn" type="submit">CREATE ACCOUNT ▸</button>
         <div id="formMsg" class="msg" role="status"></div>
 
-        <div class="small">Already have an account? <a href="/web2/login.html">Log in</a></div>
+        <div class="small">Already have an account? <a href="/index.html?login=1">Log in</a></div>
       </form>
     </div>
   </div>
@@ -255,8 +257,7 @@
         return;
       }
 
-      submit.disabled = true;
-      submit.textContent = 'Creating…';
+      const stopBusy = LF.busy(submit, 'Creating…');
 
       const payload = {
         firstName: fName.value.trim(),
@@ -276,8 +277,7 @@
         if (!res.ok) {
           const t = await res.text();
           showMsg(t || 'Registration failed.', false);
-          submit.disabled = false;
-          submit.textContent = 'CREATE ACCOUNT ▸';
+          stopBusy();
           return;
         }
 
@@ -295,8 +295,7 @@
         setTimeout(() => window.location.href = '/welcome.html', 600);
       } catch (e) {
         showMsg('Network error. Please try again.', false);
-        submit.disabled = false;
-        submit.textContent = 'CREATE ACCOUNT ▸';
+        stopBusy();
       }
     });
   </script>

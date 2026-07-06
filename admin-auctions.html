@@ -8,12 +8,12 @@
 
   <style>
     :root{
-      --bg:#f7f7f8;
+      --bg:#EAF0EC;
       --panel:#ffffff;
       --text:#111827;
       --muted:#6b7280;
-      --brand:#2563eb;
-      --brand-2:#1e40af;
+      --brand:#1F8B57;
+      --brand-2:#177045;
       --border:#e5e7eb;
 
       --success:#16a34a;
@@ -93,7 +93,7 @@
     .kpi .val{font-size:18px;font-weight:900;margin-top:4px}
     .kpi .hint{font-size:12px;color:var(--muted)}
 
-    .kpi.blue{border:1px solid rgba(37,99,235,.22);background:rgba(37,99,235,.05)}
+    .kpi.blue{border:1px solid rgba(31,139,87,.22);background:rgba(31,139,87,.05)}
     .kpi.green{border:1px solid rgba(22,163,74,.25);background:rgba(22,163,74,.06)}
     .kpi.amber{border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.07)}
     .kpi.red{border:1px solid rgba(220,38,38,.25);background:rgba(220,38,38,.06)}
@@ -376,7 +376,7 @@
 
   <!-- CONFIG + AUTH -->
   <script src="/js/config.js"></script>
-  <script src="/js/auth.js" defer></script>
+  <script src="/js/auth.js?v=2" defer></script>
 
   <!-- ADMIN LAYOUT: sidebar + page -->
   <div class="admin-layout">
@@ -661,13 +661,13 @@
           headers: authHeaders()
         });
         if(!res.ok){
-          alert("Force End failed:\n" + await res.text());
+          LF.toast("Force End failed: " + await res.text(), 'error');
           return;
         }
-        alert(await res.text());
+        LF.toast(await res.text() || "Auction ended.", 'success');
         await load();
       }catch(e){
-        alert("Force End failed. Check console.");
+        LF.toast("Force End failed. Check console.", 'error');
         console.error(e);
       }
     }

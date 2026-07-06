@@ -5,17 +5,18 @@
   <title>Welcome – Liquidation Flips</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- (Optional) Your global/topnav stylesheet if you already have one -->
-  <link rel="stylesheet" href="/web2/css/topnav.css"> 
+  <link rel="stylesheet" href="/css/topnav.css">
+  <script src="/js/config.js"></script>
+  <script src="/js/ui.js"></script>
 
   <style>
     /* --- Minimal page styling (kept lean; topnav styles remain in topnav.html / global CSS) --- */
     :root{
-      --bg:#f7f7f8;
+      --bg:#EAF0EC;
       --panel:#ffffff;
       --text:#1f2937;
       --muted:#6b7280;
-      --brand:#2563eb;
+      --brand:#1F8B57;
       --success:#22c55e;
       --border:#e5e7eb;
       --shadow:0 10px 25px rgba(0,0,0,.06);
@@ -58,8 +59,9 @@
 
     /* Footer (simple links row) */
     .links{margin-top:18px;font-size:14px;color:var(--muted)}
-    .links a{color:#0b5ed7}
+    .links a{color:#1F8B57}
   </style>
+  <link rel="stylesheet" href="/css/account-pages.css">
 </head>
 <body>
   <!-- Top nav -->
@@ -86,7 +88,7 @@
       <div class="actions">
         <!-- Update href to your email verification route if you support manual re-send 
         <a class="btn btn-primary" id="verifyCta" href="#">Get Verified Now ▸</a>
-        <a class="btn btn-ghost" id="laterCta" href="/web2/index.html">No thanks, I’ll verify later</a>
+        <a class="btn btn-ghost" id="laterCta" href="/index.html">No thanks, I’ll verify later</a>
       </div>
 	 -->
 	 
@@ -101,7 +103,7 @@
     // Load top navigation from the shared partial
     (async () => {
       try {
-        const res = await fetch('/web2/topnav.html');
+        const res = await fetch('/topnav.html');
         const html = await res.text();
         document.getElementById('topnavContainer').innerHTML = html;
 
@@ -127,7 +129,7 @@
     })();
 
     // ---- Page actions (wire these to your backend)
-    const API_BASE_URL = "http://localhost:8080"; // set for prod
+    const API_BASE_URL = CONFIG.API_BASE_URL;
     const verifyCta = document.getElementById('verifyCta');
     const resendLink = document.getElementById('resendLink');
 
@@ -136,29 +138,29 @@
       e.preventDefault();
       try {
         const email = localStorage.getItem('username'); // or separate 'email'
-        if (!email) return alert('No email found for current session.');
+        if (!email) { LF.toast('No email found for current session.', 'error'); return; }
         const res = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({ email })
         });
         if (res.ok) {
-          alert('Verification email sent. Please check your inbox.');
+          LF.toast('Verification email sent. Please check your inbox.', 'success');
         } else {
           const t = await res.text();
-          alert(t || 'Could not resend verification email.');
+          LF.toast(t || 'Could not resend verification email.', 'error');
         }
       } catch (err) {
-        alert('Network error. Please try again.');
+        LF.toast('Network error. Please try again.', 'error');
       }
     });
 
     // If you maintain a dedicated page that explains verification or polls status,
     // point this to it; otherwise keep it as a no-op or link to profile/security:
-    verifyCta.addEventListener('click', (e) => {
+    verifyCta?.addEventListener('click', (e) => {
       e.preventDefault();
       // Example: go to a verification-help page
-      window.location.href = '/web2/verify.html';
+      window.location.href = '/registration.html';
     });
   </script>
 </body>

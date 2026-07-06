@@ -8,421 +8,109 @@
 
  <!-- ✅ Replace ONLY your <style>...</style> in product-buynow.html with this GREEN version -->
 <style>
-  :root{
-    /* product-buy.html green palette */
-    --panel:#ffffff;
-    --text:#111827;
-    --muted:#6b7280;
-    --border:#e5e7eb;
-
-    --green:#1d7a59;
-    --green-2:#176248;
-
-    --primary: var(--green);
-    --primary-2: var(--green-2);
-
-    --shadow:0 10px 28px rgba(0,0,0,.08);
-    --shadow-soft:0 6px 18px rgba(0,0,0,.06);
-    --radius:14px;
-
-    /* ✅ requested blocks */
-    --greenPanelBg: rgba(29,122,89,.08);
-    --greenPanelBd: rgba(10,52,38,.35);
-  }
-
   *{box-sizing:border-box}
-  html,body{
-    margin:0;padding:0;
-    background: url("/img/hero-bg.jpg") top center / cover repeat-y fixed;
-    color:var(--text);
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  a{text-decoration:none;color:inherit}
+  :root{--accent:#1f8b57;--ink:#16202e;--muted:#6b7480;--muted2:#97a0ab;--line:#e6e8ec}
+  html,body{margin:0;padding:0}
+  body{background:#fff;color:#16202e}
+  .hidden{display:none!important}
+  .muted{color:#6b7480}
 
-  .page{max-width:1500px;margin:0 auto;padding:18px 20px 26px}
+  .page{max-width:1400px;margin:0 auto;padding:24px 28px 40px}
 
-  /* ===== Breadcrumbs ===== */
-  .breadcrumbs{
-    background:var(--panel);
-    border: 3px solid rgba(10,52,38,.35); /* 1px solid var(--border); */
-    border-radius:var(--radius);
-    box-shadow:var(--shadow-soft);
-    padding:12px 14px;
-    font-size:13px;
-    color:var(--muted);
-    margin:0 0 14px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-  }
-  .breadcrumbs a{
-    color:var(--primary);
-    font-weight:900;
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-  }
-
-  /* ===== Header (title + status chip) ===== */
-  .header{
-    background:var(--panel);
-    border: 3px solid rgba(10,52,38,.35); /* 1px solid var(--border); */
-    border-radius:var(--radius);
-    box-shadow:var(--shadow-soft);
-    padding:14px 16px;
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:16px;
-    margin-bottom:14px;
-  }
-  .lot-title{
-    font-size:28px;
-    font-weight:950;
-    line-height:1.2;
-    margin:0;
-    letter-spacing:-.3px;
-    color:var(--primary);
-  }
-  .lot-sub{
-    color:var(--muted);
-    font-size:13px;
-    font-weight:800;
-    margin-top:6px;
-  }
-
-  /* ===== Layout ===== */
-  .layout{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
-  @media (max-width: 900px){ .layout{grid-template-columns:1fr} }
-
-  /* ===== Gallery ===== */
-  .gallery{
-    background:var(--panel);
-    border: 3px solid rgba(10,52,38,.35); /*1px solid var(--border);*/
-    border-radius:var(--radius);
-    box-shadow:var(--shadow-soft);
-    padding:14px;
-  }
-  .hero{
-    position:relative;
-    height:420px;
-    border-radius:12px;
-    overflow:hidden;
-    background:#eef2f7;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin-bottom:12px;
-    cursor: zoom-in;
-    border:1px solid rgba(0,0,0,.06);
-  }
-  .hero img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-
-  /* ===== Thumbs slider (same behavior, green active) ===== */
-  .thumbs-wrap{position:relative;display:flex;align-items:center;gap:10px}
-  .thumbs-viewport{overflow:hidden;width:100%}
-  .thumbs-track{display:flex;gap:8px;transition:transform .25s ease;will-change:transform}
-
-  .thumb{
-    flex:0 0 auto;
-    width:74px;height:74px;
-    border-radius:10px;
-    overflow:hidden;
-    background:#e5e7eb;
-    border:2px solid transparent;
-    cursor:pointer;
-  }
-  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .thumb.active{
-    border-color: rgba(29,122,89,.70);
-    box-shadow: 0 0 0 2px rgba(29,122,89,.15);
-  }
-
-  .thumb-nav{
-    width:44px;height:44px;
-    border-radius:12px;
-    border:1px solid var(--border);
-    background:#fff;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:18px;
-    font-weight:900;
-    user-select:none;
-    transition:transform .08s ease, box-shadow .12s ease;
-  }
-  .thumb-nav:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
-  .thumb-nav:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
-
-  /* ===== Summary box ===== */
-  .summary{
-    background:var(--panel);
-    border: 3px solid rgba(10,52,38,.35); /* 1px solid var(--border);*/
-    border-radius:var(--radius);
-    box-shadow:var(--shadow-soft);
-    padding:14px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-  }
-  .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-  .price{
-    font-size:28px;
-    font-weight:950;
-    color:var(--primary);
-    letter-spacing:-.3px;
-  }
-  .muted{color:var(--muted);font-weight:900;font-size:13px}
-
-  /* ✅ Status badges (green theme) */
-  .badge-status{
-    padding:6px 10px;
-    border-radius:999px;
-    font-size:11px;
-    border:1px solid rgba(10,52,38,.35);
-    background: rgba(29,122,89,.10);
-    color: var(--primary);
-    font-weight:900;
-    letter-spacing:.3px;
-  }
-  .badge-status-closed{
-    border-color:#fecaca;
-    background:#fef2f2;
-    color:#b91c1c;
-  }
-
-  /* Buttons (index-like) */
-  .btn{
-    padding:11px 14px;
-    border-radius:10px;
-    border:1px solid var(--border);
-    background:#fff;
-    cursor:pointer;
-    font-weight:900;
-    min-height:42px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
-  }
-  .btn:hover{
-	background:var(--primary-2)!important; ;
-	transform:translateY(-1px);
-	box-shadow:0 6px 16px rgba(0,0,0,.06)}
-  .btn-primary{
-    background:var(--primary)!important; ;
-    border-color:var(--primary-2)!important; ;
-    color:#fff;
-  }
-  .btn-primary:hover{background:var(--primary-2);border-color:var(--primary-2)}
+  .btn{border:1px solid #dfe2e6;background:#fff;color:#16202e;font-weight:700;font-size:13.5px;padding:12px 16px;border-radius:10px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:opacity .18s ease,border-color .18s ease}
+  .btn:hover{border-color:#c7ccd2}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn-primary{border:none;background:#16202e;color:#fff}
+  .btn-primary:hover{opacity:.92;border:none}
   .btn-block{width:100%}
 
-  /* Quantity input */
-  .qty-row{display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap}
-  .qty-row input{
-    width:90px;
-    padding:11px 12px;
-    border-radius:10px;
-    border:1px solid var(--border);
-    background:#fff;
-    font-size:14px;
-    font-weight:900;
-    outline:none;
-  }
-  .qty-row input:focus{
-    border-color: rgba(29,122,89,.45);
-    box-shadow: 0 0 0 4px rgba(29,122,89,.12);
-  }
+  .skeleton{background:linear-gradient(100deg,#eef0f2 30%,#f6f7f8 50%,#eef0f2 70%);background-size:200% 100%;animation:lfsk 1.2s ease-in-out infinite;border-radius:8px}
+  @keyframes lfsk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  .skel-line{height:14px}
+  .skel-hero{height:100%;min-height:320px;border-radius:14px}
 
-  #buyMessage{font-size:13px;margin-top:6px;font-weight:900}
+  .breadcrumbs{margin-bottom:18px}
+  .chip-back a{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:#6b7480;font-weight:600;font-size:13.5px}
+  .chip-back a:hover{color:#1f8b57}
+  .header{display:none}
 
-  /* ===== Lower panels ===== */
-  .panels{display:grid;grid-template-columns:1fr .55fr;gap:18px;margin-top:18px}
-  @media (max-width: 900px){ .panels{grid-template-columns:1fr} }
+  .layout{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start}
 
-  .card{
-    background:var(--panel);
-    border: 3px solid rgba(10,52,38,.35); /*1px solid var(--border);*/
-    border-radius:var(--radius);
-    box-shadow:var(--shadow-soft);
-    padding:14px 16px;
-  }
-  .card h3{
-    margin:0 0 10px;
-    font-size:16px;
-    font-weight:950;
-    color:var(--primary);
-  }
-  .desc{white-space:pre-wrap;line-height:1.6;color:var(--text);font-weight:700}
+  .gallery .hero{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;border:1px solid #e6e8ec;background:#f3f4f6;cursor:zoom-in}
+  .gallery .hero img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumbs-wrap{display:flex;align-items:center;gap:8px;margin-top:12px}
+  .thumbs-viewport{overflow:hidden;flex:1}
+  .thumbs-track{display:flex;gap:8px;transition:transform .3s ease}
+  .thumb{width:74px;height:62px;flex-shrink:0;border-radius:9px;overflow:hidden;border:1px solid #e6e8ec;cursor:pointer;background:#f3f4f6}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb.active{border:2px solid #16202e}
+  .thumb-nav{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1px solid #e6e8ec;background:#fff;cursor:pointer;color:#16202e;display:flex;align-items:center;justify-content:center}
+  .thumb-nav:disabled{opacity:.4;cursor:default}
 
-  .specs{width:100%;border-collapse:collapse}
-  .specs th,.specs td{
-    border-bottom:1px solid var(--border);
-    padding:10px 6px;
-    text-align:left;
-    font-size:13px;
-  }
-  .specs th{width:230px;color:var(--muted);font-weight:900}
+  .summary{border:1px solid #e6e8ec;border-radius:16px;padding:26px}
+  .lot-title{font-weight:800;font-size:21px;line-height:1.25;letter-spacing:-.01em;margin:0;color:#16202e}
+  .lot-sub{font-size:13px;color:#97a0ab;margin-top:6px;margin-bottom:4px}
+  .sum-titlerow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .chip{flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.07em;padding:7px 12px;border-radius:999px;background:#16202e;color:#fff;text-transform:uppercase}
+  .badge-status{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;padding:6px 11px;border-radius:999px;background:rgba(31,139,87,.12);color:#177045;text-transform:uppercase}
+  .badge-status-closed{background:#fdecec;color:#c0453f}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #eef0f2;gap:16px}
+  .row .muted{color:#6b7480;font-weight:600;font-size:14px}
+  .price{font-weight:800;font-size:24px;color:#1f8b57;margin-top:3px}
+  #lotId,#lotCategory,#availableQty{font-weight:700;font-size:14px;color:#16202e}
+  #orderTotal{font-weight:800;font-size:16px;color:#16202e}
+  .qty-block{padding:14px 0 4px}
+  .qty-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+  .qty-row input{width:96px;border:1px solid #dfe2e6;background:#fff;border-radius:10px;padding:11px 12px;font-family:inherit;font-size:14.5px;color:#16202e;outline:none}
+  .qty-row input:focus{border-color:#1f8b57;box-shadow:0 0 0 3px rgba(31,139,87,.12)}
+  #buyNowBtn{margin-top:16px;font-size:14.5px;padding:14px}
+  #buyMessage{margin-top:10px;font-size:13px;font-weight:700}
+  #buyMessage:empty{display:none}
+  .notice{background:#f6f7f8;border-radius:10px;padding:13px 15px;margin-top:16px;font-size:12.5px;line-height:1.55;color:#6b7480}
 
-  /* ✅ Notice box (green soft panel) */
-  .notice{
-    background: var(--greenPanelBg);
-    border: 1px solid var(--greenPanelBd);
-    color: var(--text);
-    border-radius: 14px;
-    padding: 12px;
-    font-size:13px;
-    font-weight:900;
-    line-height:1.45;
-  }
+  .details-wrap{margin-top:28px}
+  .details-h{font-weight:800;font-size:22px;letter-spacing:-.01em;margin:0 0 14px;color:#16202e}
+  .tabs{display:flex;gap:8px;position:relative;z-index:1}
+  .tab{padding:11px 24px;font-family:inherit;font-weight:800;font-size:14px;border-radius:10px 10px 0 0;cursor:pointer;margin-bottom:-1px;border:1px solid #e6e8ec;background:#f6f7f8;color:#6b7480}
+  .tab.on{background:#fff;color:#16202e;border-bottom-color:#fff}
+  .tab-panel{border:1px solid #e6e8ec;border-radius:0 14px 14px 14px;padding:26px;background:#fff}
+  .desc{font-size:14.5px;line-height:1.65;color:#6b7480;margin:0 0 22px;max-width:820px}
+  .info-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  .info-card{border:1px solid #e6e8ec;border-radius:12px;padding:22px}
+  .info-card h3{font-weight:800;font-size:16px;margin:0 0 14px;color:#16202e}
+  .kv{display:flex;flex-direction:column;gap:10px;font-size:14px;color:#16202e;line-height:1.5}
+  .kv > div span{color:#97a0ab;font-weight:600}
+  .kv > div strong{font-weight:700}
 
-  /* Skeletons */
-  .skeleton{background:linear-gradient(90deg,#f5f5f5,#ececec,#f5f5f5);background-size:200% 100%;animation:shimmer 1.2s infinite}
-  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-  .skel-line{height:16px;border-radius:8px;margin:8px 0}
-  .skel-hero{height:420px;border-radius:12px;margin-bottom:10px}
+  .panels{display:grid;grid-template-columns:1fr;gap:24px;margin-top:24px}
+  .card{border:1px solid #e6e8ec;border-radius:16px;padding:26px}
+  .card h3{font-weight:800;font-size:18px;letter-spacing:-.01em;margin:0 0 12px;color:#16202e}
+  .pickup-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
 
-  /* ===== Manifest pagination (green themed) ===== */
-  .manifest-pagination{
-    margin-top:10px;
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-    justify-content:flex-end;
-    align-items:center;
-    font-size:13px;
-  }
-  .manifest-pagination button{
-    padding:8px 10px;
-    border-radius:10px;
-    border:1px solid var(--border);
-    background:#fff;
-    cursor:pointer;
-    font-size:12px;
-    font-weight:900;
-    transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
-  }
-  .manifest-pagination button:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
-  .manifest-pagination button.active{
-    background:var(--primary);
-    color:#fff;
-    border-color:var(--primary);
-  }
-  .manifest-pagination button:hover:not(.active){
-    background: rgba(29,122,89,.10);
-    border-color: rgba(10,52,38,.35);
-    color: var(--primary);
-  }
+  .manifest-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .manifest-page-size select{border:1px solid #dfe2e6;background:#fff;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:13px;color:#16202e;font-weight:600;cursor:pointer;outline:none}
+  table.specs{width:100%;border-collapse:collapse;border:1px solid #e6e8ec;border-radius:12px;overflow:hidden;font-size:13px}
+  table.specs thead th{background:#16202e;color:#fff;font-weight:700;font-size:11.5px;letter-spacing:.02em;text-transform:uppercase;text-align:left;padding:12px 14px}
+  table.specs tbody td{padding:11px 14px;border-bottom:1px solid #f1f2f4;color:#16202e;vertical-align:top}
+  table.specs tbody tr:last-child td{border-bottom:none}
+  .manifest-pagination{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px}
+  .manifest-pagination button{min-width:32px;height:32px;border-radius:8px;border:1px solid #e6e8ec;background:#fff;color:#16202e;font-weight:700;font-size:13px;cursor:pointer;padding:0 8px}
+  .manifest-pagination button.active{background:#16202e;border-color:#16202e;color:#fff}
+  .manifest-pagination button:disabled{opacity:.45;cursor:default}
+  #downloadManifestBtn{margin-top:16px}
 
-  .manifest-header{display:flex;justify-content:space-between;align-items:center;gap:10px}
-  .manifest-page-size{display:flex;align-items:center;gap:8px}
-  .manifest-page-size select{
-    padding:10px 10px;
-    border-radius:10px;
-    border:1px solid var(--border);
-    font-size:13px;
-    background:#fff;
-    font-weight:900;
-    outline:none;
-  }
-  .manifest-page-size select:focus{
-    border-color: rgba(29,122,89,.45);
-    box-shadow: 0 0 0 4px rgba(29,122,89,.12);
-  }
-
-  /* ===== Lightbox (keep, just rounding consistent) ===== */
-  .lightbox{
-    position:fixed; inset:0;
-    background:rgba(0,0,0,.86);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:16px;
-    z-index:9999;
-  }
+  .lightbox{position:fixed;inset:0;background:rgba(22,32,46,.82);display:none;align-items:center;justify-content:center;z-index:1000;padding:24px}
   .lightbox.open{display:flex}
-  .lightboxInner{
-    position:relative;
-    width:min(1100px, 100%);
-    height:min(86vh, 760px);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .lightbox img{
-    max-width:100%;
-    max-height:100%;
-    object-fit:contain;
-    border-radius:14px;
-    background:#111;
-    border:1px solid rgba(255,255,255,.10);
-  }
-  .lbBtn{
-    position:absolute;
-    top:50%;
-    transform:translateY(-50%);
-    width:44px;height:44px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.22);
-    background:rgba(0,0,0,.35);
-    color:#fff;
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;
-    user-select:none;
-  }
-  .lbBtn:hover{background:rgba(0,0,0,.55)}
-  .lbPrev{left:-6px}
-  .lbNext{right:-6px}
-  .lbClose{top:10px;right:10px;transform:none;width:40px;height:40px}
-  .lbCap{
-    position:absolute;
-    bottom:-34px;
-    left:0; right:0;
-    color:rgba(255,255,255,.88);
-    font-size:13px;
-    text-align:center;
-    font-weight:900;
-  }
-  @media(max-width:700px){
-    .lbPrev{left:6px}
-    .lbNext{right:6px}
-    .lbCap{bottom:-28px}
-  }
+  .lightboxInner{position:relative;max-width:92vw;max-height:88vh}
+  .lightbox img{max-width:92vw;max-height:88vh;border-radius:12px;display:block}
+  .lbBtn{position:absolute;width:42px;height:42px;border-radius:999px;border:none;background:rgba(255,255,255,.92);color:#16202e;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .lbClose{top:-14px;right:-14px}
+  .lbPrev{left:-14px;top:50%;transform:translateY(-50%)}
+  .lbNext{right:-14px;top:50%;transform:translateY(-50%)}
+  .lbCap{position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);color:#fff;font-size:13px;font-weight:600}
 
-  /* ===== ✅ Your requested green blocks (drop-in ready) ===== */
-  .detailsPanel{
-    background: var(--greenPanelBg);
-    border: 1px solid var(--greenPanelBd);
-    border-radius: 14px;
-    padding: 12px;
-    display: grid;
-    grid-template-columns: 140px 1fr 140px 1fr;
-    gap: 10px 14px;
-    align-items: start;
-  }
-  .pickupBox{
-    background: var(--greenPanelBg);
-    border: 1px solid var(--greenPanelBd);
-    border-radius: 14px;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  /* Mobile */
-  @media (max-width: 520px){
-    .page{padding:14px 14px 20px}
-    .lot-title{font-size:22px}
-    .hero{height:320px}
-    .skel-hero{height:320px}
-    .thumb{width:64px;height:64px}
-  }
+  @media (max-width:900px){.layout{grid-template-columns:1fr;gap:22px}.pickup-grid{grid-template-columns:1fr}}
+  @media (max-width:640px){.page{padding:20px 18px 32px}.info-cards{grid-template-columns:1fr}}
 </style>
 
 </head>
@@ -434,158 +122,117 @@
 
   <!-- Config + Auth -->
   <script src="/js/config.js"></script>
-  <script src="/js/auth.js" defer></script>
+  <script src="/js/auth.js?v=2" defer></script>
 
   <div class="page">
     <div class="breadcrumbs">
-      <div class="chip-back">
-        <a href="/product-buy.html"><i class="fa-solid fa-chevron-left"></i> Back to Browse</a>
-      </div>
+      <div class="chip-back"><a href="/index.html?type=buynow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg>Back to Buy Now</a></div>
     </div>
 
-    <div class="header">
-      <div>
-        <h1 class="lot-title" id="lotTitle">
-          <span class="skel-line skeleton" style="width:60%;display:inline-block"></span>
-        </h1>
-        <div class="lot-sub" id="lotSub">
-          <span class="skeleton skel-line" style="width:220px;display:inline-block;height:12px"></span>
-        </div>
-      </div>
-      <div class="chip">
-        <span id="lotStatusText">BUY-NOW</span>
-      </div>
-    </div>
+    <!-- title / status are populated by JS into the summary card below -->
+    <div class="header"><span id="lotStatusText">BUY-NOW</span></div>
 
     <div class="layout">
       <!-- Left: Gallery -->
       <div class="gallery">
-        <div class="hero" id="hero">
-          <div class="skel-hero skeleton" style="width:100%"></div>
-        </div>
-
-        <!-- Slider thumbs -->
+        <div class="hero" id="hero"><div class="skel-hero skeleton" style="width:100%"></div></div>
         <div class="thumbs-wrap" id="thumbsWrap" style="display:none;">
-          <button class="thumb-nav" id="thumbPrev" type="button" aria-label="Previous images">
-            <i class="fa-solid fa-chevron-left"></i>
-          </button>
-
-          <div class="thumbs-viewport">
-            <div class="thumbs-track" id="thumbsTrack"></div>
-          </div>
-
-          <button class="thumb-nav" id="thumbNext" type="button" aria-label="Next images">
-            <i class="fa-solid fa-chevron-right"></i>
-          </button>
+          <button class="thumb-nav" id="thumbPrev" type="button" aria-label="Previous images"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg></button>
+          <div class="thumbs-viewport"><div class="thumbs-track" id="thumbsTrack"></div></div>
+          <button class="thumb-nav" id="thumbNext" type="button" aria-label="Next images"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg></button>
         </div>
       </div>
 
-      <!-- Right: Buy-Now Summary -->
+      <!-- Right: Buy-Now summary -->
       <div class="summary">
-        <div class="row">
-          <div>
-            <div class="muted">Buy Now Price</div>
-            <div class="price" id="buyPrice">$—</div>
-          </div>
-          <div>
-            <span id="statusBadge" class="badge-status">AVAILABLE</span>
-          </div>
+        <div class="sum-titlerow">
+          <h1 class="lot-title" id="lotTitle"><span class="skel-line skeleton" style="width:60%;display:inline-block"></span></h1>
+          <span class="badge-status" id="statusBadge">AVAILABLE</span>
+        </div>
+        <div class="lot-sub" id="lotSub"></div>
+
+        <div class="row" style="border-bottom:1px solid #eef0f2;">
+          <div><div class="muted" style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#97a0ab;font-weight:700;">Buy Now Price</div><div class="price" id="buyPrice">$—</div></div>
         </div>
 
-        <div class="row">
-          <div class="muted">Lot ID</div>
-          <div id="lotId">—</div>
-        </div>
+        <div class="row"><div class="muted">Lot ID</div><div id="lotId">—</div></div>
+        <div class="row"><div class="muted">Category</div><div id="lotCategory">—</div></div>
+        <div class="row"><div class="muted">Available Qty</div><div id="availableQty">—</div></div>
 
-        <div class="row">
-          <div class="muted">Category</div>
-          <div id="lotCategory">—</div>
-        </div>
-
-        <div class="row">
-          <div class="muted">Available Qty</div>
-          <div id="availableQty">—</div>
-        </div>
-
-        <div>
-          <div class="muted">Select Quantity</div>
+        <div class="qty-block">
+          <div class="muted" style="font-size:12px;font-weight:700;color:#16202e;">Select quantity</div>
           <div class="qty-row">
             <input type="number" id="buyQty" min="1" value="1" />
             <span class="muted" id="qtyHelper"></span>
           </div>
         </div>
 
-        <div class="row">
-          <div class="muted">Order Total</div>
-          <div id="orderTotal" style="font-weight:700;">$—</div>
-        </div>
+        <div class="row"><div class="muted">Order Total</div><div id="orderTotal">$—</div></div>
 
         <button class="btn btn-primary btn-block" id="buyNowBtn">
-          <i class="fa-solid fa-cart-shopping"></i> Buy Now
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="18" cy="20" r="1.4"></circle><path d="M6 6L5 3H2"></path></svg>Buy Now
         </button>
-
         <div id="buyMessage"></div>
 
-        <div class="notice">
-          For Buy-Now orders, payment must be completed within the specified time.
-          New customers may be asked to complete additional verification as part of our security procedures.
+        <div class="notice">For Buy-Now orders, payment must be completed within the specified time. New customers may be asked to complete additional verification as part of our security procedures.</div>
+      </div>
+    </div>
+
+    <!-- Listing details tabs -->
+    <div class="details-wrap">
+      <h2 class="details-h">Listing details</h2>
+      <div class="tabs">
+        <button class="tab on" id="tabOverview" type="button">Overview</button>
+        <button class="tab" id="tabManifest" type="button">Manifest</button>
+      </div>
+      <div class="tab-panel">
+        <div id="panelOverview">
+          <p class="desc" id="description">Loading description…</p>
+          <div class="info-cards">
+            <div class="info-card">
+              <h3>About this listing</h3>
+              <div class="kv">
+                <div><span>Brand:</span> <strong id="specBrand">—</strong></div>
+                <div><span>Model:</span> <strong id="specModel">—</strong></div>
+                <div><span>SKU / Code:</span> <strong id="specSku">—</strong></div>
+              </div>
+            </div>
+            <div class="info-card">
+              <h3>Condition &amp; details</h3>
+              <div class="kv">
+                <div><span>Condition:</span> <strong id="specCondition">—</strong></div>
+                <div><span>Sold:</span> <strong>As-is, final sale</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panelManifest" class="hidden">
+          <div class="manifest-header">
+            <h3 style="margin:0;font-weight:800;font-size:16px;color:#16202e;">All products</h3>
+            <div class="manifest-page-size">
+              <label for="manifestPageSize" class="muted" style="font-size:12px;margin-right:6px;">Rows per page:</label>
+              <select id="manifestPageSize"><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="50">50</option></select>
+            </div>
+          </div>
+          <div id="manifestContainer"><div class="muted" style="font-size:14px;">Loading manifest…</div></div>
+          <button class="btn btn-primary" id="downloadManifestBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v5h5M14 3l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"></path><path d="M9 13h6M9 17h6"></path></svg>Download Manifest (Excel)</button>
         </div>
       </div>
     </div>
 
-    <!-- Lower panels -->
+    <!-- Pickup / terms -->
     <div class="panels">
       <div class="card">
-        <h3>Description</h3>
-        <div class="desc" id="description">Loading description…</div>
-
-        <h3 style="margin-top:20px">Specifications</h3>
-        <table class="specs">
-          <tbody>
-            <tr><th>Condition</th><td id="specCondition">—</td></tr>
-            <tr><th>Brand</th><td id="specBrand">—</td></tr>
-            <tr><th>Model</th><td id="specModel">—</td></tr>
-            <tr><th>SKU / Code</th><td id="specSku">—</td></tr>
-          </tbody>
-        </table>
-
-        <!-- Manifest -->
-        <div class="manifest-header" style="margin-top:20px;">
-          <h3 style="margin:0;">Manifest</h3>
-          <div class="manifest-page-size">
-            <label for="manifestPageSize" class="muted" style="font-size:12px;margin-right:4px;">
-              Rows per page:
-            </label>
-            <select id="manifestPageSize">
-              <option value="5" selected>5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-              <option value="50">50</option>
-            </select>
+        <div class="pickup-grid">
+          <div>
+            <h3>Pickup / Location</h3>
+            <div class="muted" style="font-size:14px;line-height:1.7;">Location: <span id="pickupLocation" style="color:#16202e;font-weight:700;">—</span><br/>Pickup Window: <span id="pickupWindow" style="color:#16202e;font-weight:700;">—</span></div>
           </div>
-        </div>
-
-        <div id="manifestContainer">
-          <div class="muted" style="font-size:14px;">Loading manifest…</div>
-        </div>
-
-        <button class="btn btn-primary" id="downloadManifestBtn" style="margin-top:10px;">
-          <i class="fa-solid fa-file-excel"></i> Download Manifest (Excel)
-        </button>
-      </div>
-
-      <div class="card">
-        <h3>Pickup / Location</h3>
-        <div class="muted">
-          Location: <span id="pickupLocation">—</span><br/>
-          Pickup Window: <span id="pickupWindow">—</span>
-        </div>
-
-        <h3 style="margin-top:20px">Terms</h3>
-        <div class="muted" style="font-size:14px;line-height:1.55">
-          All Buy-Now items are sold as-is. Please review the item details, manifest,
-          and terms before completing your purchase.
+          <div>
+            <h3>Terms</h3>
+            <div class="muted" style="font-size:14px;line-height:1.6;">All Buy-Now items are sold as-is. Please review the item details, manifest, and terms before completing your purchase.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -814,8 +461,8 @@
     async function loadProduct(){
       const id = getIdFromQuery();
       if(!id){
-        alert("Missing product id");
-        window.location.href = "/index.html";
+        LF.toast("Missing product id", 'error');
+        setTimeout(function(){ window.location.href = "/index.html"; }, 1400);
         return;
       }
 
@@ -825,7 +472,7 @@
         });
 
         if(!res.ok){
-          alert("Failed to load product");
+          LF.toast("Failed to load product", 'error');
           return;
         }
 
@@ -892,7 +539,7 @@
 
       } catch(e){
         console.error("Error loading product:", e);
-        alert("Error loading product");
+        LF.toast("Error loading product", 'error');
       }
     }
 
@@ -952,6 +599,7 @@
 	  
       msg.textContent = "Processing your order…";
       msg.style.color = "#4b5563";
+      const stopBusy = LF.busy(qs('#buyNowBtn'), 'Processing…');
 
       try{
         const res = await fetch(`${API_BASE_URL}/orders/buy-now`, {
@@ -971,9 +619,11 @@
           const txt = await res.text();
           msg.textContent = "❌ Failed to create order: " + txt;
           msg.style.color = "red";
+          stopBusy();
           return;
         }
 
+        // Keep the button busy through the redirect to checkout.
         msg.textContent = "✅ Order created successfully. Redirecting to checkout…";
         msg.style.color = "green";
 
@@ -985,6 +635,7 @@
         console.error("Error in Buy Now:", e);
         msg.textContent = "❌ Error processing your order.";
         msg.style.color = "red";
+        stopBusy();
       }
     }
 
@@ -1126,6 +777,21 @@
       wireGalleryControls();          // ✅ NEW (lightbox buttons)
       wireManifestPageSizeControl();
       loadProduct();
+    })();
+  </script>
+
+  <!-- Listing details tab toggle (Overview / Manifest) -->
+  <script>
+    (function(){
+      var to=document.getElementById('tabOverview'), tm=document.getElementById('tabManifest');
+      var po=document.getElementById('panelOverview'), pm=document.getElementById('panelManifest');
+      if(!to||!tm||!po||!pm) return;
+      function show(overview){
+        to.classList.toggle('on', overview); tm.classList.toggle('on', !overview);
+        po.classList.toggle('hidden', !overview); pm.classList.toggle('hidden', overview);
+      }
+      to.addEventListener('click', function(){ show(true); });
+      tm.addEventListener('click', function(){ show(false); });
     })();
   </script>
 </body>

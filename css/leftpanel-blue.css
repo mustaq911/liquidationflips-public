@@ -15,15 +15,15 @@
   --lp-radius: 18px;
 
   /* Theme (BLUE like index.html: --blue / --blue-2) */
-  --lp-accent:  #1f3b74;
-  --lp-accent-2:#274d9b;
+  --lp-accent:  #1F8B57;
+  --lp-accent-2:#177045;
 
   /* Derived */
   --lp-focus-bd: rgba(59,130,246,.70);
   --lp-focus-ring: rgba(59,130,246,.18);
 
-  --lp-chip-bg: rgba(31,59,116,.12);
-  --lp-chip-bd: rgba(31,59,116,.35);
+  --lp-chip-bg: rgba(31,139,87,.12);
+  --lp-chip-bd: rgba(31,139,87,.35);
 }
 
 /* Panel shell */

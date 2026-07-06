@@ -5,6 +5,12 @@
   <title>Liquidation Flips</title>
   <link href="/img/logo-small.jpg" rel="icon">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!-- Brand font: Hanken Grotesk (final design uses one sans family) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
   <!-- jQuery -->
@@ -18,713 +24,139 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 
   <style>
-    :root{
-      --panel:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --border:#e5e7eb;
-
-      --blue:#1f3b74;
-      --blue-2:#274d9b;
-
-      --green:#1d7a59;
-      --green-2:#176248;
-
-      --primary:#1f3b74;
-      --primary-2:#274d9b;
-
-      --shadow:0 10px 28px rgba(0,0,0,.08);
-      --shadow-soft:0 6px 18px rgba(0,0,0,.06);
-      --radius:14px;
-
-      /* Details Panel */
-      --chip-bg: rgba(29,122,89,.10);
-      --chip-bd: rgba(17,94,68,.35);
-      --chip-text: #0f2f25;
-    }
-
     *{box-sizing:border-box}
-    html,body{
-      margin:0;padding:0;
-      background: url("/img/hero-bg.jpg") top center / cover repeat-y fixed;
-      color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    a{text-decoration:none;color:inherit}
+    .hidden{display:none!important}
+    .lf-wrap{color:#16202e;background:#fff}
+    ::selection{background:#16202e;color:#fff}
+    .muted{color:#6b7480}
+    input::placeholder{color:#9aa1ab}
 
-    .page{max-width:1500px;margin:0 auto;padding:18px 20px 26px}
+    .lf-section{max-width:1400px;margin:0 auto}
+    .lf-hero-sec{padding:28px 28px 6px}
+    .lf-intro-sec{padding:36px 28px 8px}
+    .lf-list-sec{padding:24px 28px 0}
+    .lf-grid-sec{padding:0 28px 16px}
 
-    /* --- Top strip --- */
-    .strip{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow-soft);
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+    .lf-btn{transition:opacity .18s ease,border-color .18s ease,background .18s ease,color .18s ease}
+    .lf-btn:hover{opacity:.9}
+    .lf-btn:active{transform:translateY(1px)}
 
-    .brand{display:flex; align-items:center; gap:10px; min-width:220px;}
-    .brandText{line-height:1.1}
-    .brandText b{display:block;font-size:14px}
-    .brandText span{display:block;font-size:12px;color:var(--muted)}
+    /* Hero */
+    .lf-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .lf-eyebrow-rule{width:24px;height:1px;background:#1f8b57;display:inline-block}
+    .lf-eyebrow>span:last-child{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:#1f8b57}
+    .lf-hero-title{font-weight:800;font-size:clamp(23px,2.9vw,37px);line-height:1.08;letter-spacing:-.02em;margin:0 0 24px;color:#16202e;max-width:820px}
+    .lf-hero-title span{color:#1f8b57}
+    .lf-hero{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+    .lf-hero-sub{font-size:15px;line-height:1.6;color:#6b7480;margin:0 0 18px;max-width:480px}
+    .lf-hilite{min-height:60px}
+    .lf-hilite-row{display:flex;align-items:flex-start;gap:11px}
+    .lf-hilite-dot{flex-shrink:0;width:8px;height:8px;border-radius:999px;background:#1f8b57;margin-top:6px}
+    .lf-hilite-t{font-weight:700;font-size:16px;color:#16202e;line-height:1.3}
+    .lf-hilite-s{font-size:13.5px;color:#6b7480;line-height:1.5;margin-top:2px}
+    .lf-dots{display:flex;gap:6px;margin-top:16px}
+    .lf-dots button{height:7px;width:7px;border-radius:999px;border:none;cursor:pointer;padding:0;background:#d7dbe0;transition:width .35s ease,background .35s ease}
+    .lf-dots button.on{width:22px;background:#1f8b57}
+    .lf-heroimg{position:relative;aspect-ratio:3/1;border-radius:14px;overflow:hidden;background:#f3f4f6}
+    .lf-herolayer{position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat;transition:opacity .5s ease;opacity:0}
+    .lf-herolayer.on{opacity:1}
+    .lf-heroshade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,32,46,0) 50%,rgba(22,32,46,.5) 100%)}
+    .lf-heropill{position:absolute;left:16px;bottom:16px;display:inline-flex;align-items:center;gap:8px;background:#fff;color:#16202e;font-size:12px;font-weight:700;letter-spacing:.03em;padding:9px 14px;border-radius:999px}
+    .lf-heropill i{width:7px;height:7px;border-radius:999px;background:#1f8b57;display:inline-block}
 
-    .stripActions{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
-    .pill{
-      border:1px solid var(--border);
-      background:#fff;
-      padding:10px 14px;
-      border-radius:10px;
-      font-weight:800;
-      cursor:pointer;
-      transition:transform .08s ease, box-shadow .12s ease;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      min-height:40px;
-    }
-    .pill:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
-    .pill.primary{background:var(--primary);border-color:var(--primary);color:#fff}
-    .pill.primary:hover{background:var(--primary-2)}
-    .pill.success{background:var(--green);border-color:var(--green);color:#fff}
-    .pill.success:hover{background:var(--green-2)}
+    /* Intro */
+    .lf-intro-h{font-weight:800;font-size:24px;letter-spacing:-.01em;margin:0 0 4px;color:#16202e}
 
-    /* --- Hero --- */
-    .hero{margin:18px 0 12px;padding:4px 2px}
-    .hero h1{
-      margin:0;
-      font-size:40px;
-      letter-spacing:-.5px;
-      color: var(--blue);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    }
-    .hero p{margin:6px 0 0;color:var(--muted);font-size:16px}
+    /* Filter bar */
+    .lf-filter{background:#fff;border:1px solid #e6e8ec;border-radius:12px;padding:14px;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+    .lf-field{display:flex;flex-direction:column;gap:5px}
+    .lf-field.grow{flex:1;min-width:200px}
+    .lf-fieldcap{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#97a0ab;font-weight:700;padding-left:2px}
+    .lf-seg{display:flex;background:#f2f3f5;border-radius:9px;padding:3px;gap:2px}
+    .lf-segbtn{border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:7px;white-space:nowrap;background:transparent;color:#6b7480}
+    .lf-segbtn.is-on{background:#16202e;color:#fff}
+    .lf-searchwrap{position:relative}
+    .lf-searchwrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%)}
+    .lf-searchwrap input{width:100%;border:1px solid #dfe2e6;background:#fff;border-radius:9px;padding:10px 14px 10px 38px;font-family:inherit;font-size:14px;color:#16202e;outline:none}
+    .lf-select{border:1px solid #dfe2e6;background:#fff;border-radius:9px;padding:10px 14px;font-family:inherit;font-size:14px;color:#16202e;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7480' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+    .lf-viewtoggle{display:flex;background:#f2f3f5;border-radius:9px;padding:3px;gap:2px}
+    .lf-vbtn{border:none;cursor:pointer;width:36px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:transparent;color:#97a0ab}
+    .lf-vbtn.is-on,.lf-vbtn.active{background:#fff;color:#16202e;box-shadow:0 1px 3px rgba(22,32,46,.14)}
 
-    /* --- Filters panel --- */
-    .filters{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow-soft);
-      padding:14px;
-      display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap:12px;
-      align-items:end;
-    }
+    .lf-countrow{display:flex;align-items:center;justify-content:space-between;padding:18px 2px 20px;flex-wrap:wrap;gap:10px}
+    .lf-count{font-size:13.5px;color:#6b7480;font-weight:500}
+    .lf-dot{color:#c4cad0}
+    .lf-countright{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .lf-perpage{display:flex;align-items:center;gap:8px;font-size:13px;color:#6b7480;font-weight:500}
+    .lf-perpage select{border:1px solid #dfe2e6;background:#fff;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:13px;color:#16202e;font-weight:600;cursor:pointer;outline:none}
+    .lf-sortedby{font-size:13px;color:#6b7480;font-weight:500}
+    .lf-sortedby span{color:#16202e;font-weight:700}
 
-    .field{grid-column:span 3}
-    .field.w4{grid-column:span 4}
-    .field.w2{grid-column:span 2}
-    .field label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+    /* Grid / list */
+    #grid.lf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px;margin:0}
+    @media (min-width:1100px){ #grid.lf-grid{grid-template-columns:repeat(4,minmax(0,1fr))} }
+    #list.lf-listv{display:flex;flex-direction:column;gap:14px;margin:0}
+    #grid.lf-grid.hidden,#list.lf-listv.hidden{display:none}
 
-    select, input[type="text"]{
-      width:100%;
-      padding:11px 12px;
-      border:1px solid var(--border);
-      border-radius:10px;
-      background:#fff;
-      font-size:14px;
-      outline:none;
-    }
+    /* Cards */
+    .lf-card{transition:box-shadow .25s ease,border-color .25s ease,transform .25s ease}
+    .lf-card:hover{box-shadow:0 12px 32px -20px rgba(22,32,46,.4);border-color:#d6dade;transform:translateY(-2px)}
+    .lf-img{transition:transform .5s ease}
+    .lf-card:hover .lf-img{transform:scale(1.04)}
+    .lf-card-watch{background:rgba(255,255,255,.92);color:#16202e;border:1px solid #e6e8ec;backdrop-filter:blur(4px)}
+    .lf-card-watch.active{background:#1f8b57;color:#fff;border-color:#1f8b57}
+    .lf-watch-out{border:1px solid #dfe2e6;background:#fff;color:#16202e}
+    .lf-watch-out.active{border-color:#1f8b57;color:#1f8b57;background:rgba(31,139,87,.06)}
+    .lf-quick{border:1px solid #dfe2e6;background:#fff;color:#16202e}
 
-    .searchWrap{position:relative}
-    .searchWrap i{
-      position:absolute; right:12px; top:50%;
-      transform:translateY(-50%);
-      color:#9ca3af;
-      pointer-events:none;
-    }
-    .searchWrap input{padding-right:36px}
+    /* Bid-status chip — pill + coloured dot, bottom-left (matches the design 1:1) */
+    .lf-card.wonFrame{border-color:#1f8b57;box-shadow:0 0 0 1px #1f8b57,0 12px 32px -20px rgba(31,139,87,.5)}
+    .wonBadge{position:absolute;left:14px;bottom:14px;top:auto;right:auto;z-index:3;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:999px;box-shadow:0 4px 14px -6px rgba(22,32,46,.5)}
+    .wonBadge .wonDot{width:6px;height:6px;border-radius:999px;background:currentColor;flex:0 0 auto}
+    .wonBadge.isWinning,.wonBadge.isWon{background:#eef6f1;color:#1f8b57}
+    .wonBadge.isLosing{background:#fbeceb;color:#c0453f}
+    .listThumb .wonBadge{left:13px;bottom:13px;font-size:10.5px;gap:5px;padding:5px 10px}
 
-    .filtersActions{
-      grid-column:span 2;
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      align-items:flex-end;
-      flex-wrap:wrap;
-    }
-
-    .btn{
-      padding:11px 14px;
-      border-radius:10px;
-      border:1px solid var(--border);
-      background:#fff;
-      cursor:pointer;
-      font-weight:900;
-      min-height:42px;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      transition:transform .08s ease, box-shadow .12s ease;
-    }
-    .btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.06)}
-
-    .btn.apply{
-      background:var(--primary);
-      border-color:var(--primary);
-      color:#fff;
-    }
-    .btn.apply:hover{background:var(--primary-2)}
-
-    /* View toggle + Page size */
-    .viewTools{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-    .btn.toggle.active{
-      background:rgba(31,59,116,.10);
-      border-color:rgba(31,59,116,.35);
-      color:var(--primary);
-    }
-
-    .pageSizer{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      font-size:12px;
-      color:var(--muted);
-      font-weight:800;
-    }
-    .pageSizer select{
-      width:auto;
-      padding:10px 10px;
-      border-radius:10px;
-      border:1px solid var(--border);
-      background:#fff;
-      font-size:13px;
-      font-weight:800;
-    }
-
-    .metaLine{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin:14px 2px 10px;
-      color:var(--muted);
-      font-size:13px;
-    }
-    .dot{opacity:.7}
-
-    /* ✅ GRID = same as BuyNow (5 per row) */
-    .grid{
-      margin-top:10px;
-      display:grid;
-      gap:18px;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-    }
-    @media (max-width: 1400px){ .grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
-    @media (max-width: 1100px){ .grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
-    @media (max-width: 780px){ .grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
-    @media (max-width: 520px){ .grid{ grid-template-columns: 1fr; } }
-
-    .card{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      overflow:hidden;
-      box-shadow:var(--shadow-soft);
-      transition:transform .12s ease, box-shadow .12s ease;
-      display:flex;
-      flex-direction:column;
-      min-height:380px;
-    }
-    .card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-
-    .thumb{position:relative;height:190px;background:#eef2f7;overflow:hidden}
-    .thumb img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
-
-    .tag{
-      position:absolute;
-      left:12px; top:12px;
-      padding:7px 10px;
-      border-radius:10px;
-      font-weight:900;
-      font-size:12px;
-      letter-spacing:.5px;
-      color:#fff;
-      text-transform:uppercase;
-      background:var(--primary);
-    }
-
-    /* remove overlay countdown from thumbnail */
-    .countdown{ display:none !important; }
-
-    .body{
-      padding:14px 14px 10px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      flex:1;
-    }
-
-    .title2{
-      font-size:18px;
-      font-weight:950;
-      line-height:1.2;
-      margin:0;
-      min-height:44px;
-    }
-
-    .submeta{
-      color:var(--muted);
-      font-size:12px;
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    .price{
-      font-size:22px;
-      font-weight:950;
-      color:var(--primary);
-      margin-top:2px;
-    }
-
-    .footline{
-      color:var(--muted);
-      font-size:12px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-top:auto;
-    }
-
-    .actions{
-      padding:12px 14px 14px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .actions .btn{flex:1;justify-content:center}
-    .btn.primaryAction{
-      background:var(--primary);
-      border-color:var(--primary);
-      color:#fff;
-    }
-    .btn.primaryAction:hover{background:var(--primary-2)}
-
-    /* ✅ Quick Bid button */
-    .btn.quickBid{
-      background: rgba(31,59,116,.10);
-      border-color: rgba(31,59,116,.35);
-      color: var(--primary);
-    }
-    .btn.quickBid:hover{
-      background: rgba(31,59,116,.16);
-    }
-    .qbMsg{
-      margin-top:8px;
-      font-size:12px;
-      font-weight:900;
-      color: var(--muted);
-      text-align:center;
-    }
-    .qbMsg.ok{ color:#0f7a3d; }
-    .qbMsg.err{ color:#c1121f; }
-
-    /* ✅ LIST VIEW */
-    .list{
-      margin-top:10px;
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-    }
-
-    .listCard{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow-soft);
-      overflow:hidden;
-      display:grid;
-      grid-template-columns: 360px 1fr 320px;
-      gap:16px;
-      padding:14px;
-      align-items:stretch;
-    }
-
-    .listThumb{
-      position:relative;
-      background:#eef2f7;
-      border-radius:12px;
-      overflow:hidden;
-      min-height:210px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      padding:10px;
-    }
-
-    .listMainImg{
-      width:100%;
-      height:210px;
-      border-radius:10px;
-      overflow:hidden;
-      background:#e5e7eb;
-      border:1px solid rgba(0,0,0,.06);
-    }
-    .listMainImg img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-      cursor:pointer;
-    }
-
-    .thumbStrip{
-      display:flex;
-      gap:8px;
-      overflow:auto;
-      padding-bottom:2px;
-    }
-    .thumbStrip::-webkit-scrollbar{height:8px}
-    .thumbStrip::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:10px}
-
-    .thumbMini{
-      width:62px;
-      height:44px;
-      border-radius:10px;
-      overflow:hidden;
-      border:2px solid transparent;
-      background:#e5e7eb;
-      flex:0 0 auto;
-      cursor:pointer;
-    }
-    .thumbMini img{width:100%;height:100%;object-fit:cover;display:block}
-    .thumbMini.active{
-      border-color: rgba(31,59,116,.70);
-      box-shadow: 0 0 0 2px rgba(31,59,116,.15);
-    }
-
-    .listThumb .tag{left:18px; top:18px; position:absolute; z-index:2;}
-    .listThumb .countdown{right:18px; bottom:18px; position:absolute; z-index:2; display:inline-flex !important;}
-
-    .listMain{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      padding:4px 6px 4px 4px;
-      min-width:0;
-    }
-
-    .listTitle{
-      font-size:22px;
-      font-weight:950;
-      line-height:1.15;
-      margin:0;
-      letter-spacing:-.2px;
-    }
-
-    .detailsPanel{
-      background: rgba(31,59,116,.10);
-      border: 1px solid rgba(31,59,116,.35);
-      color: var(--primary);
-      border-radius: 14px;
-      padding: 12px;
-      display: grid;
-      grid-template-columns: 140px 1fr 140px 1fr;
-      gap: 10px 14px;
-      align-items: start;
-    }
-    .detailsItem{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      min-width:0;
-      line-height:1.35;
-    }
-    .detailsItem i{
-      color: var(--blue);
-      opacity:.95;
-      margin-top:2px;
-      flex:0 0 auto;
-    }
-    .detailsItem .k{
-      font-size:12px;
-      color: var(--muted);
-      font-weight:900;
-      white-space:nowrap;
-    }
-    .detailsItem .v{
-      font-size:13px;
-      color: var(--blue);
-      font-weight:900;
-      min-width:0;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .detailsItem .v.wrap{
-      white-space:normal;
-      overflow:visible;
-      text-overflow:clip;
-    }
-    @media (max-width: 1100px){
-      .detailsPanel{ grid-template-columns: 120px 1fr; }
-    }
-
-    .listPriceRow{
-      margin-top:auto;
-      display:flex;
-      gap:14px;
-      align-items:baseline;
-      flex-wrap:wrap;
-      padding-top:2px;
-    }
-    .listPrice{
-      font-size:28px;
-      font-weight:950;
-      color:var(--primary);
-      letter-spacing:-.3px;
-    }
-    .listNote{
-      color:var(--muted);
-      font-size:13px;
-      font-weight:900;
-    }
-
-    .listRight{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      align-items:stretch;
-      justify-content:flex-start;
-      padding:4px 6px 4px 0;
-    }
-
-    .pickupBox{
-      background: rgba(31,59,116,.10);
-      border: 1px solid rgba(31,59,116,.35);
-      border-radius: 14px;
-      padding: 12px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .pickupLine{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      color: var(--muted);
-      font-size:13px;
-      font-weight:900;
-      line-height:1.35;
-    }
-    .pickupLine i{color:var(--blue);margin-top:2px}
-    .pickupLine b{color:var(--text)}
-    .listRight .btn{width:100%;justify-content:center}
+    /* Quick bid message */
+    .qbMsg{margin-top:2px;font-size:12px;font-weight:700;text-align:center;color:#6b7480}
+    .qbMsg.ok{color:#1f8b57}
+    .qbMsg.err{color:#c0453f}
 
     /* Skeleton */
-    .skeleton{
-      background:linear-gradient(90deg,#f5f5f5,#ececec,#f5f5f5);
-      background-size:200% 100%;
-      animation:shimmer 1.2s infinite
-    }
-    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .skeleton{background:linear-gradient(100deg,#eef0f2 30%,#f6f7f8 50%,#eef0f2 70%);background-size:200% 100%;animation:lfsk 1.2s ease-in-out infinite}
+    @keyframes lfsk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .card.skel{background:#fff;border:1px solid #e6e8ec;border-radius:14px;overflow:hidden}
     .card.skel .thumb{height:180px}
     .card.skel .line{height:12px;border-radius:8px;margin:10px 14px}
     .card.skel .line.w60{width:60%}
     .card.skel .line.w40{width:40%}
 
-    /* Pagination */
-    .pagination{
-      margin:18px 0 6px;
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      align-items:center
-    }
-    .pagination .btn{min-width:44px;justify-content:center}
-    .hidden{display:none!important}
-
-    /* Owl Carousel banners */
-    #owl-demo{display:block;margin:18px 0 20px;}
-    #owl-demo .slide{
-      display:block;
-      border-radius:14px;
-      overflow:hidden;
-      border:1px solid var(--border);
-      box-shadow:0 6px 18px rgba(0,0,0,.08);
-      background:#fff;
-    }
-    #owl-demo img{
-      width:100%;
-      height:220px;
-      object-fit:cover;
-      display:block;
-    }
-    @media(max-width:980px){ #owl-demo img{ height:180px; } }
-    @media(max-width:520px){ #owl-demo img{ height:150px; } }
-    #owl-demo .owl-nav button{
-      position:absolute;
-      top:50%;
-      transform:translateY(-50%);
-      width:38px;
-      height:38px;
-      border-radius:50%;
-      background:#fff !important;
-      border:1px solid rgba(0,0,0,.1) !important;
-      box-shadow:0 6px 14px rgba(0,0,0,.15);
-    }
-    #owl-demo .owl-nav button.owl-prev{ left:-12px; }
-    #owl-demo .owl-nav button.owl-next{ right:-12px; }
-    #owl-demo .owl-nav span{ font-size:24px; }
+    /* Pager */
+    .lf-pager{display:flex;align-items:center;justify-content:center;gap:12px;padding:38px 0 8px}
+    .lf-pagebtn{width:38px;height:38px;border-radius:9px;border:1px solid #e6e8ec;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#16202e}
+    .lf-pagebtn-on{border:none;background:#16202e;color:#fff}
+    .lf-pagebtn:disabled{opacity:.45;cursor:default}
+    .lf-pageinfo{font-size:13.5px;color:#6b7480;font-weight:600}
+    .lf-pageinfo span{color:#16202e;font-weight:700}
 
     /* Responsive */
-    @media (max-width: 1200px){
-      .listCard{grid-template-columns: 320px 1fr 300px;}
+    @media (max-width:820px){.lf-hero{grid-template-columns:1fr!important;gap:20px!important}}
+    @media (max-width:880px){.lf-listrow{flex-direction:column!important}.lf-listrow>div:first-child{width:100%!important;height:200px}.lf-listrow .lf-side{width:100%!important;border-left:none!important;border-top:1px solid #e6e8ec}.lf-metagrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+    /* Inventory filter — tidy for tablet/phone so it doesn't feel cluttered */
+    @media (max-width:900px){
+      .lf-filter{align-items:stretch;gap:10px}
+      .lf-field{flex:1 1 calc(50% - 5px)}              /* ~2 controls per row on tablet */
+      .lf-field.grow{flex-basis:100%;order:-1}          /* search: full width, first */
+      .lf-seg{width:100%}.lf-seg .lf-segbtn{flex:1}
+      .lf-select{width:100%}
+      .lf-viewtoggle{width:100%;justify-content:center}
     }
-    @media (max-width: 980px){
-      .field{grid-column:span 6}
-      .field.w4{grid-column:span 12}
-      .filtersActions{grid-column:span 12; justify-content:flex-end}
-      .hero h1{font-size:32px}
-
-      .listCard{grid-template-columns: 1fr; }
-      .listRight{flex-direction:row; gap:10px; align-items:stretch}
-      .pickupBox{flex:1}
-      .listRight .btn{flex:1}
+    @media (max-width:560px){
+      .lf-field{flex-basis:100%}                         /* stack every control on phone */
+      .lf-field-view{display:none}                       /* grid by default; hide grid/list toggle */
+      .lf-countrow{gap:8px}
     }
-    @media (max-width: 520px){
-      .strip{flex-direction:column; align-items:stretch}
-      .stripActions{justify-content:stretch}
-      .stripActions .pill{width:100%; justify-content:center}
-      .hero h1{font-size:28px}
-      .listRight{flex-direction:column}
-      .detailsPanel{grid-template-columns: 1fr;}
-    }
-
-    /* ✅ Auction time box */
-    .timeBox{
-      background: rgba(31,59,116,.10);
-      border: 1px solid rgba(31,59,116,.35);
-      border-radius: 14px;
-      padding: 12px;
-      height:70px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-    }
-
-    .timeLine{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      color: var(--blue);
-      font-size:16px;
-      font-weight:900;
-      line-height:1.2;
-      text-align:center;
-    }
-    .timeLine i{color:var(--blue);margin-top:2px}
-    .timeLine b{color:var(--text)}
-
-    /* ✅ Bid + Watchlist equal width */
-    .btn.watchBtn{
-      flex:1;
-      width:100%;
-      padding:11px 14px;
-      justify-content:center;
-      background:#fff;
-      border-color: rgba(31,59,116,.35);
-      color: var(--primary);
-      gap:8px;
-    }
-
-    .btn.watchBtn:hover{
-      background: rgba(31,59,116,.10);
-    }
-
-    .btn.watchBtn.active{
-      background: rgba(29,122,89,.10);
-      border-color: rgba(29,122,89,.35);
-      color: var(--green);
-    }
-
-    /* ✅ WON frame + badge */
-    .card.wonFrame{
-      border: 3px solid rgba(29,122,89,.85);
-      box-shadow: 0 10px 28px rgba(29,122,89,.18);
-    }
-
-    .listCard.wonFrame{
-      border: 2px solid rgba(29,122,89,.85);
-      box-shadow: 0 10px 28px rgba(29,122,89,.18);
-    }
-
-    .wonBadge{
-      position:absolute;
-      right:12px;
-      top:12px;
-      z-index:3;
-      padding:7px 10px;
-      border-radius:10px;
-      font-weight:950;
-      font-size:12px;
-      letter-spacing:.4px;
-      color:#fff;
-      text-transform:uppercase;
-      background: var(--green);
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-
-    .listThumb .wonBadge{
-      right:18px;
-      top:18px;
-    }
-
-    /* ✅ small inline countdown badge used in LIST (grid keeps hidden) */
-    .countdownBadge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:7px 10px;
-      border-radius:10px;
-      font-weight:900;
-      font-size:12px;
-      color:#fff;
-      background:rgba(31,59,116,.95);
-      box-shadow:0 8px 18px rgba(0,0,0,.12);
-      white-space:nowrap;
-    }
-	
-	
-	/*  Coming-soon Flag */
-	.tag.comingSoonTag {
-	  background: #f59e0b;
-	  color: #111827;
-	}
-
-	.comingSoonNote {
-	  background: rgba(245,158,11,.14);
-	  border: 1px solid rgba(245,158,11,.45);
-	  color: #92400e;
-	  border-radius: 12px;
-	  padding: 10px 12px;
-	  font-size: 13px;
-	  font-weight: 900;
-	  text-align: center;
-	}
-	
-	
+    @media (max-width:640px){.lf-hero-sec{padding:24px 18px 6px}.lf-list-sec{padding:20px 18px 0}.lf-grid-sec{padding:0 18px 16px}.lf-intro-sec{padding:28px 18px 4px}}
   </style>
 </head>
 
@@ -736,7 +168,7 @@
 
   <!-- CONFIG + AUTH -->
   <script src="/js/config.js"></script>
-  <script src="/js/auth.js" defer></script>
+  <script src="/js/auth.js?v=2" defer></script>
 
   <!-- Owl init -->
   <script>
@@ -829,121 +261,131 @@
 	
   </script>
 
-  <div class="page">
+  <div class="page lf-wrap">
 
-    <!-- Header strip -->
-    <div class="strip">
-      <a href="/index.html" class="brand-link" aria-label="Go to Browse Auctions">
-        <div class="brand">
-          <span class="chip-logo">
-            <img src="/img/logo.jpg" alt="Liquidation Flips">
-          </span>
-          <div class="brandText">
-            <b>LIQUIDATION FLIPS</b>
-            <span>Bid Auctions • Buy Now</span>
+    <!-- ===================== HERO ===================== -->
+    <section class="lf-section lf-hero-sec">
+      <div class="lf-eyebrow">
+        <span class="lf-eyebrow-rule"></span>
+        <span>Canada&rsquo;s liquidation marketplace</span>
+      </div>
+      <h1 class="lf-hero-title">Brand-name overstock &amp; returns — <span>bid live or buy now.</span></h1>
+
+      <div class="lf-hero">
+        <div>
+          <p class="lf-hero-sub">Canada&rsquo;s marketplace for wholesale lots, customer returns and overstock. Bid live or buy now — shipped fast, coast to coast.</p>
+          <!-- TODO(backend): hero highlights are static marketing slides (rotated client-side) -->
+          <div class="lf-hilite">
+            <div class="lf-hilite-row">
+              <span class="lf-hilite-dot"></span>
+              <div>
+                <div class="lf-hilite-t" id="heroHiliteT">Up to 70% off retail</div>
+                <div class="lf-hilite-s" id="heroHiliteS">Tested electronics, appliances and home goods from trusted Canadian sellers.</div>
+              </div>
+            </div>
+            <div class="lf-dots" id="heroDots"></div>
           </div>
         </div>
-      </a>
-
-      <div class="stripActions">
-        <button id="refreshBtn" class="pill">
-          <i class="fa-solid fa-rotate"></i> Show All
-        </button>
-
-        <button class="pill primary view-nav" data-target="auction">
-          <i class="fa-solid fa-gavel"></i> Auction
-        </button>
-        <button class="pill success view-nav" data-target="buynow">
-          <i class="fa-solid fa-cart-shopping"></i> Buy Now
-        </button>
+        <div class="lf-heroimg" id="heroImg"></div>
       </div>
-    </div>
+    </section>
 
-    <!-- owl-carousel -->
-    <div id="owl-demo" class="owl-carousel owl-theme">
-      <!-- <a class="slide" href="#"><img src="/img/slides/slide-1.jpeg" alt="Slide 1"></a>
-      <a class="slide" href="#"><img src="/img/slides/slide-2.jpeg" alt="Slide 2"></a>
-      <a class="slide" href="#"><img src="/img/slides/slide-3.jpeg" alt="Slide 3"></a>
-      <a class="slide" href="#"><img src="/img/slides/slide-4.jpeg" alt="Slide 4"></a>
-      <a class="slide" href="#"><img src="/img/slides/slide-5.jpeg" alt="Slide 5"></a>
-      <a class="slide" href="#"><img src="/img/slides/slide-6.jpeg" alt="Slide 6"></a> -->
-    </div>
+    <!-- ===================== INTRO ===================== -->
+    <section id="browse" class="lf-section lf-intro-sec">
+      <h2 class="lf-intro-h">Browse auctions &amp; buy-now deals</h2>
+    </section>
 
-    <!-- Hero -->
-    <div class="hero">
-      <h1>Browse Auctions &amp; Buy-Now Deals</h1>
-      <p>Fast search. Easy filters. Clean listings.</p>
-    </div>
-
-    <!-- Filters -->
-    <div class="filters">
-      <div class="field w2">
-        <label for="typeSelect">Type</label>
-        <select id="typeSelect">
-          <option value="all">Auction + Buy Now</option>
-          <option value="auction" selected>Auction</option>
-          <option value="buynow">Buy Now</option>
-        </select>
-      </div>
-
-      <div class="field w2">
-        <label for="categorySelect">Category</label>
-        <select id="categorySelect" name="categoryId"></select>
-      </div>
-
-      <div class="field w4">
-        <label for="searchBox">Search</label>
-        <div class="searchWrap">
-          <input id="searchBox" type="text" placeholder="Search items..." />
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </div>
-      </div>
-
-      <div class="field w2">
-        <label for="sortSelect">Sort</label>
-        <select id="sortSelect">
-          <option value="endingSoon">Ending soon</option>
-          <option value="newlyListed">Newly listed</option>
-          <option value="priceLowHigh">Bid: Low to High</option>
-          <option value="priceHighLow">Bid: High to Low</option>
-        </select>
-      </div>
-
-      <div class="filtersActions">
-        <div class="viewTools">
-          <button type="button" class="btn toggle active" id="gridViewBtn" aria-pressed="true">
-            <i class="fa-solid fa-border-all"></i> Grid
-          </button>
-          <button type="button" class="btn toggle" id="listViewBtn" aria-pressed="false">
-            <i class="fa-solid fa-list"></i> List
-          </button>
-
-          <div class="pageSizer">
-            <label for="pageSizeSelect">Items</label>
-            <select id="pageSizeSelect">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="30">30</option>
-            </select>
+    <!-- ===================== FILTER BAR ===================== -->
+    <section id="listings" class="lf-section lf-list-sec">
+      <div class="lf-filter">
+        <label class="lf-field">
+          <span class="lf-fieldcap">Type</span>
+          <div class="lf-seg" id="typeTabs">
+            <button type="button" class="lf-segbtn is-on" data-tab="all">All</button>
+            <button type="button" class="lf-segbtn" data-tab="auction">Auctions</button>
+            <button type="button" class="lf-segbtn" data-tab="buynow">Buy Now</button>
           </div>
+        </label>
 
-          <button id="applyBtn" class="btn apply"><i class="fa-solid fa-filter"></i> Apply</button>
+        <label class="lf-field grow">
+          <span class="lf-fieldcap">Search</span>
+          <div class="lf-searchwrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa1ab" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+            <input id="searchBox" type="text" placeholder="Search lots, brands, categories…" />
+          </div>
+        </label>
+
+        <label class="lf-field">
+          <span class="lf-fieldcap">Category</span>
+          <select id="categorySelect" name="categoryId" class="lf-select"></select>
+        </label>
+
+        <label class="lf-field">
+          <span class="lf-fieldcap">Warehouse</span>
+          <select id="warehouseSelect" class="lf-select"><option value="all">All Warehouses</option></select>
+        </label>
+
+        <label class="lf-field">
+          <span class="lf-fieldcap">Sort by</span>
+          <select id="sortSelect" class="lf-select">
+            <option value="endingSoon" selected>Ending soonest</option>
+            <option value="newlyListed">Newest first</option>
+            <option value="priceLowHigh">Price: low to high</option>
+            <option value="priceHighLow">Price: high to low</option>
+            <option value="mostBids">Most bids</option>
+          </select>
+        </label>
+
+        <label class="lf-field lf-field-view">
+          <span class="lf-fieldcap">View</span>
+          <div class="lf-viewtoggle">
+            <button type="button" id="gridViewBtn" class="lf-vbtn is-on" aria-pressed="true" title="Grid view">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+            </button>
+            <button type="button" id="listViewBtn" class="lf-vbtn" aria-pressed="false" title="List view">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"></path></svg>
+            </button>
+          </div>
+        </label>
+      </div>
+
+      <div class="lf-countrow">
+        <div class="lf-count"><span id="metaInfo">0 lots</span> <span class="lf-dot">·</span> <span id="pageInfoInline">Page 1 of 1</span></div>
+        <div class="lf-countright">
+          <div class="lf-perpage">Show
+            <select id="pageSizeSelect"><option value="12" selected>12</option><option value="24">24</option><option value="48">48</option></select>
+            per page
+          </div>
+          <div class="lf-sortedby">Sorted by <span id="sortLabel">Ending soonest</span></div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="metaLine">
-      <div><span id="metaInfo">0 items</span> <span class="dot">•</span> <span id="pageInfoInline">Page 1</span></div>
-      <div class="muted" id="wsStatus"></div>
-    </div>
+    <!-- ===================== GRID / LIST ===================== -->
+    <section class="lf-section lf-grid-sec">
+      <div id="grid" class="lf-grid"></div>
+      <div id="list" class="lf-listv hidden"></div>
 
-    <div id="grid" class="grid"></div>
-    <div id="list" class="list hidden"></div>
+      <div class="lf-pager hidden" id="pagination">
+        <button class="lf-pagebtn" id="prevPage" aria-label="Previous">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg>
+        </button>
+        <span class="lf-pageinfo">Page <span id="pageInfo">1</span></span>
+        <button class="lf-pagebtn lf-pagebtn-on" id="nextPage" aria-label="Next">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg>
+        </button>
+      </div>
+    </section>
 
-    <div class="pagination hidden" id="pagination">
-      <button class="btn" id="prevPage"><i class="fa-solid fa-chevron-left"></i></button>
-      <span class="muted" id="pageInfo">Page 1</span>
-      <button class="btn" id="nextPage"><i class="fa-solid fa-chevron-right"></i></button>
+    <!-- Hidden legacy elements kept so existing JS keeps working -->
+    <div class="hidden" aria-hidden="true">
+      <span id="wsStatus"></span>
+      <div id="owl-demo" class="owl-carousel owl-theme"></div>
+      <select id="typeSelect"><option value="all" selected>Auction + Buy Now</option><option value="auction">Auction</option><option value="buynow">Buy Now</option></select>
+      <button id="applyBtn" type="button">Apply</button>
+      <button id="refreshBtn" type="button">All</button>
+      <button class="view-nav" data-target="auction" type="button">Auction</button>
+      <button class="view-nav" data-target="buynow" type="button">Buy Now</button>
     </div>
   </div>
 
@@ -978,7 +420,7 @@
 
     const wsStatus = $('#wsStatus');
 
-    let PAGE_SIZE = 10;
+    let PAGE_SIZE = 12;
     let VIEW_MODE = 'grid';
 
     let ALL_PRODUCTS = [];
@@ -1245,6 +687,43 @@
     // ✅ Local cache so UI can toggle immediately (no extra GET needed)
     const WATCHED_SET = new Set();
 
+    // ✅ Product ids the signed-in user has bid on — powers the Winning/Losing
+    //    status badge. Seeded from /bids/my-bids on load, kept fresh on quick-bid.
+    const MY_BID_SET = new Set();
+
+    async function addProductToCart(productId, quantity = 1){
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+      if(!token || !userid) throw new Error('not_logged_in');
+
+      const res = await fetch(`${API_BASE_URL}/orders/buy-now`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: parseInt(productId, 10),
+          userId: parseInt(userid, 10),
+          quantity: parseInt(quantity, 10) || 1
+        })
+      });
+
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error(t || 'cart_add_failed');
+      }
+
+      const ct = res.headers.get('content-type') || '';
+      return ct.includes('application/json') ? res.json() : true;
+    }
+
+    function setCartButtonState(btn, html, disabled){
+      if(!btn) return;
+      btn.innerHTML = html;
+      btn.disabled = !!disabled;
+    }
+
     async function loadMyWatchlist(){
       if(!isLoggedIn()) return;
 
@@ -1263,6 +742,30 @@
         });
       }catch(e){
         console.warn('watchlist load failed', e);
+      }
+    }
+
+    // Seed MY_BID_SET with every product the user has bid on, so cards can show
+    // the correct Winning / Losing / Won status on first paint.
+    async function loadMyBids(){
+      if(!isLoggedIn()) return;
+
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+      try{
+        const res = await fetch(`${API_BASE_URL}/bids/my-bids/${parseInt(userid)}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if(!res.ok) return;
+
+        const data = await res.json();
+        (Array.isArray(data) ? data : []).forEach(entry => {
+          const pid = entry?.product?.id ?? entry?.productId;
+          if(pid != null) MY_BID_SET.add(Number(pid));
+        });
+      }catch(e){
+        console.warn('my-bids load failed', e);
       }
     }
 
@@ -1300,6 +803,16 @@
       window.location.href = `/product-view.html?id=${id}`;
     }
 
+    // Smooth-flow routing: auctions → bidding page, buy-now → buy-now page.
+    function navigateForProduct(p){
+      if (p && p._kind === 'buynow'){
+        window.location.href = `/product-buynow.html?id=${p.id}`;
+      } else {
+        window.location.href = `/product-view.html?id=${p.id}`;
+      }
+    }
+    function isBuyNow(p){ return p && p._kind === 'buynow'; }
+
     // ==== Data Fetch ====
     async function loadAllCategories(){
       try{
@@ -1334,34 +847,59 @@
       }
     }
 
+    // Tag every product with its kind so cards + routing can branch.
+    function tagKind(arr, kind){
+      return (Array.isArray(arr) ? arr : []).map(p => { p._kind = kind; return p; });
+    }
+
+    // Interleave auctions + buy-now so both appear "in smooth flow"
+    // (~2 auctions : 1 buy-now, like the mock). Used as the default order.
+    function mergeSmooth(a, b){
+      const out = []; let i = 0, j = 0;
+      while (i < a.length || j < b.length){
+        if (i < a.length) out.push(a[i++]);
+        if (i < a.length) out.push(a[i++]);
+        if (j < b.length) out.push(b[j++]);
+      }
+      return out;
+    }
+
+    // ✅ Smooth flow: load ongoing AUCTIONS and BUY-NOW items together.
     async function fetchAllProducts(){
       try{
         showSkeletons();
-        const res = await fetch(`${API_BASE_URL}/products/get/allAuctionOngoin`);
-        if(!res.ok) throw new Error('Unauthorized');
-        const data = await res.json();
-        ALL_PRODUCTS = Array.isArray(data) ? data : (data.content || []);
+
+        // Both endpoints already exist (auctions = homepage, buynow = Buy Now page).
+        const [aRes, bRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/products/get/allAuctionOngoin`),
+          fetch(`${API_BASE_URL}/products/buynow`).catch(() => null)
+        ]);
+
+        if(!aRes.ok) throw new Error('Unauthorized');
+        const aData = await aRes.json();
+        const auctions = tagKind(Array.isArray(aData) ? aData : (aData.content || []), 'auction');
+
+        let buynow = [];
+        if (bRes && bRes.ok){
+          const bData = await bRes.json();
+          buynow = tagKind(Array.isArray(bData) ? bData : (bData.content || []), 'buynow');
+        }
+
+        ALL_PRODUCTS = mergeSmooth(auctions, buynow);
         applyFilters();
       }catch(err){
         console.error('Failed to load products', err);
-        alert('You must be logged in to view products.');
+        LF.toast('You must be logged in to view products.', 'error');
         window.location.href = "/index.html";
       }
     }
 
+    // Category filtering is done client-side now (data for both kinds is already
+    // loaded), which keeps the auction + buy-now flow intact. Kept as a thin
+    // wrapper so existing callers still work.
     async function fetchByCategory(categoryId){
-      try{
-        showSkeletons();
-        const res = await fetch(`${API_BASE_URL}/products/get/allAuctionOngoin?categoryId=${categoryId}`);
-        if(!res.ok) throw new Error('Unauthorized');
-        const data = await res.json();
-        ALL_PRODUCTS = Array.isArray(data) ? data : (data.content || []);
-        applyFilters();
-      }catch(err){
-        console.error('Failed to load category products', err);
-        alert('You must be logged in to view products.');
-        window.location.href = "/index.html";
-      }
+      categorySelect.value = categoryId || '';
+      applyFilters();
     }
 
     // ==== Skeleton ====
@@ -1458,19 +996,35 @@
 	  const myId = localStorage.getItem('userid');
 	  const iWon = (myId && wonUserId != null && String(wonUserId) === String(myId));
 
-	  // frame
+	  // Bid status for THIS user on this card:
+	  //  - winning: you're the current highest bidder while the auction is still live
+	  //  - won:     the auction ended and you're the highest bidder
+	  //  - losing:  you've bid on this item but someone else is now ahead (still live)
+	  const endIso = containerNode.dataset.auctionEnd || containerNode.getAttribute('data-auction-end') || '';
+	  const ended  = isAuctionEnded(endIso);
+	  const iBid   = !!myId && MY_BID_SET.has(Number(pid));
+	  let status = null;
+	  if (iWon)                status = ended ? 'won' : 'winning';
+	  else if (iBid && !ended) status = 'losing';
+
+	  // frame (green highlight only while you're ahead)
 	  containerNode.classList.toggle('wonFrame', !!iWon);
 
-	  // badge
+	  // badge (rendered bottom-left; never overlaps the top-right watchlist button)
 	  let badge = containerNode.querySelector('.wonBadge');
-	  if (iWon){
+	  if (status){
 		if (!badge){
 		  badge = document.createElement('div');
-		  badge.className = 'wonBadge';
-		  badge.innerHTML = `<i class="fa-solid fa-trophy"></i> Won`;
 		  const thumb = containerNode.querySelector('.thumb') || containerNode.querySelector('.listThumb') || containerNode;
 		  thumb.appendChild(badge);
 		}
+		const meta = {
+		  won:     { cls:'wonBadge isWon',     label:'Won' },
+		  winning: { cls:'wonBadge isWinning', label:'Winning' },
+		  losing:  { cls:'wonBadge isLosing',  label:'Outbid' }
+		}[status];
+		badge.className = meta.cls;
+		badge.innerHTML = '<span class="wonDot"></span>' + meta.label;
 	  } else {
 		if (badge) badge.remove();
 	  }
@@ -1627,188 +1181,37 @@
 	  return Boolean(p?.comingSoon);
 	}
 
-    // ==== GRID card ====
-    function productCardGrid(p){
-      const img = getPrimaryImage(p);
-      const title = p.title || 'Untitled';
-	  
-	  const comingSoon = isComingSoon(p);
-	  
-	  // alert('comingSoon '+comingSoon);
-
-      // Auction current bid
-      const currentBid = (p.highestBid != null ? p.highestBid : p.basePrice);
-      const current = formatPrice(currentBid);
-
-      const catName =
-        (p.category && (p.category.name || p.category.title)) ||
+    // Stock qty helper (buy-now items)
+    function getQty(p){
+      const q = (p.quantity ?? p.qty ?? p.stock ?? p.availableQty);
+      return (q === undefined) ? null : q;
+    }
+    // Retail price helper (TODO(backend): only shows when the product carries a retail value)
+    function getRetail(p){
+      const r = (p.retailPrice ?? p.retail ?? p.msrp ?? p.compareAtPrice);
+      return (r == null || Number(r) <= 0) ? null : Number(r);
+    }
+    function belowRetailPct(price, retail){
+      if (!retail || retail <= 0 || price == null) return null;
+      const pct = Math.round((1 - (Number(price) / retail)) * 100);
+      return (pct > 0 && pct < 100) ? pct : null;
+    }
+    function categoryName(p){
+      return (p.category && (p.category.name || p.category.title)) ||
         p.categoryName ||
         (p.categoryId ? `Category ${p.categoryId}` : 'OTHER');
+    }
 
-      const idText = (p.id != null) ? `ID #${p.id}` : '';
-
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.setAttribute('data-pid', p.id);
-      card.setAttribute('data-auction-end', p.auctionEnd || '');
-      card.dataset.wonUserId = (p.wonUserId == null ? '' : String(p.wonUserId));
-
-      if (hasWon(p)) card.classList.add('wonFrame');
-
-      card.innerHTML = `
-        <div class="thumb">
-          <img src="${img}" alt="${title}" class="clickable-img"/>
-          <div class="tag ${comingSoon ? 'comingSoonTag' : ''}">
-			${comingSoon ? 'COMING SOON' : 'AUCTION'}
-		  </div>
-          ${hasWon(p) ? `<div class="wonBadge"><i class="fa-solid fa-trophy"></i> Won</div>` : ``}
-        </div>
-
-        <div class="body">
-          <div class="title2" title="${title}">${title}</div>
-
-          <div class="submeta">
-            <span>${String(catName).toUpperCase()}</span>
-            ${idText ? `<span class="dot">•</span><span>${idText}</span>` : ``}
-          </div>
-
-          <div class="price" data-bind="currentBid">${current}</div>
-
-		  ${
-			comingSoon
-			? ``
-			: `
-			  <div class="footline">
-				<span>Current bid</span>
-				<span class="dot">•</span>
-				<span>Time left: <b data-bind="timeLeft">${timeLeftLabelSeconds(p.auctionEnd)}</b></span>
-			  </div>
-			`
-		  }
-		  
-        </div>
-
-        <div class="actions" style="flex-direction:column;">
-		  ${
-			comingSoon
-			  ? `
-				<div class="comingSoonNote">
-				  <i class="fa-regular fa-clock"></i> Coming Soon
-				</div>
-			  `
-			  : `
-				<div style="display:flex; gap:10px; width:100%;">
-				  <button class="btn primaryAction" data-id="${p.id}" style="flex:1;">
-					<i class="fa-solid fa-gavel"></i> Bid
-				  </button>
-
-				  <button class="btn watchBtn hidden" data-watch="${p.id}" type="button" title="Watchlist">
-					<i class="fa-regular fa-eye"></i> Watch
-				  </button>
-				</div>
-
-				<button class="btn quickBid hidden" data-bind="quickBidBtn" data-qb="${p.id}" type="button">
-				  <i class="fa-solid fa-bolt"></i> <span data-bind="quickBidText">Quick Bid</span>
-				</button>
-
-				<div class="qbMsg hidden" data-bind="qbMsg" data-qbm="${p.id}"></div>
-			  `
-		  }
-		</div>
-      `;
-
-      // card.querySelector('[data-id]').addEventListener('click', () => navigateToProduct(p.id));
-	  const bidBtn = card.querySelector('[data-id]');
-	  if (bidBtn) {
-	    bidBtn.addEventListener('click', () => navigateToProduct(p.id));
-	  }
-      card.querySelector('.clickable-img').addEventListener('click', () => navigateToProduct(p.id));
-
-      // ✅ Quick Bid wiring (GRID) - UPDATED with validation
-	  
-	  if (comingSoon) {
-	    card.querySelector('.clickable-img').addEventListener('click', () => navigateToProduct(p.id));
-	    return card;
-	  }
-	  
-      const qbBtn = card.querySelector(`[data-qb="${p.id}"]`);
-      const qbMsg = card.querySelector(`[data-qbm="${p.id}"]`);
-
-      if (hasWon(p) && qbBtn) {
-        qbBtn.disabled = true;
-        qbBtn.classList.remove('hidden');
-        qbBtn.dataset.wonLocked = "1";
-        wireWonHover(qbBtn);
-        qbBtn.title = "You already won this item";
-      }
-
-      if (isLoggedIn() && qbBtn && qbMsg) {
-        qbBtn.classList.remove('hidden');
-        qbBtn.disabled = true;
-
-        const highest = (p.highestBid != null ? p.highestBid : p.basePrice);
-
-        qbBtn.querySelector('[data-bind="quickBidText"]').textContent = 'Quick Bid (loading…)';
-
-        getNextMinBid(highest)
-          .then(({ minAllowed }) => {
-            if (!qbBtn.dataset.wonLocked) qbBtn.disabled = false;
-            qbBtn.dataset.amount = String(minAllowed);
-            qbBtn.querySelector('[data-bind="quickBidText"]').textContent = `Quick Bid ${formatPrice(minAllowed)}`;
-          })
-          .catch(() => {
-            qbBtn.disabled = true;
-            qbBtn.querySelector('[data-bind="quickBidText"]').textContent = `Quick Bid unavailable`;
-          });
-
-        qbBtn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          if (qbBtn.dataset.wonLocked) return;
-
-          const amt = Number(qbBtn.dataset.amount || 0);
-          if (!amt) return;
-
-          showQbMessage(qbMsg, 'Placing bid…', 'info');
-
-          try{
-            // await validateQuickBidOrThrow(p, amt, qbMsg);
-			
-			const latest = getLatestProduct(p.id) || p;
-			await validateQuickBidOrThrow(latest, amt, qbMsg);
-
-            const prod = await placeQuickBid(p.id, amt);
-
-            if (prod?.isAutoOutbid && String(prod.isAutoOutbid).trim() !== "") {
-              showQbMessage(qbMsg, prod.isAutoOutbid, 'err', 10000);
-            } else {
-              showQbMessage(qbMsg, '✅ Bid placed!', 'ok', 2500);
-            }
-
-          }catch(err){
-            if (err?.message && !["not_logged_in","auction_ended","already_highest_bidder","bad_amount"].includes(err.message)) {
-              showQbMessage(qbMsg, '❌ ' + (err.message || 'Bid failed'), 'err', 4000);
-            }
-          }
-        });
-      } else {
-        qbBtn?.classList.add('hidden');
-        qbMsg?.classList.add('hidden');
-      }
-
-      // ✅ Watchlist wiring (GRID)
-      const watchBtn = card.querySelector(`[data-watch="${p.id}"]`);
-
-      if (isLoggedIn() && watchBtn) {
+    // Shared watchlist wiring for any card that has a [data-watch] button
+    function wireWatch(container, p){
+      const watchBtn = container.querySelector(`[data-watch="${p.id}"]`);
+      if (isLoggedIn() && watchBtn){
         watchBtn.classList.remove('hidden');
-
-        // set initial state
         if (WATCHED_SET.has(Number(p.id))) watchBtn.classList.add('active');
-
         watchBtn.addEventListener('click', async (e) => {
           e.stopPropagation();
-
           try{
-            if (WATCHED_SET.has(Number(p.id))) {
+            if (WATCHED_SET.has(Number(p.id))){
               await removeFromWatchlist(p.id);
               WATCHED_SET.delete(Number(p.id));
               watchBtn.classList.remove('active');
@@ -1817,345 +1220,306 @@
               WATCHED_SET.add(Number(p.id));
               watchBtn.classList.add('active');
             }
-          }catch(err){
-            alert('Watchlist failed: ' + (err?.message || 'error'));
-          }
+          }catch(err){ LF.toast('Watchlist failed: ' + (err?.message || 'error'), 'error'); }
         });
       } else {
         watchBtn?.classList.add('hidden');
       }
+    }
 
-      // Apply won UI once on build
-      applyWonUi(card, p.id, p.wonUserId);
+    // ==== GRID card: BUY NOW variant ====
+    // ===== Reference-design cards (grid + list), wired to live data =====
+    function lfPhBg(p){
+      const arr = [
+        'linear-gradient(135deg,#E6EDF4 0%,#C7D6E5 100%)',
+        'linear-gradient(135deg,#DCE4EE 0%,#B7C7DC 100%)',
+        'linear-gradient(135deg,#E4EBE5 0%,#C6D6CB 100%)',
+        'linear-gradient(135deg,#ECE8E1 0%,#D3CABB 100%)',
+        'linear-gradient(135deg,#F0EADC 0%,#DDCFB4 100%)'
+      ];
+      return arr[(Number(p.id) || 0) % arr.length];
+    }
 
+    function lfDecorate(p){
+      const isA = !isBuyNow(p);
+      const comingSoon = isComingSoon(p);
+      const images = getAllImages(p);
+      const img = images[0] || 'https://via.placeholder.com/600x450?text=No+Image';
+      const cat = categoryName(p);
+      const currentBid = (p.highestBid != null ? p.highestBid : p.basePrice);
+      const priceVal = isA ? currentBid : p.basePrice;
+      const endIso = p.auctionEnd;
+      const endMs = endIso ? new Date(endIso).getTime() : 0;
+      const urgent = isA && endMs && (endMs - Date.now() < 3600000) && (endMs > Date.now());
+      const bidCount = (p.bidCount ?? p.totalBids ?? (Array.isArray(p.bids) ? p.bids.length : null));
+      const wh = warehouseForProduct(p);
+      const qty = getQty(p);
+      return {
+        isA, comingSoon, img,
+        cat: String(cat),
+        catUpper: String(cat).toUpperCase(),
+        title: p.title || 'Untitled',
+        lotNo: 'LOT ' + String(p.id == null ? '' : p.id).padStart(3, '0'),
+        priceLabel: isA ? 'Current bid' : 'Buy now price',
+        priceText: formatPrice(priceVal),
+        timeLeft: timeLeftLabelSeconds(endIso),
+        chipBg: urgent ? '#8A2B28' : '#14263F',
+        chipDot: urgent ? '#FF6B68' : '#37C0DC',
+        bidsText: isA ? ((bidCount != null ? bidCount : 0) + ' bids') : 'In stock',
+        condition: safeText(p.condition || p.itemCondition || p.grade, '—'),
+        statusText: isA ? 'AUCTION' : 'BUY NOW',
+        badgeText: comingSoon ? 'Coming Soon' : (isA ? 'Auction' : 'Buy Now'),
+        badgeStyle: comingSoon
+          ? 'background:#eef0f2;color:#6b7480;'
+          : (isA
+            ? 'background:rgba(31,139,87,.12);color:#177045;'
+            : 'background:#16202e;color:#fff;'),
+        timeStyle: urgent ? 'color:#c0453f;font-weight:700;' : 'color:#6b7480;font-weight:600;',
+        badgeDot: isA ? '#1F8B57' : '#ffffff',
+        idText: 'ID #' + (p.id == null ? '—' : p.id),
+        sku: safeText(p.sku || p.skuCode || p.productCode, 'LF-' + (p.id == null ? '' : p.id)),
+        qty: (qty == null ? '—' : qty),
+        stockText: 'In stock',
+        whText: 'Warehouse ' + (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId ?? 1),
+        hub: wh ? safeText(wh.name) : '—',
+        addr: wh ? formatWarehouseAddress(wh) : '—',
+        phBg: lfPhBg(p)
+      };
+    }
+
+    function lfMeta(icon, label, value, color){
+      const vc = color || '#14263F';
+      const vw = color ? 700 : 600;
+      return '<div><div style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#A0AEAA;font-weight:700;display:flex;align-items:center;gap:5px;">' +
+        icon + label + '</div><div style="font-size:13px;color:' + vc + ';font-weight:' + vw + ';margin-top:4px;">' + value + '</div></div>';
+    }
+
+    // Wiring shared by both card layouts
+    function lfWireWatchAll(container, p){
+      const btns = Array.from(container.querySelectorAll('[data-watch="' + p.id + '"]'));
+      if (!isLoggedIn()){ btns.forEach(b => b.classList.add('hidden')); return; }
+      const watched = () => WATCHED_SET.has(Number(p.id));
+      const sync = () => btns.forEach(b => {
+        b.classList.remove('hidden');
+        b.classList.toggle('active', watched());
+        const lbl = b.querySelector('[data-watchlabel]');
+        if (lbl) lbl.textContent = watched() ? 'Watching' : 'Watch';
+      });
+      sync();
+      btns.forEach(b => b.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        try {
+          if (watched()){ await removeFromWatchlist(p.id); WATCHED_SET.delete(Number(p.id)); }
+          else { await addToWatchlist(p.id); WATCHED_SET.add(Number(p.id)); }
+          sync();
+        } catch (err){ LF.toast('Watchlist failed: ' + (err?.message || 'error'), 'error'); }
+      }));
+    }
+
+    function lfWireQuick(container, p){
+      const qbBtn = container.querySelector('[data-qb="' + p.id + '"]');
+      const qbMsg = container.querySelector('[data-qbm="' + p.id + '"]');
+      if (!qbBtn) return;
+      const setLbl = (t) => { const l = qbBtn.querySelector('[data-bind="quickBidText"]'); if (l) l.textContent = t; };
+
+      if (hasWon(p)){
+        qbBtn.classList.remove('hidden'); qbBtn.disabled = true;
+        qbBtn.dataset.wonLocked = "1"; wireWonHover(qbBtn); qbBtn.title = "You already won this item";
+      }
+      if (isLoggedIn() && qbMsg){
+        qbBtn.classList.remove('hidden'); qbBtn.disabled = true;
+        const highest = (p.highestBid != null ? p.highestBid : p.basePrice);
+        getNextMinBid(highest).then(({ minAllowed }) => {
+          if (!qbBtn.dataset.wonLocked) qbBtn.disabled = false;
+          qbBtn.dataset.amount = String(minAllowed);
+          setLbl('Quick bid ' + formatPrice(minAllowed));
+        }).catch(() => { qbBtn.disabled = true; });
+
+        qbBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (qbBtn.dataset.wonLocked) return;
+          const amt = Number(qbBtn.dataset.amount || 0);
+          if (!amt) return;
+          showQbMessage(qbMsg, 'Placing bid…', 'info');
+          const stopBusy = LF.busy(qbBtn, 'Bidding…');
+          try {
+            const latest = getLatestProduct(p.id) || p;
+            await validateQuickBidOrThrow(latest, amt, qbMsg);
+            const prod = await placeQuickBid(p.id, amt);
+            MY_BID_SET.add(Number(p.id));
+            if (prod?.isAutoOutbid && String(prod.isAutoOutbid).trim() !== "") showQbMessage(qbMsg, prod.isAutoOutbid, 'err', 10000);
+            else showQbMessage(qbMsg, '✅ Bid placed!', 'ok', 2500);
+            // Refresh the status badge right away (Winning, or Losing if auto-outbid).
+            if (prod && prod.wonUserId !== undefined) applyWonUi(container, p.id, prod.wonUserId);
+          } catch (err){
+            if (err?.message && !["not_logged_in","auction_ended","already_highest_bidder","bad_amount"].includes(err.message))
+              showQbMessage(qbMsg, '❌ ' + (err.message || 'Bid failed'), 'err', 4000);
+          } finally {
+            stopBusy();
+          }
+        });
+      } else {
+        // Logged out: still show Quick Bid so guests see the price, but any
+        // click prompts sign in instead of placing a bid.
+        qbBtn.classList.remove('hidden'); qbBtn.disabled = false;
+        qbMsg?.classList.add('hidden');
+        const highest = (p.highestBid != null ? p.highestBid : p.basePrice);
+        getNextMinBid(highest)
+          .then(({ minAllowed }) => setLbl('Quick bid ' + formatPrice(minAllowed)))
+          .catch(() => setLbl('Quick bid'));
+        qbBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          requireLogin(() => {});
+        });
+      }
+    }
+
+    // Gate an action behind login: run it if signed in, else show the
+    // login / sign-up popup (auth.js modal, falls back to ?login=1).
+    function requireLogin(action){
+      if (isLoggedIn()) { action(); return; }
+      if (typeof window.openLoginModal === 'function') window.openLoginModal();
+      else window.location.href = '/index.html?login=1';
+    }
+
+    function lfWireCard(container, p, d){
+      // Browsing is free: image + title open the product page for anyone.
+      container.querySelectorAll('.clickable-img').forEach(el => el.addEventListener('click', () => navigateForProduct(p)));
+      // Purchase intent (Place Bid / Buy Now) requires login → popup if signed out.
+      const idBtn = container.querySelector('[data-id]');
+      if (idBtn) idBtn.addEventListener('click', () => requireLogin(() => navigateForProduct(p)));
+      container.querySelectorAll('.lf-addcart').forEach(b => b.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        requireLogin(async () => {
+          const normalHtml = b.dataset.normalHtml || b.innerHTML;
+          b.dataset.normalHtml = normalHtml;
+          setCartButtonState(b, 'Adding...', true);
+
+          try {
+            await addProductToCart(p.id, 1);
+            setCartButtonState(b, 'Added to cart', true);
+            if (typeof window.__updateTopnavUI === 'function') window.__updateTopnavUI();
+            if (typeof window.openAccountDrawer === 'function') window.openAccountDrawer('cart');
+            setTimeout(() => setCartButtonState(b, normalHtml, false), 1800);
+          } catch (err) {
+            setCartButtonState(b, 'Add failed', false);
+            LF.toast('Could not add to cart: ' + (err?.message || 'error'), 'error');
+            setTimeout(() => setCartButtonState(b, normalHtml, false), 2200);
+          }
+        });
+      }));
+      lfWireWatchAll(container, p);
+      if (!d.comingSoon && d.isA) lfWireQuick(container, p);
+      applyWonUi(container, p.id, p.wonUserId);
+    }
+
+    // ==== GRID card ====
+    function productCardGrid(p){
+      const d = lfDecorate(p);
+      const card = document.createElement('article');
+      card.className = 'lf-card';
+      card.setAttribute('style', 'background:#fff;border:1px solid #E0E8E2;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;');
+      card.setAttribute('data-pid', p.id);
+      card.setAttribute('data-auction-end', p.auctionEnd || '');
+      card.dataset.wonUserId = (p.wonUserId == null ? '' : String(p.wonUserId));
+      if (hasWon(p)) card.classList.add('wonFrame');
+
+      const timeChip = (d.isA && !d.comingSoon)
+        ? '<div style="display:flex;align-items:center;gap:5px;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;' + d.timeStyle + '">' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>' +
+            '<span data-bind="timeBoxLeft">' + d.timeLeft + '</span></div>'
+        : '';
+
+      const metaLine = d.isA ? (d.bidsText + ' · ' + d.condition) : ('In stock · ' + d.condition);
+
+      const primaryBtn = d.comingSoon
+        ? '<div style="text-align:center;color:#6b7480;font-weight:700;font-size:13px;padding:12px;border:1px dashed #dfe2e6;border-radius:9px;background:#f6f7f8;">Coming soon</div>'
+        : '<button data-id="' + p.id + '" class="lf-btn" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">' + (d.isA ? 'Place Bid' : 'Buy Now') + '</button>';
+
+      const secondaryBtn = d.comingSoon ? ''
+        : (d.isA
+          ? '<button data-qb="' + p.id + '" data-bind="quickBidBtn" class="lf-btn lf-quick hidden" style="margin-top:8px;width:100%;font-weight:700;font-size:13px;padding:10px;border-radius:9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#1f8b57"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg><span data-bind="quickBidText">Quick bid</span></button>' +
+            '<div class="qbMsg hidden" data-bind="qbMsg" data-qbm="' + p.id + '"></div>'
+          : '<button class="lf-btn lf-addcart" style="margin-top:8px;width:100%;font-weight:700;font-size:13px;padding:10px;border-radius:9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #dfe2e6;background:#fff;color:#16202e;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="18" cy="20" r="1.4"></circle><path d="M6 6L5 3H2"></path></svg>Add to cart</button>');
+
+      card.innerHTML =
+        '<div class="thumb" style="position:relative;overflow:hidden;background:#f3f4f6;">' +
+          '<div class="lf-img clickable-img" style="position:relative;aspect-ratio:4/3;background-position:center;background-size:cover;background-image:url(\'' + d.img + '\');cursor:pointer;"></div>' +
+          '<span style="position:absolute;left:14px;top:14px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 11px;border-radius:6px;' + d.badgeStyle + '">' + d.badgeText + '</span>' +
+          '<button data-watch="' + p.id + '" type="button" class="lf-btn lf-card-watch hidden" title="Watchlist" style="position:absolute;right:13px;top:13px;width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;">' +
+            '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="2.6"></circle></svg></button>' +
+        '</div>' +
+        '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;flex:1;">' +
+          '<div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#aab1ba;margin-bottom:7px;">' + d.catUpper + '</div>' +
+          '<h3 class="clickable-img" style="font-weight:600;font-size:15px;line-height:1.35;margin:0 0 16px;color:#16202e;min-height:40px;cursor:pointer;">' + d.title + '</h3>' +
+          '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:auto;">' +
+            '<div data-bind="currentBid" style="font-weight:800;font-size:23px;line-height:1;color:#16202e;font-variant-numeric:tabular-nums;">' + d.priceText + '</div>' + timeChip +
+          '</div>' +
+          '<div style="font-size:12px;color:#aab1ba;margin-top:9px;font-weight:500;">' + metaLine + '</div>' +
+          '<div style="margin-top:15px;">' + primaryBtn + '</div>' + secondaryBtn +
+        '</div>';
+
+      lfWireCard(card, p, d);
       return card;
     }
 
     // ==== LIST row ====
     function productCardList(p){
-      const images = getAllImages(p);
-      const mainImg = images[0] || 'https://via.placeholder.com/600x400?text=No+Image';
-
-      const title = p.title || 'Untitled';
-	  
-	  const comingSoon = isComingSoon(p); // ✅ ADD THIS
-
-      // Auction current bid
-      const currentBid = (p.highestBid != null ? p.highestBid : p.basePrice);
-      const current = formatPrice(currentBid);
-
-      const catName =
-        (p.category && (p.category.name || p.category.title)) ||
-        p.categoryName ||
-        (p.categoryId ? `Category ${p.categoryId}` : 'OTHER');
-
-      const idText = (p.id != null) ? `ID #${p.id}` : '—';
-      const left = timeLeftLabelSeconds(p.auctionEnd);
-      const status = safeText(p.status,'—');
-
-      const wid = (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId);
-
-      const wh = warehouseForProduct(p);
-      const pickupName = wh ? safeText(wh.name) : '—';
-      const pickupAddr = wh ? formatWarehouseAddress(wh) : '—';
-
-      const thumbItems = images.slice(0, 10).map((u, idx) => `
-        <div class="thumbMini ${idx===0?'active':''}" data-img="${u}">
-          <img src="${u}" alt="thumb ${idx+1}">
-        </div>
-      `).join('');
-
-      const row = document.createElement('div');
-      row.className = 'listCard';
+      const d = lfDecorate(p);
+      const row = document.createElement('article');
+      row.className = 'lf-card lf-listrow';
+      row.setAttribute('style', 'background:#fff;border:1px solid #E0E8E2;border-radius:18px;overflow:hidden;display:flex;align-items:stretch;');
       row.setAttribute('data-pid', p.id);
       row.setAttribute('data-auction-end', p.auctionEnd || '');
       row.dataset.wonUserId = (p.wonUserId == null ? '' : String(p.wonUserId));
-
       if (hasWon(p)) row.classList.add('wonFrame');
 
-      row.innerHTML = `
-        <div class="listThumb">
-          <div class="tag ${comingSoon ? 'comingSoonTag' : ''}">
-		    ${comingSoon ? 'COMING SOON' : 'AUCTION'}
-		  </div>
-          ${hasWon(p) ? `<div class="wonBadge"><i class="fa-solid fa-trophy"></i> Won</div>` : ``}
+      const cell = (label, val) =>
+        '<div><div style="font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#aab1ba;font-weight:700;">' + label + '</div>' +
+        '<div style="font-size:13px;color:#16202e;font-weight:600;margin-top:3px;">' + val + '</div></div>';
 
-          ${
-			  comingSoon
-				? ``
-				: `
-				  <div class="countdownBadge" style="position:absolute; right:18px; bottom:18px; z-index:2;">
-					<i class="fa-regular fa-clock"></i> <span data-bind="leftBadge">${left}</span>
-				  </div>
-				`
-		  }
+      const priceSide =
+        '<div>' +
+          '<div style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#97a0ab;font-weight:600;">' + d.priceLabel + '</div>' +
+          '<div data-bind="currentBid" style="font-weight:800;font-size:26px;line-height:1;margin-top:4px;color:#16202e;font-variant-numeric:tabular-nums;">' + d.priceText + '</div>' +
+          (d.comingSoon ? '' : (d.isA
+            ? '<div style="display:flex;align-items:center;gap:6px;font-size:12.5px;margin-top:9px;font-variant-numeric:tabular-nums;' + d.timeStyle + '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg><span data-bind="timeBoxLeft">' + d.timeLeft + '</span></div>'
+            : '<div style="font-size:12px;color:#6b7480;font-weight:600;margin-top:9px;display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"></path></svg>Instant checkout</div>')) +
+        '</div>';
 
-          <div class="listMainImg">
-            <img src="${mainImg}" alt="${title}" class="mainImg clickable-img"/>
-          </div>
+      const sideBtns = d.comingSoon
+        ? '<div style="text-align:center;color:#6b7480;font-weight:700;font-size:13px;padding:13px;border:1px dashed #dfe2e6;border-radius:9px;background:#fff;">Coming soon</div>'
+        : (d.isA
+          ? '<button data-id="' + p.id + '" class="lf-btn" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">Place Bid</button>' +
+            '<button data-qb="' + p.id + '" data-bind="quickBidBtn" class="lf-btn lf-quick hidden" style="width:100%;font-weight:700;font-size:12.5px;padding:9px;border-radius:9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#1f8b57"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg><span data-bind="quickBidText">Quick bid</span></button>' +
+            '<div class="qbMsg hidden" data-bind="qbMsg" data-qbm="' + p.id + '"></div>'
+          : '<button data-id="' + p.id + '" class="lf-btn" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">Buy Now</button>' +
+            '<button class="lf-btn lf-addcart" style="width:100%;font-weight:700;font-size:12.5px;padding:9px;border-radius:9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #dfe2e6;background:#fff;color:#16202e;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="18" cy="20" r="1.4"></circle><path d="M6 6L5 3H2"></path></svg>Add to cart</button>');
 
-          ${images.length > 1 ? `<div class="thumbStrip">${thumbItems}</div>` : ``}
-        </div>
+      const qtyText = (d.qty === '—') ? '—' : (d.qty + ' units');
 
-        <div class="listMain">
-          <h3 class="listTitle" title="${title}">${title}</h3>
+      row.innerHTML =
+        '<div class="listThumb lf-img clickable-img" style="position:relative;width:210px;flex-shrink:0;background:#f3f4f6;background-image:url(\'' + d.img + '\');background-position:center;background-size:cover;overflow:hidden;cursor:pointer;">' +
+          '<span style="position:absolute;left:13px;top:13px;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:6px;' + d.badgeStyle + '">' + d.badgeText + '</span>' +
+        '</div>' +
+        '<div style="flex:1;min-width:0;padding:18px 22px;display:flex;flex-direction:column;">' +
+          '<div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#97a0ab;margin-bottom:4px;">' + d.catUpper + '</div>' +
+          '<h3 class="clickable-img" style="font-weight:700;font-size:18px;line-height:1.25;margin:0 0 14px;color:#16202e;cursor:pointer;">' + d.title + '</h3>' +
+          '<div class="lf-metagrid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 18px;margin-top:auto;">' +
+            cell('Category', d.cat) + cell('Condition', d.condition) + cell('Quantity', qtyText) + cell('Pickup', d.hub) +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#97a0ab;margin-top:14px;font-weight:500;"><span>' + d.bidsText + '</span><span style="color:#d3d8dd;">·</span><span>' + d.lotNo + '</span></div>' +
+        '</div>' +
+        '<div class="lf-side" style="width:230px;flex-shrink:0;border-left:1px solid #e6e8ec;padding:18px 22px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;">' +
+          priceSide +
+          '<div style="display:flex;flex-direction:column;gap:8px;">' + sideBtns +
+            '<button data-watch="' + p.id + '" type="button" class="lf-btn lf-watch-out hidden" style="width:100%;font-weight:700;font-size:13px;padding:11px;border-radius:9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="2.6"></circle></svg><span data-watchlabel>Watch</span></button>' +
+          '</div>' +
+        '</div>';
 
-          <div class="detailsPanel">
-            <div class="detailsItem">
-              <i class="fa-solid fa-layer-group"></i>
-              <div>
-                <div class="k">Category</div>
-                <div class="v">${safeText(catName).toUpperCase()}</div>
-              </div>
-            </div>
-
-            <div class="detailsItem">
-              <i class="fa-solid fa-hashtag"></i>
-              <div>
-                <div class="k">Product ID</div>
-                <div class="v">${safeText(idText)}</div>
-              </div>
-            </div>
-
-            ${
-			  comingSoon
-				? ``
-				: `
-				  <div class="detailsItem">
-					<i class="fa-solid fa-money-bill-wave"></i>
-					<div>
-					  <div class="k">Current Bid</div>
-					  <div class="v" data-bind="highestBid">${current}</div>
-					</div>
-				  </div>
-
-				  <div class="detailsItem">
-					<i class="fa-regular fa-clock"></i>
-					<div>
-					  <div class="k">Time Left</div>
-					  <div class="v" data-bind="timeLeft">${left}</div>
-					</div>
-				  </div>
-				`
-			}
-
-            <div class="detailsItem">
-              <i class="fa-solid fa-warehouse"></i>
-              <div>
-                <div class="k">Pickup</div>
-                <div class="v">${pickupName}</div>
-              </div>
-            </div>
-
-            <div class="detailsItem">
-              <i class="fa-solid fa-location-dot"></i>
-              <div>
-                <div class="k">Address</div>
-                <div class="v wrap">${pickupAddr}</div>
-              </div>
-            </div>
-
-            <div class="detailsItem">
-              <i class="fa-solid fa-signal"></i>
-              <div>
-                <div class="k">Status</div>
-                <div class="v">${status}</div>
-              </div>
-            </div>
-
-            <div class="detailsItem">
-              <i class="fa-solid fa-building"></i>
-              <div>
-                <div class="k">Warehouse ID</div>
-                <div class="v">${wid == null ? '—' : wid}</div>
-              </div>
-            </div>
-          </div>
-
-			${
-			  comingSoon
-				? ``
-				: `
-				  <div class="listPriceRow">
-					<div class="listPrice" data-bind="currentBid">${current}</div>
-					<div class="listNote">Current bid</div>
-				  </div>
-				`
-			}
-			
-        </div>
-
-        <div class="listRight">
-          
-		  
-		  <div class="pickupBox">
-            <div class="pickupLine"><i class="fa-solid fa-truck-fast"></i><div>Pickup from <b>${pickupName}</b></div></div>
-            <div class="pickupLine"><i class="fa-solid fa-location-dot"></i><div>${pickupAddr}</div></div>
-          </div>
-
-          ${
-		  comingSoon
-			? `
-			  <div class="comingSoonNote">
-				<i class="fa-regular fa-clock"></i> Coming Soon
-			  </div>
-			`
-			: `
-			  <div style="display:flex; gap:10px; width:100%;">
-				<button class="btn primaryAction" data-id="${p.id}" style="flex:1;">
-				  <i class="fa-solid fa-gavel"></i> Bid
-				</button>
-
-				<button class="btn watchBtn hidden" data-watch="${p.id}" type="button" title="Watchlist">
-				  <i class="fa-regular fa-eye"></i> Watch
-				</button>
-			  </div>
-
-			  <button class="btn quickBid hidden" data-bind="quickBidBtn" data-qb="${p.id}" type="button">
-				<i class="fa-solid fa-bolt"></i> <span data-bind="quickBidText">Quick Bid</span>
-			  </button>
-
-			  <div class="qbMsg hidden" data-bind="qbMsg" data-qbm="${p.id}"></div>
-
-			  <div class="timeBox">
-				<div class="timeLine">
-				  <i class="fa-solid fa-stopwatch"></i>
-				  <div>Auction Ends In : <b data-bind="timeBoxLeft">${left}</b></div>
-				</div>
-			  </div>
-			`
-		  }
-		  
-		  
-        </div>
-      `;
-
-      // Bid/View click
-      const bidBtn = row.querySelector('[data-id]');
-	  if (bidBtn) {
-		  bidBtn.addEventListener('click', () => navigateToProduct(p.id));
-	  }
-		
-      row.querySelector('.clickable-img').addEventListener('click', () => navigateToProduct(p.id));
-
-      // ✅ thumbnail click → swap main image (NO zoom)
-      const main = row.querySelector('.mainImg');
-      row.querySelectorAll('.thumbMini').forEach(t => {
-        t.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const url = t.getAttribute('data-img');
-          if (!url) return;
-          main.src = url;
-          row.querySelectorAll('.thumbMini').forEach(x => x.classList.remove('active'));
-          t.classList.add('active');
-        });
-      });
-
-	  // After thumbnail before Quick Bid wiring
-	  if (comingSoon) {
-	    return row;
-	  }
-	  
-	  
-      // ✅ Quick Bid wiring (LIST) - UPDATED with validation
-      const qbBtn = row.querySelector(`[data-qb="${p.id}"]`);
-      const qbMsg = row.querySelector(`[data-qbm="${p.id}"]`);
-
-      if (hasWon(p) && qbBtn) {
-        qbBtn.disabled = true;
-        qbBtn.classList.remove('hidden');
-        qbBtn.dataset.wonLocked = "1";
-        wireWonHover(qbBtn);
-        qbBtn.title = "You already won this item";
-      }
-
-      if (isLoggedIn() && qbBtn && qbMsg) {
-        qbBtn.classList.remove('hidden');
-        qbBtn.disabled = true;
-
-        const highest = (p.highestBid != null ? p.highestBid : p.basePrice);
-
-        qbBtn.querySelector('[data-bind="quickBidText"]').textContent = 'Quick Bid (loading…)';
-
-        getNextMinBid(highest)
-          .then(({ minAllowed }) => {
-            if (!qbBtn.dataset.wonLocked) qbBtn.disabled = false;
-            qbBtn.dataset.amount = String(minAllowed);
-            qbBtn.querySelector('[data-bind="quickBidText"]').textContent = `Quick Bid ${formatPrice(minAllowed)}`;
-          })
-          .catch(() => {
-            qbBtn.disabled = true;
-            qbBtn.querySelector('[data-bind="quickBidText"]').textContent = `Quick Bid unavailable`;
-          });
-
-        qbBtn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          if (qbBtn.dataset.wonLocked) return;
-
-          const amt = Number(qbBtn.dataset.amount || 0);
-          if (!amt) return;
-
-          showQbMessage(qbMsg, 'Placing bid…', 'info');
-
-          try{
-            
-			
-			// await validateQuickBidOrThrow(p, amt, qbMsg);
-			
-			const latest = getLatestProduct(p.id) || p;
-			await validateQuickBidOrThrow(latest, amt, qbMsg);
-
-            const prod = await placeQuickBid(p.id, amt);
-
-            if (prod?.isAutoOutbid && String(prod.isAutoOutbid).trim() !== "") {
-              showQbMessage(qbMsg, prod.isAutoOutbid, 'err', 10000);
-            } else {
-              showQbMessage(qbMsg, '✅ Bid placed!', 'ok', 2500);
-            }
-
-          }catch(err){
-            if (err?.message && !["not_logged_in","auction_ended","already_highest_bidder","bad_amount"].includes(err.message)) {
-              showQbMessage(qbMsg, '❌ ' + (err.message || 'Bid failed'), 'err', 4000);
-            }
-          }
-        });
-      } else {
-        qbBtn?.classList.add('hidden');
-        qbMsg?.classList.add('hidden');
-      }
-
-      // ✅ Watchlist wiring (LIST)
-      const watchBtn = row.querySelector(`[data-watch="${p.id}"]`);
-
-      if (isLoggedIn() && watchBtn) {
-        watchBtn.classList.remove('hidden');
-
-        if (WATCHED_SET.has(Number(p.id))) watchBtn.classList.add('active');
-
-        watchBtn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-
-          try{
-            if (WATCHED_SET.has(Number(p.id))) {
-              await removeFromWatchlist(p.id);
-              WATCHED_SET.delete(Number(p.id));
-              watchBtn.classList.remove('active');
-            } else {
-              await addToWatchlist(p.id);
-              WATCHED_SET.add(Number(p.id));
-              watchBtn.classList.add('active');
-            }
-          }catch(err){
-            alert('Watchlist failed: ' + (err?.message || 'error'));
-          }
-        });
-      } else {
-        watchBtn?.classList.add('hidden');
-      }
-
-      // Apply won UI once on build
-      applyWonUi(row, p.id, p.wonUserId);
-
+      lfWireCard(row, p, d);
       return row;
     }
 
@@ -2179,6 +1543,22 @@
       }
 
       render();
+    }
+
+    // Build a windowed list of page numbers, e.g. [1,'...',4,5,6,'...',42]
+    function pageWindow(cur, total){
+      const out = [];
+      const push = n => { if (!out.includes(n)) out.push(n); };
+      push(1);
+      for (let n = cur - 1; n <= cur + 1; n++){ if (n > 1 && n < total) push(n); }
+      if (total > 1) push(total);
+      // insert ellipses where there are gaps
+      const withDots = [];
+      for (let i = 0; i < out.length; i++){
+        withDots.push(out[i]);
+        if (i < out.length - 1 && out[i+1] - out[i] > 1) withDots.push('...');
+      }
+      return withDots;
     }
 
     function render(){
@@ -2207,13 +1587,14 @@
       }
 
       metaInfo.textContent = `${total} item${total!==1?'s':''}`;
-      pageInfoInline.textContent = `Page ${CURRENT_PAGE}`;
+      pageInfoInline.textContent = `Page ${CURRENT_PAGE} of ${totalPages}`;
 
       if(totalPages > 1){
         pagination.classList.remove('hidden');
-        pageInfo.textContent = `Page ${CURRENT_PAGE} of ${totalPages}`;
         prevPage.disabled = CURRENT_PAGE===1;
         nextPage.disabled = CURRENT_PAGE===totalPages;
+        // Design pager: prev / "Page x of y" / next
+        pageInfo.textContent = `${CURRENT_PAGE} of ${totalPages}`;
       }else{
         pagination.classList.add('hidden');
       }
@@ -2227,15 +1608,22 @@
     function applyFilters(){
       const q = (searchBox.value||'').trim().toLowerCase();
       const catId = categorySelect.value ? Number(categorySelect.value) : null;
+      const type = typeSelect.value; // all | auction | buynow
+      const whVal = (document.getElementById('warehouseSelect')?.value) || 'all';
 
       FILTERED = ALL_PRODUCTS.filter(p => {
         const matchesText = !q || (p.title && p.title.toLowerCase().includes(q));
         const matchesCat = !catId || p.categoryId === catId || (p.category && p.category.id === catId);
-        return matchesText && matchesCat;
+        const matchesType = (type === 'all' || !type) ? true : (p._kind === type);
+        const pwh = (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId);
+        const matchesWh = (whVal === 'all') || (pwh != null && String(pwh) === String(whVal));
+        return matchesText && matchesCat && matchesType && matchesWh;
       });
 
       const sort = sortSelect.value;
       FILTERED.sort((a,b) => {
+        // "recommended" keeps the interleaved auction/buy-now smooth-flow order
+        if(sort==='recommended') return 0;
         if(sort==='endingSoon'){
           const ta = a.auctionEnd ? new Date(a.auctionEnd).getTime() : Infinity;
           const tb = b.auctionEnd ? new Date(b.auctionEnd).getTime() : Infinity;
@@ -2256,6 +1644,11 @@
           const cb = (b.highestBid != null ? b.highestBid : b.basePrice);
           return (Number(cb)||0) - (Number(ca)||0);
         }
+        if(sort==='mostBids'){
+          const ba = (a.bidCount ?? a.totalBids ?? (Array.isArray(a.bids)?a.bids.length:0));
+          const bb = (b.bidCount ?? b.totalBids ?? (Array.isArray(b.bids)?b.bids.length:0));
+          return (Number(bb)||0) - (Number(ba)||0);
+        }
         return 0;
       });
 
@@ -2267,20 +1660,46 @@
     $('#refreshBtn').addEventListener('click', () => {
       categorySelect.value = '';
       searchBox.value = '';
-      typeSelect.value = 'auction';
-      fetchAllProducts();
+      typeSelect.value = 'all';   // smooth flow: show auctions + buy-now
+      applyFilters();
     });
 
     applyBtn.addEventListener('click', applyFilters);
 
-    categorySelect.addEventListener('change', async () => {
-      const val = categorySelect.value;
-      if(!val){ fetchAllProducts(); return; }
-      await fetchByCategory(val);
-    });
+    // Category is filtered client-side now (both kinds already loaded).
+    categorySelect.addEventListener('change', applyFilters);
+    typeSelect.addEventListener('change', applyFilters);
 
     sortSelect.addEventListener('change', applyFilters);
     searchBox.addEventListener('input', applyFilters);
+
+    // Segmented Type tabs (All / Auctions / Buy Now) drive the hidden typeSelect.
+    document.querySelectorAll('#typeTabs .lf-segbtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#typeTabs .lf-segbtn').forEach(b => b.classList.remove('is-on'));
+        btn.classList.add('is-on');
+        typeSelect.value = btn.dataset.tab || 'all';
+        applyFilters();
+      });
+    });
+
+    // "Sorted by" label mirror.
+    const SORT_LABELS = { endingSoon:'Ending soonest', newlyListed:'Newest first', priceLowHigh:'Price: low to high', priceHighLow:'Price: high to low', mostBids:'Most bids' };
+    const sortLabelEl = document.getElementById('sortLabel');
+    function updateSortLabel(){ if (sortLabelEl) sortLabelEl.textContent = SORT_LABELS[sortSelect.value] || 'Ending soonest'; }
+    sortSelect.addEventListener('change', updateSortLabel);
+    updateSortLabel();
+
+    // Warehouse filter (client-side; product warehouse data is already loaded).
+    const warehouseSelect = document.getElementById('warehouseSelect');
+    warehouseSelect?.addEventListener('change', applyFilters);
+    function populateWarehouseSelect(){
+      if (!warehouseSelect || !WAREHOUSE_MAP.size) return;
+      const cur = warehouseSelect.value;
+      warehouseSelect.innerHTML = '<option value="all">All Warehouses</option>' +
+        Array.from(WAREHOUSE_MAP.values()).map(w => `<option value="${w.id}">${w.name || ('Warehouse ' + w.id)}</option>`).join('');
+      warehouseSelect.value = cur || 'all';
+    }
 
     prevPage.addEventListener('click', () => {
       if(CURRENT_PAGE>1){ CURRENT_PAGE--; render(); }
@@ -2302,29 +1721,113 @@
 
     // --- Auction / Buy Now toggle navigation ---
     document.addEventListener('DOMContentLoaded', () => {
+      // Auction / Buy Now are just filters on this same listing page now.
       $$('.view-nav').forEach(btn => {
         btn.addEventListener('click', () => {
           const target = btn.dataset.target;
-          if (target === 'auction') {
-            if (!location.pathname.endsWith('index.html')) window.location.href = '/index.html';
-          } else if (target === 'buynow') {
-            if (!location.pathname.endsWith('product-buy.html')) window.location.href = '/product-buy.html';
-          }
+          const tab = document.querySelector('#typeTabs .lf-segbtn[data-tab="' + target + '"]');
+          if (tab) tab.click();
         });
       });
     });
 
+    // ===== Category pills (new design) =====
+    function setActivePill(el){
+      document.querySelectorAll('#catPills .pill-cat').forEach(b => b.classList.remove('active'));
+      if (el) el.classList.add('active');
+    }
+
+    // Build the pill row from the SAME categories used by the (hidden) categorySelect,
+    // so each pill maps to a real category id and filters via the existing code path.
+    function buildCategoryPills(){
+      const host = document.getElementById('catPills');
+      if (!host) return;
+
+      // clear any previously injected pills (keep the "All" pill / #refreshBtn)
+      host.querySelectorAll('.pill-cat[data-cat]:not(#refreshBtn)').forEach(n => n.remove());
+
+      const opts = Array.from(categorySelect.options).filter(o => o.value); // skip "All Categories"
+      opts.slice(0, 6).forEach(o => {                                       // show up to 6 like the mock
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'pill-cat';
+        b.dataset.cat = o.value;
+        b.textContent = o.textContent;
+        b.addEventListener('click', async () => {
+          setActivePill(b);
+          categorySelect.value = o.value;
+          await fetchByCategory(o.value);
+        });
+        host.appendChild(b);
+      });
+    }
+
+    // "All" pill also runs the original reset handler; here we just mark it active.
+    document.getElementById('refreshBtn')?.addEventListener('click', function(){ setActivePill(this); });
+
+    // Hero "Start browsing" → jump to the listings.
+    document.getElementById('heroBrowse')?.addEventListener('click', () => {
+      document.querySelector('.toolbar')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+
+    // Hero tiles → filter by the first category whose name matches the keyword.
+    document.querySelectorAll('.heroTile[data-hero-cat]').forEach(tile => {
+      tile.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const key = (tile.dataset.heroCat || '').toLowerCase();
+        const match = Array.from(categorySelect.options)
+          .find(o => o.value && o.textContent.toLowerCase().includes(key));
+        if (match){
+          categorySelect.value = match.value;
+          const pill = document.querySelector(`#catPills .pill-cat[data-cat="${match.value}"]`);
+          setActivePill(pill || null);
+          await fetchByCategory(match.value);
+        }
+        document.querySelector('.toolbar')?.scrollIntoView({ behavior:'smooth', block:'start' });
+      });
+    });
+
+    // Header search hook (used by the nav search in topnav.html): live filter, no reload.
+    window.applyHeaderSearch = function(term){
+      searchBox.value = term || '';
+      applyFilters();
+      document.querySelector('.toolbar')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    };
+
     // ==== Boot ====
     (async function init(){
-      pageSizeSelect.value = "10";
+      pageSizeSelect.value = "12";
       setView('grid');
-	  
+
 	   // ✅ Load homepage banners first
 	  await loadBanners();
 
       await loadAllCategories();
+      buildCategoryPills();              // ✅ build pills from real categories
       await loadWarehouses();
+      populateWarehouseSelect();          // fill the visible Warehouse filter
       await loadMyWatchlist();
+      await loadMyBids();
+
+      // ✅ Prefill from URL params (this page is the single listing view):
+      //    ?q=  → search term ; ?type=auction|buynow → pre-set the Type filter
+      //    so "Buy Now" / "Auctions" links land here pre-filtered (no separate page).
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const q = params.get('q');
+        if (q) searchBox.value = q;
+        const t = (params.get('type') || '').toLowerCase();
+        if (t === 'auction' || t === 'buynow') {
+          typeSelect.value = t;
+          document.querySelectorAll('#typeTabs .lf-segbtn').forEach(b => b.classList.toggle('is-on', b.dataset.tab === t));
+        }
+        // ?category=<id> → pre-select category (from the Shop by Category page).
+        const cat = params.get('category');
+        if (cat && Array.from(categorySelect.options).some(o => o.value === String(cat))) {
+          categorySelect.value = String(cat);
+        }
+      } catch(e){}
+
       await fetchAllProducts();
 
       // ✅ Start 1s countdown updates
@@ -2404,6 +1907,48 @@
     }
   });
 </script>
+
+  <!-- Hero highlight rotator — static marketing slides. TODO(backend): wire to featured lots. -->
+  <script>
+    (function(){
+      var slides = [
+        { t:'Up to 70% off retail', s:'Brand-name appliances, electronics and home goods — tested and priced to move.', img:'/img/70percantageoffretail.png' },
+        { t:'Wholesale & bulk lots', s:'Pallets and case-packs at the best prices for resellers.', img:'/img/wholesaleandbulkitems.png' },
+        { t:'Fast shipping across Canada', s:'Won lots and buy-now orders shipped fast, coast to coast.', img:'/img/Fastshipping.png' }
+      ];
+      var imgEl = document.getElementById('heroImg');
+      var tEl = document.getElementById('heroHiliteT');
+      var sEl = document.getElementById('heroHiliteS');
+      var dotsEl = document.getElementById('heroDots');
+      if(!imgEl || !tEl || !sEl || !dotsEl) return;
+
+      var layers = slides.map(function(sl, i){
+        var d = document.createElement('div');
+        d.className = 'lf-herolayer' + (i===0 ? ' on' : '');
+        d.style.backgroundImage = "url('" + sl.img + "')";
+        imgEl.insertBefore(d, imgEl.firstChild);
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = (i===0 ? 'on' : '');
+        dot.setAttribute('aria-label', 'Slide ' + (i+1));
+        dot.addEventListener('click', function(){ go(i); });
+        dotsEl.appendChild(dot);
+        return d;
+      });
+      var dots = Array.prototype.slice.call(dotsEl.children);
+      var cur = 0, timer = null;
+      function paint(){
+        layers.forEach(function(l,i){ l.classList.toggle('on', i===cur); });
+        dots.forEach(function(dd,i){ dd.classList.toggle('on', i===cur); });
+        tEl.textContent = slides[cur].t;
+        sEl.textContent = slides[cur].s;
+      }
+      function go(i){ cur = (i + slides.length) % slides.length; paint(); restart(); }
+      function next(){ go(cur + 1); }
+      function restart(){ if(timer) clearInterval(timer); timer = setInterval(next, 5000); }
+      paint(); restart();
+    })();
+  </script>
 
 </body>
 </html>

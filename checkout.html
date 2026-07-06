@@ -9,12 +9,12 @@
 
   <style>
     :root{
-      --bg:#f7f7f8;
+      --bg:#EAF0EC;
       --panel:#ffffff;
       --text:#111827;
       --muted:#6b7280;
-      --brand:#2563eb;
-      --brand-2:#1e40af;
+      --brand:#1F8B57;
+      --brand-2:#177045;
       --border:#e5e7eb;
       --chip:#0ea5e9;
       --danger:#dc2626;
@@ -252,7 +252,7 @@
 
   <!-- CONFIG + AUTH -->
   <script src="/js/config.js"></script>
-  <script src="/js/auth.js" defer></script>
+  <script src="/js/auth.js?v=2" defer></script>
 
   <div class="page">
     <div class="breadcrumbs">
@@ -382,14 +382,14 @@
   async function loadOrder() {
     const orderId = getOrderIdFromQuery();
     if (!orderId) {
-      alert("Missing orderId in URL. Redirecting back to Buy-Now page.");
-      window.location.href = "/product-buynow.html";
+      LF.toast("Missing order — redirecting to Buy-Now.", 'error');
+      setTimeout(function(){ window.location.href = "/product-buynow.html"; }, 1400);
       return;
     }
 
     if (!token) {
-      alert("Please log in to view your order.");
-      window.location.href = "/web/login_cu.html";
+      LF.toast("Please log in to view your order.", 'error');
+      setTimeout(function(){ window.location.href = "/web/login_cu.html"; }, 1400);
       return;
     }
 
@@ -404,7 +404,7 @@
       if (!res.ok) {
         const txt = await res.text();
         console.error("Failed to load order:", txt);
-        alert("Unable to load order. Please try again.");
+        LF.toast("Unable to load order. Please try again.", 'error');
         return;
       }
 
@@ -414,7 +414,7 @@
 
     } catch (err) {
       console.error("Error loading order:", err);
-      alert("Error loading order.");
+      LF.toast("Error loading order.", 'error');
     }
   }
 
@@ -509,6 +509,7 @@
 
       const orderId = currentOrder.id;
 
+      const stopBusy = LF.busy(qs("#payNowBtn"), "Starting payment…");
       try {
         const res = await fetch(`${API_BASE_URL}/payments/intent`, {
           method: "POST",
@@ -525,6 +526,7 @@
           const txt = await res.text();
           console.error("Payment intent error:", txt);
           errEl.textContent = "Unable to start payment: " + txt;
+          stopBusy();
           return;
         }
 
@@ -548,6 +550,7 @@
       } catch (e) {
         console.error("Payment error:", e);
         errEl.textContent = "Error starting payment. Please try again.";
+        stopBusy();
       }
     });
   }

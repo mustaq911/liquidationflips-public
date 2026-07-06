@@ -1,0 +1,405 @@
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap');
+
+/* Shared account, verification, and onboarding page styles */
+
+:root {
+  --lf-green: #1f8b57;
+  --lf-green-dark: #177045;
+  --lf-ink: #16202e;
+  --lf-muted: #6b7480;
+  --lf-muted-2: #97a0ab;
+  --lf-border: #e6e8ec;
+  --lf-border-2: #dfe2e6;
+  --lf-soft: #f6f7f8;
+  --lf-danger: #b42318;
+  --lf-success: #027a48;
+}
+
+html,
+body {
+  margin: 0;
+  background: #fff !important;
+  color: var(--lf-ink) !important;
+  font-family: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--lf-green);
+}
+
+.page,
+.section {
+  width: 100%;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  padding: 44px 28px 64px !important;
+}
+
+.card,
+.step-page {
+  background: #fff !important;
+  border: 1px solid var(--lf-border) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.card {
+  max-width: 640px !important;
+  margin: 0 auto !important;
+  padding: 32px !important;
+}
+
+.step-page {
+  max-width: 980px;
+  margin: 0 auto 28px !important;
+  padding: 30px !important;
+}
+
+.h1,
+h1 {
+  color: var(--lf-ink) !important;
+  font-size: clamp(27px, 3vw, 38px) !important;
+  line-height: 1.08 !important;
+  letter-spacing: 0 !important;
+  font-weight: 800 !important;
+  margin: 0 0 10px !important;
+}
+
+h2 {
+  color: var(--lf-ink) !important;
+  font-size: 20px !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+  font-weight: 800 !important;
+  margin: 24px 0 14px !important;
+}
+
+h3 {
+  color: var(--lf-ink) !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  margin: 0 0 14px !important;
+}
+
+.subtitle,
+p,
+.muted,
+.form-note,
+.address-search-note,
+.small,
+.links {
+  color: var(--lf-muted) !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
+.subtitle {
+  margin: 0 0 24px !important;
+}
+
+.row,
+.form-row {
+  display: flex;
+  gap: 14px !important;
+  flex-wrap: wrap;
+}
+
+.field,
+.form-group {
+  display: flex !important;
+  flex: 1 1 240px;
+  flex-direction: column;
+  margin: 0 0 16px !important;
+}
+
+.field span,
+.form-group label {
+  color: var(--lf-ink) !important;
+  display: block;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  margin: 0 0 7px !important;
+}
+
+.required {
+  color: var(--lf-green) !important;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+select,
+.otp-input {
+  width: 100% !important;
+  min-height: 44px;
+  padding: 11px 13px !important;
+  border: 1px solid var(--lf-border-2) !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  color: var(--lf-ink) !important;
+  font: inherit !important;
+  font-size: 14.5px !important;
+  outline: none !important;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+input:focus,
+select:focus,
+.otp-input:focus {
+  border-color: var(--lf-green) !important;
+  box-shadow: 0 0 0 3px rgba(31, 139, 87, .12) !important;
+}
+
+input[readonly] {
+  background: var(--lf-soft) !important;
+  color: var(--lf-muted) !important;
+}
+
+.pw-wrap {
+  position: relative;
+}
+
+.pw-toggle {
+  position: absolute !important;
+  right: 7px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  border: 1px solid var(--lf-border) !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  color: var(--lf-muted) !important;
+  padding: 0 !important;
+}
+
+.checkbox,
+.terms label,
+.checkbox-inline {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  margin: 10px 0 !important;
+  color: var(--lf-ink) !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.checkbox input,
+.terms input[type="checkbox"],
+.checkbox-inline input {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0 !important;
+  accent-color: var(--lf-green);
+  flex: 0 0 auto;
+}
+
+.btn,
+.step-page .btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 11px 18px !important;
+  border: 1px solid var(--lf-ink) !important;
+  border-radius: 8px !important;
+  background: var(--lf-ink) !important;
+  color: #fff !important;
+  cursor: pointer;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  text-decoration: none !important;
+  transition: opacity .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.card .btn,
+#submitBtn {
+  width: 100%;
+}
+
+.btn:hover,
+.step-page .btn:hover {
+  opacity: .92;
+}
+
+.btn-secondary,
+.step-page .btn-secondary,
+.btn-ghost {
+  background: #fff !important;
+  border-color: var(--lf-border-2) !important;
+  color: var(--lf-ink) !important;
+}
+
+.button-container,
+.button-row,
+.actions {
+  display: flex !important;
+  align-items: center;
+  gap: 10px !important;
+  flex-wrap: wrap;
+  margin-top: 18px !important;
+}
+
+.progress {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px !important;
+  margin: 0 0 28px !important;
+}
+
+.progress .step {
+  min-width: 0;
+  margin: 0 !important;
+  padding: 9px 8px !important;
+  border: 1px solid var(--lf-border) !important;
+  border-radius: 8px !important;
+  background: var(--lf-soft) !important;
+  color: var(--lf-muted) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  text-align: center;
+}
+
+.progress .step.active {
+  background: var(--lf-ink) !important;
+  border-color: var(--lf-ink) !important;
+  color: #fff !important;
+}
+
+.progress .step.completed {
+  background: rgba(31, 139, 87, .1) !important;
+  border-color: rgba(31, 139, 87, .28) !important;
+  color: var(--lf-green-dark) !important;
+}
+
+.info-box,
+.status-box,
+.note {
+  border: 1px solid rgba(31, 139, 87, .24) !important;
+  border-left: 4px solid var(--lf-green) !important;
+  border-radius: 8px !important;
+  background: #effaf4 !important;
+  color: var(--lf-success) !important;
+  padding: 12px 14px !important;
+  font-size: 13.5px !important;
+  line-height: 1.55 !important;
+}
+
+.status-box.bad,
+.msg.error,
+.msg.err,
+.error {
+  color: var(--lf-danger) !important;
+}
+
+.status-box.bad {
+  background: #fff1f3 !important;
+  border-color: #f5c2c7 !important;
+  border-left-color: var(--lf-danger) !important;
+}
+
+.status-box.ok,
+.msg.ok,
+.success {
+  color: var(--lf-success) !important;
+}
+
+.payment-forms {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+}
+
+.address-panel,
+.billing,
+.credit-card {
+  min-width: 0 !important;
+  border: 1px solid var(--lf-border) !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  padding: 18px !important;
+}
+
+.stripe-box {
+  min-height: 44px;
+  padding: 13px !important;
+  border: 1px solid var(--lf-border-2) !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+}
+
+.email-status {
+  margin-top: 7px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.email-status.ok {
+  color: var(--lf-success) !important;
+}
+
+.email-status.error {
+  color: var(--lf-danger) !important;
+}
+
+.input-success {
+  border-color: var(--lf-green) !important;
+}
+
+.input-error {
+  border-color: var(--lf-danger) !important;
+}
+
+.small a,
+.links a,
+.terms a,
+.resend {
+  color: var(--lf-green) !important;
+  font-weight: 800;
+  text-decoration: none !important;
+}
+
+.resend {
+  display: inline-block;
+  margin-top: 14px !important;
+  cursor: pointer;
+}
+
+.confetti,
+.icon {
+  color: var(--lf-green) !important;
+}
+
+@media (max-width: 760px) {
+  .page,
+  .section {
+    padding: 28px 18px 48px !important;
+  }
+
+  .card,
+  .step-page {
+    padding: 22px !important;
+  }
+
+  .progress {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .payment-forms {
+    grid-template-columns: 1fr;
+  }
+
+  .btn,
+  .step-page .btn,
+  .button-container .btn {
+    width: 100%;
+  }
+}

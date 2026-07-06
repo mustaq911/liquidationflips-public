@@ -1,10 +1,131 @@
 /* ==== Auth + Topnav wiring ==== */
 
-	/**  define new auth_API_BASE_URL 
-		avoid conflict with parent page variables 
+/* =========================================================================
+   Shared UI feedback helper — window.LF.busy()
+   Gives every button/link a consistent "working…" state so the user knows a
+   backend request is in flight (some calls are a touch slow). Minimal: a small
+   inline spinner + optional label, the control is disabled to block double
+   taps, and the original content is restored on completion.
+
+   Usage:
+     const stop = LF.busy(btn, 'Saving…');   // start
+     try { ...await fetch... } finally { stop(); }   // always restore
+   It is idempotent (calling busy twice is a no-op) and width-locked so the
+   button doesn't jump. Defined at top level so it exists on every page that
+   loads auth.js, even pages without a topnav.
+   ========================================================================= */
+(function () {
+  window.LF = window.LF || {};
+  if (window.LF.busy) return;
+
+  if (!document.getElementById('lf-ui-feedback-css')) {
+    var css = document.createElement('style');
+    css.id = 'lf-ui-feedback-css';
+    css.textContent =
+      '@keyframes lf-spin{to{transform:rotate(360deg)}}' +
+      '.lf-spinner{display:inline-block;width:1em;height:1em;border:2px solid currentColor;' +
+        'border-right-color:transparent;border-radius:50%;animation:lf-spin .6s linear infinite;' +
+        'box-sizing:border-box;flex:0 0 auto}' +
+      '.lf-is-loading{display:inline-flex!important;align-items:center;justify-content:center;' +
+        'gap:.5em;cursor:progress!important;opacity:.85}' +
+      '#lf-toast-wrap{position:fixed;top:16px;right:16px;z-index:99999;display:flex;flex-direction:column;' +
+        'gap:10px;max-width:min(360px,92vw);pointer-events:none}' +
+      '.lf-toast{pointer-events:auto;background:#fff;color:#16202e;font:600 13.5px/1.45 "Hanken Grotesk",' +
+        '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:12px 14px;border-radius:11px;' +
+        'border:1px solid #e6e8ec;border-left:4px solid #6b7480;box-shadow:0 12px 30px -12px rgba(22,32,46,.4);' +
+        'opacity:0;transform:translateY(-8px);transition:opacity .22s ease,transform .22s ease;cursor:pointer}' +
+      '.lf-toast.lf-toast-in{opacity:1;transform:none}' +
+      '.lf-toast-error{border-left-color:#c0453f}' +
+      '.lf-toast-success{border-left-color:#1f8b57}' +
+      '.lf-toast-info{border-left-color:#16202e}';
+    (document.head || document.documentElement).appendChild(css);
+  }
+
+  // Put a spinner (+ optional label) in a button/link and disable it.
+  // Returns stop() which restores the original content and state.
+  window.LF.busy = function (btn, label) {
+    if (!btn || btn.__lfBusy) return (btn && btn.__lfStop) || function () {};
+    btn.__lfBusy = true;
+
+    var canDisable = ('disabled' in btn);
+    var prevHtml = btn.innerHTML;
+    var prevDisabled = !!btn.disabled;
+    var prevPointer = btn.style.pointerEvents;
+    var prevMinW = btn.style.minWidth;
+
+    // Freeze current width so the label→spinner swap doesn't shrink the button.
+    var w = btn.getBoundingClientRect().width;
+    if (w) btn.style.minWidth = Math.ceil(w) + 'px';
+
+    btn.setAttribute('aria-busy', 'true');
+    btn.classList.add('lf-is-loading');
+    if (canDisable) btn.disabled = true; else btn.style.pointerEvents = 'none';
+
+    btn.innerHTML = '<span class="lf-spinner"></span>' +
+      (label ? '<span>' + label + '</span>' : '');
+
+    var stop = function () {
+      if (!btn.__lfBusy) return;
+      btn.__lfBusy = false;
+      btn.innerHTML = prevHtml;
+      btn.removeAttribute('aria-busy');
+      btn.classList.remove('lf-is-loading');
+      btn.style.minWidth = prevMinW;
+      if (canDisable) btn.disabled = prevDisabled; else btn.style.pointerEvents = prevPointer;
+    };
+    btn.__lfStop = stop;
+    return stop;
+  };
+
+  // Non-blocking toast notification (replaces alert()). type: 'error'|'success'|'info'.
+  window.LF.toast = function (message, type) {
+    var wrap = document.getElementById('lf-toast-wrap');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'lf-toast-wrap';
+      (document.body || document.documentElement).appendChild(wrap);
+    }
+    var t = document.createElement('div');
+    t.className = 'lf-toast lf-toast-' + (type || 'info');
+    t.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    t.textContent = (message == null ? '' : String(message));
+    wrap.appendChild(t);
+    requestAnimationFrame(function () { t.classList.add('lf-toast-in'); });
+    var hide = function () {
+      t.classList.remove('lf-toast-in');
+      setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 260);
+    };
+    var timer = setTimeout(hide, type === 'error' ? 5200 : 3400);
+    t.addEventListener('click', function () { clearTimeout(timer); hide(); });
+    return t;
+  };
+})();
+
+	/**  define new auth_API_BASE_URL
+		avoid conflict with parent page variables
 	*/
 	const auth_API_BASE_URL = CONFIG.API_BASE_URL;
   	console.log("API Base URL:", auth_API_BASE_URL);
+
+	/**
+	 * Dev servers like VS Code "Live Server" inject a websocket live-reload
+	 * <script> into every .html they serve. topnav/footer/leftpanel are HTML
+	 * *fragments* (no <body>), so that script gets inserted inside elements
+	 * (e.g. <svg>) and corrupts the markup — which was collapsing the nav and
+	 * hiding the Sign in / Register actions. These fragments contain no real
+	 * <script> of their own, so strip any injected scripts before using them.
+	 */
+	function stripInjectedScripts(html) {
+	  // These fragments (topnav/footer/leftpanel) contain NO real <script> of
+	  // their own — verified — so removing every <script> block is safe and
+	  // reliably kills any dev-server (Live Server) injection, wherever it lands
+	  // (it otherwise nests inside an <svg> and breaks the parser, dropping the
+	  // Sign in / Register actions). Also drop the Live Server marker comment.
+	  return String(html || '')
+	    .replace(/<script\b[\s\S]*?<\/script>/gi, '')
+	    .replace(/<script\b[^>]*\/?>/gi, '')
+	    .replace(/<!--\s*Code injected by live-server[\s\S]*?-->/gi, '');
+	}
 	
 		// const qs = (s, r=document) => r.querySelector(s);
 		const qsauth = (s, r=document) => r.querySelector(s);
@@ -18,12 +139,22 @@
 	  const container = document.getElementById('topnavContainer');
 	  if (!container) return;
 	
-	  const res = await fetch('topnav.html');
-	  container.innerHTML = await res.text();
+	  // Absolute path so injection works from any page depth.
+	  const res = await fetch('/topnav.html');
+	  container.innerHTML = stripInjectedScripts(await res.text());
 	  
 	  // Calling Lef-Panel
 	  await initLeftPanel(); 	 // your existing function
 	  await initFooter();      // ✅ add this line
+
+	  // Load the shared account drawer (Bids / Watchlist / Cart / Orders) once.
+	  if (!document.querySelector('script[data-account-drawer]')) {
+		const ad = document.createElement('script');
+		ad.src = '/js/account-drawer.js';
+		ad.defer = true;
+		ad.setAttribute('data-account-drawer', '1');
+		document.body.appendChild(ad);
+	  }
 	  
 	  
 	  // 🔁 Re-query modal & nav elements AFTER topnav is injected
@@ -48,6 +179,11 @@
 	  const userMenu     = document.getElementById('userMenu');
 	  const userDropdown = document.getElementById('userDropdown');
 	  const userEmailShort = document.getElementById('userEmailShort');
+
+	  // Display-only nav elements (new design): Register button + dropdown header
+	  const registerLink = document.getElementById('registerLink');
+	  const udName       = document.getElementById('udName');
+	  const udEmail      = document.getElementById('udEmail');
 	  
 	  // 🔐 Topnav Forget Pasword UI
 	  const fpOverlay = document.getElementById('fpOverlay');
@@ -69,6 +205,12 @@
 		caret?.addEventListener('click', (e) => {
 		  e.stopPropagation();
 		  userDropdown?.classList.toggle('hidden');
+		});
+
+		// Close the account dropdown when clicking anywhere outside it.
+		document.addEventListener('click', (e) => {
+		  if (!userMenu || !userDropdown || userDropdown.classList.contains('hidden')) return;
+		  if (!userMenu.contains(e.target)) userDropdown.classList.add('hidden');
 		});
 
 		
@@ -188,6 +330,7 @@
 				return;
 			  }
 
+			  const stopFp = window.LF.busy(document.getElementById('fpSubmit'), 'Sending…');
 			  try {
 				const res = await fetch(`${auth_API_BASE_URL}/auth/password/forgot`, {
 				  method: 'POST',
@@ -205,6 +348,8 @@
 				showForgotSuccess(data.message || 'If the email exists, we sent a reset link.');
 			  } catch (err) {
 				showForgotError('Network error. Please try again.');
+			  } finally {
+				stopFp();
 			  }
 			});
 
@@ -223,7 +368,8 @@
 				showAuthError('Please enter your email and password.');
 				return;
 			  }
-  
+
+			  const stopBusy = window.LF.busy(document.getElementById('authSubmit'), 'Signing in…');
 			  try {
 				const res = await fetch(`${auth_API_BASE_URL}/user/login`, {
 				  method: 'POST',
@@ -265,6 +411,7 @@
 					  resendLink?.addEventListener('click', async (ev) => {
 						ev.preventDefault();
 
+						const stopResend = window.LF.busy(ev.currentTarget, 'Sending…');
 						try {
 						  const resendRes = await fetch(`${auth_API_BASE_URL}/user/resend-verification`, {
 							method: 'POST',
@@ -284,6 +431,8 @@
 						  showAuthSuccess(result.message || 'Verification email sent successfully.');
 						} catch (err) {
 						  showAuthError('Failed to resend verification email.');
+						} finally {
+						  stopResend();
 						}
 					  }, { once: true });
 
@@ -316,18 +465,63 @@
 
 			  } catch (err) {
 				showAuthError('Network error. Please try again.');
+			  } finally {
+				stopBusy();
 			  }
 			});
-		
+
 		  /* END OF LOGIN SUBMIT  */
 
+		  // Decode a JWT and return true only if it carries an `exp` claim that is
+		  // already in the past. Non-JWT / unparseable tokens are treated as NOT
+		  // expired so we never wrongly log someone out.
+		  function tokenExpired(tok) {
+			try {
+			  const part = (tok || '').split('.')[1];
+			  if (!part) return false;
+			  const json = JSON.parse(atob(part.replace(/-/g, '+').replace(/_/g, '/')));
+			  if (!json || typeof json.exp !== 'number') return false;
+			  return (json.exp * 1000) <= Date.now();
+			} catch (e) { return false; }
+		  }
+
+		  // Clears a stale/expired session so the signed-out nav (Sign in / Register)
+		  // shows again instead of being masked by a dead token.
+		  function purgeExpiredSession() {
+			const tok = localStorage.getItem('token');
+			if (tok && tokenExpired(tok)) {
+			  localStorage.removeItem('token');
+			  localStorage.removeItem('userid');
+			  localStorage.removeItem('username');
+			  return true;
+			}
+			return false;
+		  }
+
 		  function isLoggedIn() {
-			return !!localStorage.getItem('token');
+			const tok = localStorage.getItem('token');
+			const uid = localStorage.getItem('userid');
+			// Require a token AND a user id, and the token must not be expired.
+			// A token with no userid is a broken half-session → treat as logged out.
+			return !!tok && !!uid && !tokenExpired(tok);
 		  }
 	
 		
 		  function updateTopnavUI() {
-			  
+
+			// Escape hatch: /any-page?logout=1 clears the session (handy when a
+			// stale token from testing is masking the Sign in / Register buttons).
+			try {
+			  if (new URLSearchParams(window.location.search).get('logout') === '1') {
+				localStorage.removeItem('token');
+				localStorage.removeItem('userid');
+				localStorage.removeItem('username');
+			  }
+			} catch (e) {}
+
+			// Drop a dead/expired token first so Sign in / Register reappear.
+			purgeExpiredSession();
+
 			const username = localStorage.getItem('username') || 'User';
 			
 			
@@ -335,19 +529,26 @@
 			
 			if (isLoggedIn()) {
 			  signInLink?.classList.add('hidden');
+			  registerLink?.classList.add('hidden');       // 👈 hide Register when signed in
 				  // greetUser?.classList.remove('hidden');
 				  // bidsLink?.classList.remove('hidden');
 				  // watchLink?.classList.remove('hidden');
-		      userMenu?.classList.remove('hidden');        // 👈 show menu
-			  
+		      userMenu?.classList.remove('hidden');
+			      cartLink?.classList.remove('hidden');        // show cart when signed in        // 👈 show menu
+
 			  signOutLinkDrop?.classList.remove('hidden');
-			  
+
 			  if (greetUser && userEmailShort) {
 				  userEmailShort.textContent = shortName;
 			  }
+			  // Dropdown header (display only)
+			  if (udName)  udName.textContent  = shortName;
+			  if (udEmail) udEmail.textContent = localStorage.getItem('email') || localStorage.getItem('userEmail') || shortName;
 			} else {
 			  signInLink?.classList.remove('hidden');
+			  registerLink?.classList.remove('hidden');     // 👈 show Register when signed out
 			  userMenu?.classList.add('hidden');   // 👈 hide menu when logged out
+			  cartLink?.classList.add('hidden');   // 👈 hide cart when logged out
 			  signOutLinkDrop?.classList.add('hidden');
 			}
 			
@@ -389,8 +590,9 @@
 		  
 		  cartLink?.addEventListener('click', (e) => {
 			  e.preventDefault();
-			  // either open a modal or redirect:
-			  window.location.href = '/cart.html';
+			  if (!isLoggedIn()) { openModal(); return; }
+			  if (typeof window.openAccountDrawer === 'function') window.openAccountDrawer('cart');
+			  else window.location.href = '/cart.html';
 		  });
 		  
 		  // Open modal on "SIGN IN / REGISTER"
@@ -402,16 +604,23 @@
 		  //====  End of signLink
 	
 		  
-		  // Gate BIDS / WATCHLIST behind login
-		  [bidsLink, watchLink].forEach(link => {
+		  // Account dropdown items open the shared account drawer.
+		  // The href on each link is kept as a deep-link / no-JS fallback.
+		  const ordersLink   = document.getElementById('ordersLink');
+		  const cartMenuLink = document.getElementById('cartMenuLink');
+		  function openDrawerOr(tab) {
+			if (!isLoggedIn()) { openModal(); return; }
+			if (typeof window.openAccountDrawer === 'function') window.openAccountDrawer(tab);
+			// else: allow the href to navigate to the full page (fallback)
+		  }
+		  [[bidsLink, 'bids'], [watchLink, 'watch'], [ordersLink, 'orders'], [cartMenuLink, 'cart']].forEach(pair => {
+			const link = pair[0], tab = pair[1];
 			link?.addEventListener('click', (e) => {
-			  if (!isLoggedIn()) {
-				e.preventDefault(); 
-				openModal(); 
-			  }
+			  if (!isLoggedIn() || typeof window.openAccountDrawer === 'function') e.preventDefault();
+			  openDrawerOr(tab);
 			});
 		  });
-		  //  End of Bids & WATCHLIST Link
+		  //  End of account dropdown → drawer
 
 		  // Sign out
 		  signOutLinkDrop?.addEventListener('click', (e) => {
@@ -445,6 +654,11 @@
 			  if (justRegistered) {
 				showAuthSuccess('Registration completed successfully. Please log in.');
 			  }
+			} else if (justRegistered && isLoggedIn()) {
+			  // Registration finished and the user is already signed in — welcome
+			  // them instead of asking them to log in again.
+			  if (window.LF && typeof LF.toast === 'function')
+				LF.toast('🎉 Registration complete — welcome to Liquidation Flips!', 'success');
 			}
 			
 		  /* === Public API + ready signal === */
@@ -513,7 +727,7 @@ async function initLeftPanel() {
 
   // 3) Load HTML
   const res = await fetch('/leftpanel.html');
-  leftContainer.innerHTML = await res.text();
+  leftContainer.innerHTML = stripInjectedScripts(await res.text());
   
    // ✅ after "leftpanel.html" is injected
   await loadLeftPanelWarehouses();
@@ -629,9 +843,9 @@ async function initFooter() {
   const shadow = host.shadowRoot || host.attachShadow({ mode: "open" });
 
   try {
-    // Load footer html
+    // Load footer html (strip any dev-server injected live-reload script)
     const res = await fetch("/footer.html");
-    const html = await res.text();
+    const html = stripInjectedScripts(await res.text());
 
     // IMPORTANT: load Bootstrap *inside* shadow so it won't affect the page
     shadow.innerHTML = `
@@ -639,6 +853,26 @@ async function initFooter() {
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
       ${html}
     `;
+
+    // Wire the newsletter subscribe form (client-side confirmation for now).
+    // TODO(backend): POST the email to a real subscribe endpoint.
+    try {
+      const form = shadow.querySelector('.lf-newsform');
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          const input = form.querySelector('input');
+          const email = (input && input.value || '').trim();
+          if (!email || email.indexOf('@') < 0) { if (input) input.focus(); return; }
+          const wrap = form.parentElement;
+          form.style.display = 'none';
+          const ok = document.createElement('div');
+          ok.style.cssText = 'font-size:13.5px;font-weight:700;color:#1f8b57;padding:9px 2px;';
+          ok.textContent = "✓ You're subscribed — watch your inbox.";
+          if (wrap) wrap.insertBefore(ok, form.nextSibling);
+        });
+      }
+    } catch (e) { /* non-fatal */ }
 
     window.dispatchEvent(new Event("footer:ready"));
   } catch (err) {
