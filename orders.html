@@ -29,7 +29,7 @@
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
     a{text-decoration:none;color:inherit}
 
-    .page{max-width:1180px;margin:0 auto;padding:22px;}
+    .page{max-width:1400px;margin:0 auto;padding:24px 28px 40px;box-sizing:border-box;}
     .row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
     .card{
@@ -43,16 +43,16 @@
     .hero{
       display:flex;align-items:flex-start;gap:14px;
       padding:16px 18px;border-radius:var(--radius);
-      border:1px solid rgba(14,165,233,.25);
-      background:rgba(14,165,233,.06);
+      border:1px solid var(--border);
+      background:#f5f8f6;
       margin-bottom:16px;
     }
     .heroIcon{
       width:44px;height:44px;border-radius:12px;
       display:grid;place-items:center;
-      background:rgba(14,165,233,.16);
-      border:1px solid rgba(14,165,233,.25);
-      color:#0369a1;
+      background:rgba(31,139,87,.12);
+      border:1px solid rgba(31,139,87,.20);
+      color:var(--brand);
       font-size:18px;
       flex:0 0 auto;
     }
@@ -68,13 +68,14 @@
       white-space:nowrap;
     }
     .pill strong{color:var(--text)}
+    .pill i{color:var(--brand)}
     .pill.success{border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.05)}
     .pill.success i{color:var(--success)}
     .pill.warn{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.06)}
     .pill.warn i{color:var(--warn)}
     .pill.danger{border-color:rgba(220,38,38,.35);background:rgba(220,38,38,.06)}
     .pill.danger i{color:var(--danger)}
-    .pill.info{border-color:rgba(31,139,87,.30);background:rgba(31,139,87,.05)}
+    .pill.info{border-color:var(--border);background:#fff}
     .pill.info i{color:var(--brand)}
 
     .toolbar{
@@ -110,13 +111,12 @@
       background:#fff;
     }
     .kpi .label{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
+    .kpi .label i{color:var(--brand)}
     .kpi .val{font-size:18px;font-weight:900;margin-top:6px}
     .kpi .hint{font-size:12px;color:var(--muted);margin-top:4px}
 
-    .kpi.green{border:1px solid rgba(22,163,74,.25);background:rgba(22,163,74,.06)}
-    .kpi.blue{border:1px solid rgba(31,139,87,.22);background:rgba(31,139,87,.05)}
-    .kpi.red{border:1px solid rgba(220,38,38,.25);background:rgba(220,38,38,.06)}
-    .kpi.amber{border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.07)}
+    /* One neutral tile treatment — colour comes only from the green icon. */
+    .kpi.green,.kpi.blue,.kpi.red,.kpi.amber{border:1px solid var(--border);background:#fff}
 
     table{width:100%;border-collapse:collapse;font-size:13px}
     th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;vertical-align:middle}

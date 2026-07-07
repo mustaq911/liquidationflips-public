@@ -37,15 +37,23 @@
     return isNaN(t.getTime()) ? '—' : t.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
-  var overlay, panel, bodyEl, footerEl, searchInput, statusSel, closeBtn;
+  var overlay, panel, bodyEl, footerEl, searchInput, statusSel, closeBtn, viewAll;
   var activeTab = 'bids';
+
+  // Full-page destination + label for each tab's "Open full page" link.
+  var FULL_PAGE = {
+    bids:   { href: '/my-bids.html',   label: 'Open full Bids page' },
+    watch:  { href: '/watchlist.html', label: 'Open full Watchlist page' },
+    cart:   { href: '/cart.html',      label: 'Open full Cart page' },
+    orders: { href: '/orders.html',    label: 'Open full Orders page' }
+  };
   var RAW = {};        // tab -> raw array/object
   var seq = 0;         // guards against out-of-order async renders
 
   function els() {
     overlay = $('adOverlay'); panel = $('adPanel'); bodyEl = $('adBody');
     footerEl = $('adFooter'); searchInput = $('adSearch'); statusSel = $('adStatus');
-    closeBtn = $('adClose');
+    closeBtn = $('adClose'); viewAll = $('adViewAll');
   }
 
   /* ---- open / close ---- */
@@ -73,6 +81,11 @@
       b.classList.toggle('on', b.getAttribute('data-adtab') === tab);
     });
     if (searchInput) searchInput.value = '';
+    if (viewAll) {
+      var fp = FULL_PAGE[tab] || FULL_PAGE.bids;
+      viewAll.setAttribute('href', fp.href);
+      viewAll.firstChild.nodeValue = fp.label + ' ';
+    }
     if (statusSel) statusSel.style.display = (tab === 'orders') ? '' : 'none';
     if (footerEl) footerEl.style.display = 'none';
     load(tab);
@@ -84,7 +97,8 @@
   function rowHTML(o) {
     var thumb = '<div class="ad-thumb"' + (o.photo ? ' style="background-image:url(\'' + esc(o.photo) + '\')"' : '') + '></div>';
     var right = '<div class="ad-rright"><div class="ad-rval">' + (o.right || '') + '</div>' +
-      (o.status ? '<div class="ad-status ' + o.status.cls + '">' + esc(o.status.label) + '</div>' : '') + '</div>';
+      (o.status ? '<div class="ad-status ' + o.status.cls + '">' + esc(o.status.label) + '</div>' : '') +
+      (o.action || '') + '</div>';
     var mid = '<div class="ad-rmid"><div class="ad-rtitle">' + esc(o.title) + '</div>' +
       (o.sub ? '<div class="ad-rsub">' + esc(o.sub) + '</div>' : '') + '</div>';
     var inner = thumb + mid + right;
@@ -133,13 +147,87 @@
                  (mine != null && p.highestBid != null && Number(mine) >= Number(p.highestBid));
       var st = ended ? (high ? { label: 'Won', cls: 'ok' } : { label: 'Lost', cls: 'mut' })
                      : (high ? { label: 'Winning', cls: 'ok' } : { label: 'Outbid', cls: 'bad' });
+      // Quick Bid only when you're outbid on a still-live auction.
+      var canQuick = !ended && !high && p.highestBid != null && p.id != null;
+      var action = canQuick
+        ? '<button type="button" class="ad-qb" data-qbid="' + p.id + '" data-high="' + p.highestBid + '">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="#1f8b57"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg>' +
+            '<span>Quick Bid</span></button>'
+        : '';
       return rowHTML({
         photo: p.imageUrl, title: p.title || 'Untitled',
         sub: cat + ' · Lot #' + (p.id != null ? p.id : '—'),
-        right: money(p.highestBid), status: st,
+        right: money(p.highestBid), status: st, action: action,
         href: '/product-view.html?id=' + p.id
       });
     }).join('');
+    wireQuickBids();
+  }
+
+  // Next allowed bid = current highest + server increment (same endpoint the
+  // homepage quick-bid uses). Cached by highest amount so re-renders (e.g. while
+  // typing in search) don't refetch. Returns a Promise resolving to the amount.
+  var INC_CACHE = {};
+  function nextMinBid(highest) {
+    var key = String(highest);
+    if (INC_CACHE[key] != null) return Promise.resolve(INC_CACHE[key]);
+    return fetch(API + '/bids/increment?amount=' + encodeURIComponent(highest), { headers: authHeaders() })
+      .then(function (r) {
+        if (!r.ok) throw 0;
+        var ct = r.headers.get('content-type') || '';
+        return ct.indexOf('json') >= 0 ? r.json() : r.text().then(parseFloat);
+      })
+      .then(function (inc) {
+        inc = Number(inc);
+        if (!isFinite(inc)) throw 0;
+        var min = Number(highest) + inc;
+        INC_CACHE[key] = min;
+        return min;
+      });
+  }
+
+  function placeBid(productId, amount) {
+    return fetch(API + '/bids', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+      body: JSON.stringify({ productId: parseInt(productId, 10), userId: parseInt(userId(), 10), bidAmount: Number(amount) })
+    }).then(function (r) {
+      if (!r.ok) return r.text().then(function (t) { throw new Error(t || 'bid_failed'); });
+      return r.json();
+    });
+  }
+
+  function toast(msg, type) { if (window.LF && typeof LF.toast === 'function') LF.toast(msg, type); }
+
+  // Load each Quick Bid button's amount, and wire it to place the bid.
+  function wireQuickBids() {
+    Array.prototype.forEach.call(bodyEl.querySelectorAll('.ad-qb'), function (btn) {
+      var high = Number(btn.getAttribute('data-high'));
+      var labelEl = btn.querySelector('span');
+
+      nextMinBid(high).then(function (min) {
+        btn.dataset.amt = String(min);
+        if (labelEl) labelEl.textContent = 'Quick Bid ' + money(min);
+      }).catch(function () { /* keep the plain "Quick Bid" label */ });
+
+      btn.addEventListener('click', function (ev) {
+        ev.preventDefault();       // the row is a link — don't navigate
+        ev.stopPropagation();
+        var pid = btn.getAttribute('data-qbid');
+        var amt = Number(btn.dataset.amt || 0);
+        if (!amt) { toast('One moment — still loading the bid amount…', 'info'); return; }
+
+        var stop = (window.LF && LF.busy) ? LF.busy(btn, 'Bidding…') : function () {};
+        placeBid(pid, amt).then(function (prod) {
+          if (prod && prod.isAutoOutbid && String(prod.isAutoOutbid).trim() !== '') toast(prod.isAutoOutbid, 'error');
+          else toast('✅ Bid placed!', 'success');
+          load('bids');            // refresh statuses/amounts (re-renders the list)
+        }).catch(function (err) {
+          toast('❌ ' + ((err && err.message) || 'Bid failed'), 'error');
+          stop();
+        });
+      });
+    });
   }
 
   // WATCHLIST

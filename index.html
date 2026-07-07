@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Liquidation Flips</title>
-  <link href="/img/logo-small.jpg" rel="icon">
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 
   <!-- Brand font: Hanken Grotesk (final design uses one sans family) -->
@@ -49,11 +49,15 @@
     .lf-hero-title span{color:#1f8b57}
     .lf-hero{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
     .lf-hero-sub{font-size:15px;line-height:1.6;color:#6b7480;margin:0 0 18px;max-width:480px}
-    .lf-hilite{min-height:60px}
+    .lf-hilite{min-height:66px}
     .lf-hilite-row{display:flex;align-items:flex-start;gap:11px}
     .lf-hilite-dot{flex-shrink:0;width:8px;height:8px;border-radius:999px;background:#1f8b57;margin-top:6px}
-    .lf-hilite-t{font-weight:700;font-size:16px;color:#16202e;line-height:1.3}
-    .lf-hilite-s{font-size:13.5px;color:#6b7480;line-height:1.5;margin-top:2px}
+    /* Fixed 1-line title + 2-line subtitle so the hero height never changes as
+       slides (with different-length copy) rotate — esp. in tablet/narrow views. */
+    .lf-hilite-t{font-weight:700;font-size:16px;color:#16202e;line-height:1.3;
+      display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
+    .lf-hilite-s{font-size:13.5px;color:#6b7480;line-height:1.5;margin-top:2px;min-height:41px;
+      display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
     .lf-dots{display:flex;gap:6px;margin-top:16px}
     .lf-dots button{height:7px;width:7px;border-radius:999px;border:none;cursor:pointer;padding:0;background:#d7dbe0;transition:width .35s ease,background .35s ease}
     .lf-dots button.on{width:22px;background:#1f8b57}
@@ -108,9 +112,14 @@
     .lf-watch-out{border:1px solid #dfe2e6;background:#fff;color:#16202e}
     .lf-watch-out.active{border-color:#1f8b57;color:#1f8b57;background:rgba(31,139,87,.06)}
     .lf-quick{border:1px solid #dfe2e6;background:#fff;color:#16202e}
+    /* Keep the quick-bid label on one line so status/label swaps never resize the card */
+    .lf-quick [data-bind="quickBidText"]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
     /* Bid-status chip — pill + coloured dot, bottom-left (matches the design 1:1) */
     .lf-card.wonFrame{border-color:#1f8b57;box-shadow:0 0 0 1px #1f8b57,0 12px 32px -20px rgba(31,139,87,.5)}
+    /* Outbid / losing: subtle red ring + red type badge so it reads at a glance */
+    .lf-card.losingFrame{border-color:#c0453f;box-shadow:0 0 0 1px #c0453f,0 12px 32px -20px rgba(192,69,63,.45)}
+    .lf-card.losingFrame .lf-typebadge{background:#fbeceb!important;color:#c0453f!important}
     .wonBadge{position:absolute;left:14px;bottom:14px;top:auto;right:auto;z-index:3;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:999px;box-shadow:0 4px 14px -6px rgba(22,32,46,.5)}
     .wonBadge .wonDot{width:6px;height:6px;border-radius:999px;background:currentColor;flex:0 0 auto}
     .wonBadge.isWinning,.wonBadge.isWon{background:#eef6f1;color:#1f8b57}
@@ -491,7 +500,7 @@
 	  label.textContent = amt ? `Quick Bid ${formatPrice(amt)}` : 'Quick Bid';
 	}
 
-	function wireWonHover(btn, msg = "🏆 You are currently winning this item.") {
+	function wireWonHover(btn, msg = "🏆 You're winning") {
 	  if (!btn) return;
 	  if (btn._wonHoverWired) return;
 
@@ -569,16 +578,12 @@
     // ✅ Shared Quick Bid Validation
     // ============================
     function showQbMessage(el, text, type = "info", autoHideMs = 0) {
-      if (!el) return;
-      el.classList.remove('hidden');
-      el.className = 'qbMsg'; // reset
-      if (type === "ok") el.classList.add('ok');
-      if (type === "err") el.classList.add('err');
-      el.textContent = text;
-
-      if (autoHideMs > 0) {
-        setTimeout(() => el.classList.add('hidden'), autoHideMs);
-      }
+      // Quick-bid feedback now floats as a toast instead of expanding an inline
+      // box under the button — so the card never changes height. "info" messages
+      // (e.g. "Placing bid…") are skipped since the button already shows a spinner.
+      if (type === "info") return;
+      const t = (type === "err") ? "error" : "success";
+      if (window.LF && typeof LF.toast === "function") LF.toast(text, t);
     }
 
     function isAuctionEnded(auctionEndIso) {
@@ -1007,8 +1012,9 @@
 	  if (iWon)                status = ended ? 'won' : 'winning';
 	  else if (iBid && !ended) status = 'losing';
 
-	  // frame (green highlight only while you're ahead)
+	  // frame: green while you're ahead, subtle red while you're outbid (live).
 	  containerNode.classList.toggle('wonFrame', !!iWon);
+	  containerNode.classList.toggle('losingFrame', status === 'losing');
 
 	  // badge (rendered bottom-left; never overlaps the top-right watchlist button)
 	  let badge = containerNode.querySelector('.wonBadge');
@@ -1045,7 +1051,7 @@
 		// store the normal label BEFORE we start swapping it on hover
 		// qbBtn.dataset.normalHtml = qbBtn.dataset.normalHtml || qbBtn.innerHTML;
 
-		wireWonHover(qbBtn, "🏆 You are currently winning this item.");
+		wireWonHover(qbBtn, "🏆 You're winning");
 		if (!qbBtn._wonHoverActive) setQuickBidLabelFromAmount(qbBtn);
 
 	  } else {
@@ -1447,7 +1453,7 @@
       card.innerHTML =
         '<div class="thumb" style="position:relative;overflow:hidden;background:#f3f4f6;">' +
           '<div class="lf-img clickable-img" style="position:relative;aspect-ratio:4/3;background-position:center;background-size:cover;background-image:url(\'' + d.img + '\');cursor:pointer;"></div>' +
-          '<span style="position:absolute;left:14px;top:14px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 11px;border-radius:6px;' + d.badgeStyle + '">' + d.badgeText + '</span>' +
+          '<span class="lf-typebadge" style="position:absolute;left:14px;top:14px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 11px;border-radius:6px;' + d.badgeStyle + '">' + d.badgeText + '</span>' +
           '<button data-watch="' + p.id + '" type="button" class="lf-btn lf-card-watch hidden" title="Watchlist" style="position:absolute;right:13px;top:13px;width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;">' +
             '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="2.6"></circle></svg></button>' +
         '</div>' +
@@ -1502,7 +1508,7 @@
 
       row.innerHTML =
         '<div class="listThumb lf-img clickable-img" style="position:relative;width:210px;flex-shrink:0;background:#f3f4f6;background-image:url(\'' + d.img + '\');background-position:center;background-size:cover;overflow:hidden;cursor:pointer;">' +
-          '<span style="position:absolute;left:13px;top:13px;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:6px;' + d.badgeStyle + '">' + d.badgeText + '</span>' +
+          '<span class="lf-typebadge" style="position:absolute;left:13px;top:13px;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:6px;' + d.badgeStyle + '">' + d.badgeText + '</span>' +
         '</div>' +
         '<div style="flex:1;min-width:0;padding:18px 22px;display:flex;flex-direction:column;">' +
           '<div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#97a0ab;margin-bottom:4px;">' + d.catUpper + '</div>' +

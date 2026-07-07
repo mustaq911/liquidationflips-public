@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <title>My Cart - Liquidation Flips</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
   <style>
-    :root {
+    :root{
       --bg:#EAF0EC;
       --panel:#ffffff;
       --text:#111827;
@@ -15,269 +15,231 @@
       --brand:#1F8B57;
       --brand-2:#177045;
       --border:#e5e7eb;
-      --danger:#dc2626;
+
       --success:#16a34a;
+      --danger:#dc2626;
+      --warn:#f59e0b;
+      --chip:#0ea5e9;
+
+      --shadow: 0 16px 40px rgba(15,23,42,0.07);
+      --radius: 16px;
     }
     *{box-sizing:border-box}
-    html,body{
-      margin:0;padding:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
     a{text-decoration:none;color:inherit}
 
-    .page{
-      max-width:1200px;
-      margin:0 auto;
-      padding:20px;
-    }
-
-    .header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:18px;
-      flex-wrap:wrap;
-    }
-    .header-title{
-      font-size:26px;
-      font-weight:800;
-      letter-spacing:.2px;
-    }
-    .header-sub{
-      color:var(--muted);
-      font-size:13px;
-      margin-top:4px;
-    }
-    .chip{
-      background:#eaf6ff;
-      color:#075985;
-      border-radius:999px;
-      padding:6px 10px;
-      border:1px solid #cde9ff;
-      font-size:12px;
-      font-weight:600;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-    }
-
-    .layout{
-      display:grid;
-      grid-template-columns:1.2fr .8fr;
-      gap:18px;
-    }
-    @media(max-width:900px){
-      .layout{grid-template-columns:1fr;}
-    }
+    .page{max-width:1400px;margin:0 auto;padding:24px 28px 40px;box-sizing:border-box;}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
     .card{
       background:var(--panel);
-      border-radius:14px;
       border:1px solid var(--border);
+      border-radius:var(--radius);
       padding:16px;
-      box-shadow:0 16px 40px rgba(15,23,42,0.08);
+      box-shadow:var(--shadow);
     }
 
-    .card h3{
-      margin:0 0 10px 0;
-      font-size:18px;
-	  font-weight: 800;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:13px;
-    }
-    th,td{
-      border-bottom:1px solid var(--border);
-      padding:8px 6px;
-      text-align:left;
-      vertical-align:middle;
-    }
-    th{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:.06em;
-      color:var(--muted);
-    }
-
-    .cart-product{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .cart-product img{
-      width:48px;
-      height:48px;
-      border-radius:8px;
+    .hero{
+      display:flex;align-items:flex-start;gap:14px;
+      padding:16px 18px;border-radius:var(--radius);
       border:1px solid var(--border);
-      object-fit:cover;
+      background:#f5f8f6;
+      margin-bottom:16px;
     }
-    .cart-product-title{font-weight:600;font-size:14px;}
-    .cart-product-sub{font-size:12px;color:var(--muted);margin-top:2px;}
-
-    .qty-actions{
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:8px;
-      white-space:nowrap;
-    }
-    .qty-control{
-      display:inline-flex;
-      align-items:center;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:#f9fafb;
-      padding:2px 6px;
-      gap:2px;
-    }
-    .qty-btn{
-      border:none;
-      background:transparent;
-      cursor:pointer;
-      width:22px;
-      height:22px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      font-size:11px;
-      color:#4b5563;
-    }
-    .qty-value{
-      min-width:18px;
-      text-align:center;
-      font-size:13px;
-      font-weight:600;
-    }
-    .btn-remove{
-      border:none;
-      background:transparent;
-      color:var(--danger);
-      font-size:12px;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      padding:4px 6px;
-      border-radius:999px;
-    }
-    .btn-remove:hover{background:#fef2f2;}
-
-    .stock-hint{
-      font-size:11px;
-      color:var(--muted);
-      margin-top:2px;
-    }
-    .stock-low{color:#b45309;font-weight:500;}
-
-    .totals-row{
-      display:flex;
-      justify-content:space-between;
-      margin:6px 0;
-      font-size:14px;
-    }
-    .totals-label{color:var(--muted);}
-    .totals-value{font-weight:700;}
-    .totals-grand{
+    .heroIcon{
+      width:44px;height:44px;border-radius:12px;
+      display:grid;place-items:center;
+      background:rgba(31,139,87,.12);
+      border:1px solid rgba(31,139,87,.20);
+      color:var(--brand);
       font-size:18px;
-      font-weight:800;
-      margin-top:6px;
+      flex:0 0 auto;
     }
+    h1{font-size:22px;margin:0 0 6px;}
+    .muted{color:var(--muted);font-size:13px;line-height:1.45}
 
-    .btn{
-      padding:10px 14px;
-      border-radius:8px;
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
       border:1px solid var(--border);
       background:#fff;
-      cursor:pointer;
-      font-weight:600;
-      font-size:14px;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
+      font-size:12px;color:var(--muted);
+      white-space:nowrap;
     }
-    .btn-primary{
-      background:var(--brand);
-      color:#fff;
-      border-color:var(--brand);
-    }
-    .btn-primary:hover{background:var(--brand-2);}
-    .btn-ghost{
-      background:transparent;
-    }
-    .btn-block{
-      width:100%;
-      justify-content:center;
-      text-align:center;
-    }
-    .btn-row{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
+    .pill strong{color:var(--text)}
+    .pill i{color:var(--brand)}
+    .pill.info{border-color:var(--border);background:#fff}
+
+    .toolbar{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;
       margin-top:10px;
     }
-    @media(min-width:700px){
-      .btn-row{
-        flex-direction:row;
-        justify-content:space-between;
-      }
-      .btn-row .btn-block{width:auto;}
+    .input{
+      background:#fff;border:1px solid var(--border);
+      border-radius:12px;padding:10px 12px;
+      font-size:13px;outline:none;
+      min-width:220px;
     }
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;cursor:pointer;
+      font-weight:800;font-size:13px;
+      white-space:nowrap;
+    }
+    .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .btn-primary:hover{background:var(--brand-2)}
+    .btn-danger{border-color:var(--border);background:#fff;color:var(--muted)}
+    .btn-danger:hover{color:#b91c1c;border-color:#e7c3c3}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0;}
+    @media(max-width:950px){.kpis{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:520px){.kpis{grid-template-columns:1fr}}
+
+    .kpi{
+      border-radius:var(--radius);
+      padding:14px;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+    .kpi .label{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
+    .kpi .label i{color:var(--brand)}
+    .kpi .val{font-size:18px;font-weight:900;margin-top:6px}
+    .kpi .hint{font-size:12px;color:var(--muted);margin-top:4px}
+    /* One neutral tile treatment — colour comes only from the green icon. */
+    .kpi.blue,.kpi.green,.kpi.amber,.kpi.red{border:1px solid var(--border);background:#fff}
+
+    .layout{display:grid;grid-template-columns:1.4fr .8fr;gap:16px;}
+    @media(max-width:900px){.layout{grid-template-columns:1fr;}}
+
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;vertical-align:middle}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+    .tdRight{text-align:right}
+
+    .prod{display:flex;align-items:center;gap:10px}
+    .thumb{
+      width:46px;height:46px;border-radius:12px;
+      background:linear-gradient(135deg, rgba(31,139,87,.12), rgba(14,165,233,.10));
+      border:1px solid rgba(31,139,87,.15);
+      overflow:hidden;flex:0 0 auto;display:grid;place-items:center;color:#1f2937;
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .pTitle{font-weight:900;font-size:13px}
+    .pSub{font-size:12px;color:var(--muted);margin-top:2px}
+    .stock-hint{font-size:11px;color:var(--muted);margin-top:2px}
+    .stock-low{color:#b45309;font-weight:700}
+
+    .qty-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;white-space:nowrap}
+    .qty-control{
+      display:inline-flex;align-items:center;border-radius:999px;
+      border:1px solid var(--border);background:#f9fafb;padding:2px 6px;gap:2px;
+    }
+    .qty-btn{
+      border:none;background:transparent;cursor:pointer;width:24px;height:24px;
+      display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#4b5563;
+    }
+    .qty-value{min-width:20px;text-align:center;font-size:13px;font-weight:800}
+
+    .totals-row{display:flex;justify-content:space-between;margin:8px 0;font-size:13px}
+    .totals-label{color:var(--muted)}
+    .totals-value{font-weight:800}
+    .divider{height:1px;background:var(--border);margin:12px 0}
+    .totals-grand{display:flex;justify-content:space-between;align-items:baseline;font-size:18px;font-weight:900;margin-top:2px}
+
+    .btn-block{width:100%;justify-content:center}
+    .btn-row{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 
     .notice{
-      margin-top:10px;
-      background:#fff8e1;
-      border-radius:10px;
-      border:1px solid #f7e09b;
-      padding:10px;
-      font-size:13px;
-      color:#7a5d00;
+      margin-top:12px;background:#f5f8f6;
+      border-radius:12px;border:1px solid var(--border);
+      padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.5;
     }
 
-    .cart-empty{
-      padding:24px;
-      text-align:center;
-      background:var(--panel);
-      border-radius:12px;
-      box-shadow:0 14px 36px rgba(15,23,42,0.06);
-      margin-top:12px;
-      font-size:14px;
+    .empty{
+      padding:18px;border-radius:var(--radius);
+      border:1px dashed rgba(15,23,42,.18);
+      background:#fff;text-align:center;color:var(--muted);margin-top:12px;
+    }
+    .err{
+      border:1px solid rgba(220,38,38,.25);
+      background:rgba(220,38,38,.06);
+      color:#991b1b;padding:12px;border-radius:14px;
+      font-size:13px;margin-top:10px;display:none;
     }
 
-    .error-msg{
-      color:var(--danger);
-      font-size:13px;
-      margin-top:6px;
+    @media print{
+      .toolbar, .btn, #topnavContainer {display:none !important;}
+      body{background:#fff}
+      .card{box-shadow:none}
+      .page{max-width:100%;padding:0}
     }
   </style>
 </head>
 <body>
-  <!-- Shared Topnav -->
+  <!-- TOP NAV -->
   <link rel="stylesheet" href="/css/topnav.css">
   <div id="topnavContainer"></div>
-
-  <div class="page">
-    <div class="header">
-      <div>
-        <div class="header-title">My Cart</div>
-        <div class="header-sub">Review items in your cart before checkout.</div>
-      </div>
-      <div class="chip">
-        <i class="fa-solid fa-receipt"></i>
-        Cart <span id="cartIdChip">—</span>
-      </div>
-    </div>
-
-    <div id="cartContainer"></div>
-  </div>
+  <script>
+    fetch("/topnav.html")
+      .then(res => res.text())
+      .then(html => { document.getElementById("topnavContainer").innerHTML = html; });
+  </script>
 
   <script src="/js/config.js"></script>
   <script src="/js/auth.js?v=2" defer></script>
+
+  <div class="page">
+    <div class="hero">
+      <div class="heroIcon"><i class="fa-solid fa-cart-shopping"></i></div>
+      <div style="flex:1">
+        <h1>My Cart</h1>
+        <div class="muted">Review items in your cart before checkout.</div>
+
+        <div class="toolbar">
+          <input id="q" class="input" placeholder="Search by title or Product ID..." />
+          <button class="btn btn-primary" id="btnRefresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+          <button class="btn" id="btnPrint"><i class="fa-solid fa-print"></i> Print</button>
+          <a class="btn" href="/index.html"><i class="fa-solid fa-store"></i> Continue shopping</a>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <span class="pill info"><i class="fa-solid fa-user"></i> <strong id="pillUser">—</strong></span>
+        <span class="pill"><i class="fa-regular fa-clock"></i> <span id="pillNow">—</span></span>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi blue">
+        <div class="label"><i class="fa-solid fa-box"></i> Items</div>
+        <div class="val" id="kpiItems">—</div>
+        <div class="hint">Distinct products</div>
+      </div>
+      <div class="kpi green">
+        <div class="label"><i class="fa-solid fa-layer-group"></i> Total quantity</div>
+        <div class="val" id="kpiQty">—</div>
+        <div class="hint">Units in cart</div>
+      </div>
+      <div class="kpi amber">
+        <div class="label"><i class="fa-solid fa-receipt"></i> Subtotal</div>
+        <div class="val" id="kpiSubtotal">—</div>
+        <div class="hint">Before taxes &amp; fees</div>
+      </div>
+      <div class="kpi blue">
+        <div class="label"><i class="fa-solid fa-sack-dollar"></i> Total</div>
+        <div class="val" id="kpiTotal">—</div>
+        <div class="hint">Amount due</div>
+      </div>
+    </div>
+
+    <div id="errorBox" class="err"></div>
+
+    <div id="cartContainer"></div>
+  </div>
 
   <script>
     const API_BASE_URL = CONFIG.API_BASE_URL;
@@ -285,17 +247,42 @@
     const userId = localStorage.getItem('userid');
     const stockCache = {}; // productId -> stock
 
+    const state = { order: null };
+
+    function setNow(){
+      document.getElementById("pillNow").textContent = new Date().toLocaleString();
+      document.getElementById("pillUser").textContent = localStorage.getItem("email") || userId || "—";
+    }
+
     function fmt(n){
       if(n == null) return '$0.00';
       const x = Number(n);
-      return '$' + x.toLocaleString(undefined,
-        {minimumFractionDigits:2,maximumFractionDigits:2});
+      return '$' + x.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+    }
+
+    function showErr(msg){
+      const el = document.getElementById("errorBox");
+      if (!msg){ el.style.display="none"; el.textContent=""; return; }
+      el.style.display="block"; el.textContent = msg;
+    }
+
+    function setKPIs(order){
+      const items = (order && order.items) || [];
+      const qty = items.reduce((s, it) => s + Number(it.quantity || 0), 0);
+      document.getElementById("kpiItems").textContent = items.length;
+      document.getElementById("kpiQty").textContent = qty;
+      document.getElementById("kpiSubtotal").textContent = fmt(order ? order.subtotal : 0);
+      document.getElementById("kpiTotal").textContent = fmt(order ? order.totalAmount : 0);
     }
 
     async function loadCart() {
+      setNow();
+      showErr(null);
+
       if (!userId || !token) {
+        setKPIs(null);
         document.getElementById('cartContainer').innerHTML =
-          '<div class="cart-empty">Please sign in to view your cart.</div>';
+          '<div class="empty">Please sign in to view your cart.</div>';
         return;
       }
 
@@ -304,125 +291,129 @@
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) {
-          document.getElementById('cartContainer').innerHTML =
-            '<div class="cart-empty">Failed to load cart.</div>';
+          setKPIs(null);
+          showErr('Failed to load cart.');
+          document.getElementById('cartContainer').innerHTML = '<div class="empty">Failed to load cart.</div>';
           return;
         }
-        const data = await res.json();
-		
-		
-        renderCart(data);
+        state.order = await res.json();
+        renderCart();
       } catch (e) {
         console.error(e);
-        document.getElementById('cartContainer').innerHTML =
-          '<div class="cart-empty">Error loading cart.</div>';
+        setKPIs(null);
+        showErr('Error loading cart.');
+        document.getElementById('cartContainer').innerHTML = '<div class="empty">Error loading cart.</div>';
       }
     }
 
-    function renderCart(order) {
+    function getFilteredItems(){
+      const order = state.order || {};
+      const items = order.items || [];
+      const q = (document.getElementById('q').value || '').trim().toLowerCase();
+      if (!q) return items;
+      return items.filter(it =>
+        String(it.productTitle || '').toLowerCase().includes(q) ||
+        String(it.productId || '').includes(q)
+      );
+    }
+
+    function renderCart() {
+      const order = state.order || {};
       const container = document.getElementById('cartContainer');
+
+      setKPIs(order);
 
       if (!order.items || order.items.length === 0) {
         container.innerHTML =
-          '<div class="cart-empty">Your cart is empty. <a href="/index.html">Continue shopping</a>.</div>';
+          '<div class="empty">Your cart is empty. <a href="/index.html" style="color:var(--brand);font-weight:800;">Continue shopping</a>.</div>';
         return;
       }
-	  
 
-      document.getElementById('cartIdChip').textContent = order.id ?? '—';
+      const items = getFilteredItems();
 
-      const rows = order.items.map(it => `
+      const rows = items.map(it => `
         <tr data-item-id="${it.orderItemId}">
           <td>
-            <div class="cart-product">
-              ${it.productImageUrl ? `<img src="${it.productImageUrl}" alt="">` : ''}
+            <div class="prod">
+              <div class="thumb">
+                ${it.productImageUrl ? `<img src="${it.productImageUrl}" alt="">` : `<i class="fa-solid fa-box"></i>`}
+              </div>
               <div>
-                <div class="cart-product-title">${it.productTitle || 'Product'}</div>
-                <div class="cart-product-sub">ITEM ID: ${it.productId}</div>
+                <div class="pTitle">${it.productTitle || 'Product'}</div>
+                <div class="pSub">Product ID: ${it.productId}</div>
                 <div id="stock-${it.orderItemId}" class="stock-hint"></div>
               </div>
             </div>
           </td>
-          <td>${fmt(it.unitPrice)}</td>
-          <td>${fmt(it.lineTotal)}</td>
-          <td style="text-align:right;">
+          <td><strong>${fmt(it.unitPrice)}</strong></td>
+          <td class="tdRight"><strong>${fmt(it.lineTotal)}</strong></td>
+          <td class="tdRight">
             <div class="qty-actions">
               <div class="qty-control">
-                <button class="qty-btn"
-                        onclick="changeQty(event, ${order.userId}, ${it.orderItemId}, ${it.productId}, -1)">
+                <button class="qty-btn" onclick="changeQty(event, ${order.userId}, ${it.orderItemId}, ${it.productId}, -1)">
                   <i class="fa-solid fa-minus"></i>
                 </button>
                 <span id="qty-${it.orderItemId}" class="qty-value">${it.quantity}</span>
-                <button class="qty-btn"
-                        onclick="changeQty(event, ${order.userId}, ${it.orderItemId}, ${it.productId}, 1)">
+                <button class="qty-btn" onclick="changeQty(event, ${order.userId}, ${it.orderItemId}, ${it.productId}, 1)">
                   <i class="fa-solid fa-plus"></i>
                 </button>
               </div>
-              <button class="btn-remove"
-                      onclick="removeItem(${order.userId}, ${it.orderItemId})">
-                <i class="fa-regular fa-trash-can"></i>
-                Remove
+              <button class="btn btn-danger" onclick="removeItem(${order.userId}, ${it.orderItemId})">
+                <i class="fa-regular fa-trash-can"></i> Remove
               </button>
             </div>
           </td>
         </tr>
       `).join('');
 
+      const body = items.length
+        ? rows
+        : `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:18px;">No items match your search.</td></tr>`;
+
       container.innerHTML = `
         <div class="layout">
           <section class="card">
-            <h3>Order Summary</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th style="width:100px;">Unit</th>
-                  <th style="width:120px;">Line total</th>
-                  <th style="width:190px;text-align:right;">Qty &amp; actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rows}
-              </tbody>
-            </table>
+            <div class="row" style="margin-bottom:6px;">
+              <div style="font-weight:900;font-size:16px">Cart items</div>
+              <div class="pill"><i class="fa-solid fa-filter"></i> ${items.length} shown</div>
+            </div>
+            <div style="overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th style="width:110px;">Unit</th>
+                    <th class="tdRight" style="width:130px;">Line total</th>
+                    <th class="tdRight" style="width:230px;">Qty &amp; actions</th>
+                  </tr>
+                </thead>
+                <tbody>${body}</tbody>
+              </table>
+            </div>
           </section>
 
           <section class="card">
-            <h3>Payment</h3>
-            <div class="totals-row">
-              <div class="totals-label">Subtotal</div>
-              <div class="totals-value">${fmt(order.subtotal)}</div>
-            </div>
-            <div class="totals-row">
-              <div class="totals-label">Estimated taxes</div>
-              <div class="totals-value">${fmt(order.tax)}</div>
-            </div>
-            <div class="totals-row">
-              <div class="totals-label">Fees</div>
-              <div class="totals-value">${fmt(order.fees || 0)}</div>
-            </div>
-            <div class="totals-grand">
-              Total: <span>${fmt(order.totalAmount)}</span>
-            </div>
+            <div style="font-weight:900;font-size:16px;margin-bottom:6px;">Payment</div>
+            <div class="totals-row"><div class="totals-label">Subtotal</div><div class="totals-value">${fmt(order.subtotal)}</div></div>
+            <div class="totals-row"><div class="totals-label">Estimated taxes</div><div class="totals-value">${fmt(order.tax)}</div></div>
+            <div class="totals-row"><div class="totals-label">Fees</div><div class="totals-value">${fmt(order.fees || 0)}</div></div>
+            <div class="divider"></div>
+            <div class="totals-grand"><span>Total</span><span>${fmt(order.totalAmount)}</span></div>
 
             <div class="btn-row">
-              <button class="btn btn-primary btn-block"
-                      onclick="startCheckout(${order.id})">
-                <i class="fa-solid fa-credit-card"></i>
-                Proceed to Checkout
+              <button class="btn btn-primary btn-block" onclick="startCheckout(${order.id})">
+                <i class="fa-solid fa-credit-card"></i> Proceed to Checkout
               </button>
-              <button class="btn btn-ghost btn-block"
-                      onclick="continueShopping()">
-                <i class="fa-solid fa-cart-shopping"></i>
-                Continue Shopping
+              <button class="btn btn-block" onclick="continueShopping()">
+                <i class="fa-solid fa-cart-shopping"></i> Continue Shopping
               </button>
             </div>
 
             <div class="notice">
-              Items in your cart are reserved for a limited time. Please
-              complete payment promptly to avoid losing availability.
+              Items in your cart are reserved for a limited time. Please complete
+              payment promptly to avoid losing availability.
             </div>
-            <div id="cartError" class="error-msg"></div>
+            <div id="cartError" class="err"></div>
           </section>
         </div>
       `;
@@ -445,13 +436,12 @@
       }
     }
 
-    async function changeQty(e, userId, orderItemId, productId, delta) {
+    async function changeQty(e, uid, orderItemId, productId, delta) {
       e.preventDefault();
-	  
+
       const qtyEl = document.getElementById(`qty-${orderItemId}`);
-	  
       if (!qtyEl) return;
-	
+
       let current = parseInt(qtyEl.textContent, 10) || 1;
 
       if (delta > 0) {
@@ -467,44 +457,32 @@
 
       try {
         const res = await fetch(
-          `${API_BASE_URL}/orders/cart/${userId}/items/${orderItemId}/quantity`,
+          `${API_BASE_URL}/orders/cart/${uid}/items/${orderItemId}/quantity`,
           {
             method: 'PATCH',
-            headers: {
-              'Content-Type':'application/json',
-              'Authorization':`Bearer ${token}`
-            },
+            headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
             body: JSON.stringify({ quantity:newQty })
           }
         );
-        if (!res.ok) {
-          LF.toast('Failed to update quantity.', 'error');
-          return;
-        }
-        const order = await res.json();
-        renderCart(order);
+        if (!res.ok) { LF.toast('Failed to update quantity.', 'error'); return; }
+        state.order = await res.json();
+        renderCart();
       } catch (e) {
         console.error(e);
         LF.toast('Error updating quantity.', 'error');
       }
     }
 
-    async function removeItem(userId, orderItemId) {
+    async function removeItem(uid, orderItemId) {
       if (!confirm('Remove this item from your cart?')) return;
       try {
         const res = await fetch(
-          `${API_BASE_URL}/orders/cart/${userId}/items/${orderItemId}`,
-          {
-            method:'DELETE',
-            headers:{'Authorization':`Bearer ${token}`}
-          }
+          `${API_BASE_URL}/orders/cart/${uid}/items/${orderItemId}`,
+          { method:'DELETE', headers:{'Authorization':`Bearer ${token}`} }
         );
-        if (!res.ok) {
-          LF.toast('Failed to remove item.', 'error');
-          return;
-        }
-        const order = await res.json();
-        renderCart(order);
+        if (!res.ok) { LF.toast('Failed to remove item.', 'error'); return; }
+        state.order = await res.json();
+        renderCart();
       } catch (e) {
         console.error(e);
         LF.toast('Error removing item.', 'error');
@@ -515,63 +493,63 @@
       window.location.href = '/index.html';
     }
 
-	let checkoutBusy = false;
-	
-    // 🟦 Create PaymentIntent server-side and go to Stripe payment page
-    async function startCheckout(orderId) {
-      
-	  const errEl = document.getElementById('cartError');
-      errEl.textContent = '';
-	  
-	  if (checkoutBusy) return;
-	  checkoutBusy = true;
+    let checkoutBusy = false;
 
-	  const btn = document.querySelector('button[onclick^="startCheckout"]');
-	  const stopBusy = LF.busy(btn, 'Starting checkout…');
-	  let redirecting = false;
+    // Create PaymentIntent server-side and go to Stripe payment page
+    async function startCheckout(orderId) {
+      const errEl = document.getElementById('cartError');
+      if (errEl) errEl.style.display = 'none';
+
+      if (checkoutBusy) return;
+      checkoutBusy = true;
+
+      const btn = document.querySelector('button[onclick^="startCheckout"]');
+      const stopBusy = LF.busy(btn, 'Starting checkout…');
+      let redirecting = false;
 
       try {
         const res = await fetch(`${API_BASE_URL}/payments/intent`, {
           method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'Authorization':`Bearer ${token}`
-          },
+          headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
           body: JSON.stringify({ orderId })
         });
         if (!res.ok) {
           const txt = await res.text();
           console.error('intent error', txt);
-          errEl.textContent = 'Unable to start payment. Please try again.';
+          if (errEl){ errEl.textContent = 'Unable to start payment. Please try again.'; errEl.style.display='block'; }
           return;
         }
         const data = await res.json();
-		
-		// ✅ if already paid, go directly to success page
-		if (data.alreadyPaid === true) {
-		  sessionStorage.setItem('stripeOrderId', data.orderId);
-		  sessionStorage.setItem('stripePaymentIntentId', data.paymentIntentId || '');
-		  redirecting = true;
-		  window.location.href = '/payment-success.html';
-		  return;
-		}
+
+        // if already paid, go directly to success page
+        if (data.alreadyPaid === true) {
+          sessionStorage.setItem('stripeOrderId', data.orderId);
+          sessionStorage.setItem('stripePaymentIntentId', data.paymentIntentId || '');
+          redirecting = true;
+          window.location.href = '/payment-success.html';
+          return;
+        }
 
         // normal flow -> go to checkout page
-		sessionStorage.setItem('stripeClientSecret', data.clientSecret);
-		sessionStorage.setItem('stripeOrderId', data.orderId);
-		sessionStorage.setItem('stripePaymentIntentId', data.paymentIntentId || '');
-		redirecting = true;
-		window.location.href = '/checkout-payment.html';
+        sessionStorage.setItem('stripeClientSecret', data.clientSecret);
+        sessionStorage.setItem('stripeOrderId', data.orderId);
+        sessionStorage.setItem('stripePaymentIntentId', data.paymentIntentId || '');
+        redirecting = true;
+        window.location.href = '/checkout-payment.html';
 
       } catch (e) {
         console.error(e);
-        errEl.textContent = 'Error starting payment. Please try again.';
+        if (errEl){ errEl.textContent = 'Error starting payment. Please try again.'; errEl.style.display='block'; }
       } finally {
-		checkoutBusy = false;
-		// Stay busy through the redirect; otherwise restore the button.
-		if (!redirecting) stopBusy();
-	  }
+        checkoutBusy = false;
+        // Stay busy through the redirect; otherwise restore the button.
+        if (!redirecting) stopBusy();
+      }
     }
+
+    document.getElementById("btnRefresh").addEventListener("click", loadCart);
+    document.getElementById("btnPrint").addEventListener("click", () => window.print());
+    document.getElementById("q").addEventListener("input", () => { if (state.order) renderCart(); });
 
     window.addEventListener('auth:ready', loadCart);
   </script>

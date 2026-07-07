@@ -41,6 +41,21 @@
     (document.head || document.documentElement).appendChild(css);
   }
 
+  // Site favicon = the brand logo (green LF mark). Set here so every page that
+  // loads auth.js shows it, including the ~20 pages that have no <link rel=icon>.
+  // Any stale icon link (e.g. the old /img/logo-small.jpg) is replaced.
+  try {
+    var favHref = '/img/favicon.svg';
+    document.querySelectorAll('link[rel~="icon"]').forEach(function (l) {
+      if (l.parentNode) l.parentNode.removeChild(l);
+    });
+    var favicon = document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.type = 'image/svg+xml';
+    favicon.href = favHref;
+    (document.head || document.documentElement).appendChild(favicon);
+  } catch (e) {}
+
   // Put a spinner (+ optional label) in a button/link and disable it.
   // Returns stop() which restores the original content and state.
   window.LF.busy = function (btn, label) {
