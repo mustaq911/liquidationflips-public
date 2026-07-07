@@ -134,11 +134,17 @@
     /* Skeleton */
     .skeleton{background:linear-gradient(100deg,#eef0f2 30%,#f6f7f8 50%,#eef0f2 70%);background-size:200% 100%;animation:lfsk 1.2s ease-in-out infinite}
     @keyframes lfsk{0%{background-position:200% 0}100%{background-position:-200% 0}}
-    .card.skel{background:#fff;border:1px solid #e6e8ec;border-radius:14px;overflow:hidden}
-    .card.skel .thumb{height:180px}
-    .card.skel .line{height:12px;border-radius:8px;margin:10px 14px}
+    /* Skeleton card mirrors the real grid card so products swap in without any jump */
+    .card.skel{background:#fff;border:1px solid #E0E8E2;border-radius:20px;overflow:hidden;display:flex;flex-direction:column}
+    .card.skel .thumb{aspect-ratio:4/3;width:100%}
+    .card.skel .sk-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:11px;flex:1}
+    .card.skel .line{height:13px;border-radius:7px}
+    .card.skel .line.w35{width:35%}
+    .card.skel .line.w80{width:80%}
     .card.skel .line.w60{width:60%}
     .card.skel .line.w40{width:40%}
+    .card.skel .line.price{height:24px;width:45%;margin-top:6px}
+    .card.skel .sk-btn{height:44px;border-radius:9px;margin-top:8px}
 
     /* Pager */
     .lf-pager{display:flex;align-items:center;justify-content:center;gap:12px;padding:38px 0 8px}
@@ -435,6 +441,7 @@
     let ALL_PRODUCTS = [];
     let FILTERED = [];
     let CURRENT_PAGE = 1;
+    let PRODUCTS_LOADED = false;   // stays false until the first product fetch resolves
 
     // ✅ Warehouse cache (same as BuyNow)
     let WAREHOUSE_MAP = new Map();
@@ -891,6 +898,7 @@
         }
 
         ALL_PRODUCTS = mergeSmooth(auctions, buynow);
+        PRODUCTS_LOADED = true;   // real data is in — render() may now show the empty state
         applyFilters();
       }catch(err){
         console.error('Failed to load products', err);
@@ -908,7 +916,17 @@
     }
 
     // ==== Skeleton ====
-    function showSkeletons(count=12){
+    // Show at least a few placeholder cards while products load so the page never
+    // looks empty. Count adapts to the viewport (phone/tablet/desktop) so we fill
+    // roughly the visible rows without overloading small screens.
+    function skeletonCount(){
+      const w = window.innerWidth || 1200;
+      if (w < 640) return 4;    // phone: ~1 col → 4 cards
+      if (w < 1100) return 6;   // tablet: ~2–3 cols → 6 cards
+      return 12;                // desktop: 4 cols → 3 rows
+    }
+    function showSkeletons(count){
+      count = count || skeletonCount();
       grid.innerHTML = '';
       list.innerHTML = '';
       grid.classList.remove('hidden');
@@ -919,9 +937,14 @@
         c.className = 'card skel';
         c.innerHTML = `
           <div class="thumb skeleton"></div>
-          <div class="line skeleton w60"></div>
-          <div class="line skeleton w40"></div>
-          <div class="line skeleton w60"></div>
+          <div class="sk-body">
+            <div class="line skeleton w35"></div>
+            <div class="line skeleton w80"></div>
+            <div class="line skeleton w60"></div>
+            <div class="line skeleton price"></div>
+            <div class="line skeleton w40"></div>
+            <div class="sk-btn skeleton"></div>
+          </div>
         `;
         grid.appendChild(c);
       }
@@ -1574,6 +1597,13 @@
 
       const start = (CURRENT_PAGE - 1) * PAGE_SIZE;
       const pageItems = FILTERED.slice(start, start + PAGE_SIZE);
+
+      // Products haven't loaded yet → keep showing skeletons instead of flashing
+      // an "empty" message before the first fetch resolves.
+      if(!PRODUCTS_LOADED){
+        showSkeletons();
+        return;
+      }
 
       grid.innerHTML = '';
       list.innerHTML = '';

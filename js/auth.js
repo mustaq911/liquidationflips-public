@@ -581,6 +581,7 @@
 			  
 			  if (!isLoggedIn()) {
 				if (cartCount) cartCount.textContent = '0';
+				setBadge('cartMenuCount', 0);
 				return;
 			  }
 
@@ -597,6 +598,7 @@
 
 				const data = await res.json();
 				if (cartCount) cartCount.textContent = String(data.itemCount || 0);
+				setBadge('cartMenuCount', data.itemCount || 0);
 
 			  } catch (e) {
 				console.error('Failed to load cart', e);
@@ -902,7 +904,8 @@ function setBadge(id, value) {
   const el = document.getElementById(id);
   if (!el) return;
   const n = Number(value || 0);
-  el.textContent = n;
+  // Show the exact count for 1–9, then cap at "9+" so the pill never overflows.
+  el.textContent = n > 9 ? "9+" : String(n);
   el.classList.toggle("hidden", n <= 0);
 }
 
@@ -912,21 +915,27 @@ async function loadMenuCounts() {
   if (!token || !userId) return;
   
   
+  const authHeader = { Authorization: `Bearer ${token}` };
+  const len = (arr) => (Array.isArray(arr) ? arr.length : 0);
+
   try {
-    const [ongoingRes, wonRes] = await Promise.all([
-      fetch(`${auth_API_BASE_URL}/bids/count/ongoing/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      }),
-      fetch(`${auth_API_BASE_URL}/products/count/won/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+    const [ongoingRes, wonRes, watchRes, ordersRes] = await Promise.all([
+      fetch(`${auth_API_BASE_URL}/bids/count/ongoing/${userId}`, { headers: authHeader }),
+      fetch(`${auth_API_BASE_URL}/products/count/won/${userId}`, { headers: authHeader }),
+      fetch(`${auth_API_BASE_URL}/watchlist/user/${userId}`, { headers: authHeader }).catch(() => null),
+      fetch(`${auth_API_BASE_URL}/orders/user/${userId}`, { headers: authHeader }).catch(() => null)
     ]);
 
     const ongoing = ongoingRes.ok ? await ongoingRes.json() : 0;
     const won = wonRes.ok ? await wonRes.json() : 0;
+    const watch = (watchRes && watchRes.ok) ? len(await watchRes.json()) : 0;
+    const orders = (ordersRes && ordersRes.ok) ? len(await ordersRes.json()) : 0;
 
     setBadge("ongoingBidCount", ongoing);
     setBadge("wonAuctionCount", won);
+    setBadge("watchCount", watch);
+    setBadge("ordersCount", orders);
+    // The cart badge is refreshed separately by refreshCartCount().
   } catch (e) {
     console.error("Count load failed", e);
   }
