@@ -1833,17 +1833,26 @@
     // ==== Boot ====
     (async function init(){
       pageSizeSelect.value = "12";
-      setView('grid');
+      setView('grid');                    // paint skeleton cards immediately
 
-	   // ✅ Load homepage banners first
-	  await loadBanners();
+      // Banners are decorative — load in the background so they never delay the
+      // toolbar or the product grid.
+      loadBanners();
 
+      // Card-decoration data (warehouses for pickup, watchlist + bid status) is
+      // needed before the cards render, but NOT before the filter shows. Kick it
+      // all off in parallel now and await it just before fetching products.
+      const cardDataReady = Promise.all([
+        loadWarehouses().then(populateWarehouseSelect),
+        loadMyWatchlist(),
+        loadMyBids()
+      ]);
+
+      // Categories drive the visible category filter. Load + build them first so
+      // the toolbar appears right away, while the product cards are still loading —
+      // instead of being stuck behind banners / watchlist / bids / the product fetch.
       await loadAllCategories();
-      buildCategoryPills();              // ✅ build pills from real categories
-      await loadWarehouses();
-      populateWarehouseSelect();          // fill the visible Warehouse filter
-      await loadMyWatchlist();
-      await loadMyBids();
+      buildCategoryPills();               // build pills from real categories
 
       // ✅ Prefill from URL params (this page is the single listing view):
       //    ?q=  → search term ; ?type=auction|buynow → pre-set the Type filter
@@ -1864,6 +1873,9 @@
         }
       } catch(e){}
 
+      // Ensure warehouse / watchlist / bid data is in so cards paint with correct
+      // pickup + watch + bid states on first render.
+      await cardDataReady;
       await fetchAllProducts();
 
       // ✅ Start 1s countdown updates

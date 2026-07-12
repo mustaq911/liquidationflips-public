@@ -169,15 +169,20 @@
         <div class="row"><div class="muted">Lot ID</div><div id="lotId">—</div></div>
         <div class="row"><div class="muted">Category</div><div id="lotCategory">—</div></div>
 
-        <label class="bidlabel" for="bidAmount">Your maximum bid</label>
-        <div class="bid-form">
-          <input type="number" id="bidAmount" placeholder="Enter your max bid" />
-          <button class="btn btn-primary" id="bidNow"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg>Place bid</button>
+        <div id="bidPanel">
+          <label class="bidlabel" for="bidAmount">Your maximum bid</label>
+          <div class="bid-form">
+            <input type="number" id="bidAmount" placeholder="Enter your max bid" />
+            <button class="btn btn-primary" id="bidNow"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg>Place bid</button>
+          </div>
+          <div id="bidIncrement"></div>
+          <div id="bidMessage"></div>
         </div>
-        <div id="bidIncrement"></div>
+
+        <div id="comingSoonPanel" class="hidden" style="margin-top:18px;text-align:center;color:#6b7480;font-weight:700;font-size:13.5px;padding:16px;border:1px dashed #dfe2e6;border-radius:11px;background:#f6f7f8;">Coming soon — bidding hasn&rsquo;t opened for this lot yet.</div>
+
         <input type="hidden" id="minAllowedBidValue" value="0" />
         <input type="hidden" id="wonUserId" value="0" />
-        <div id="bidMessage"></div>
 
         <button class="btn" id="watchBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="2.6"></circle></svg> Add to Watchlist</button>
 
@@ -521,6 +526,9 @@
         renderThumbs(GALLERY_IMAGES);
         setActiveIndex(0);
 
+        // Coming soon lots: browsing only — no bidding until they open.
+        const comingSoon = Boolean(product.comingSoon);
+
         // Summary
         qs('#highestBid').textContent  = fmtMoney(product.highestBid);
         // qs('#maxBid').textContent      = fmtMoney(product.maxBid);
@@ -540,13 +548,15 @@
 		const myId = localStorage.getItem('userid');
 		const iAmWinning = (myId && product.wonUserId != null && String(product.wonUserId) === String(myId));
 
-		
-		
-		if (iAmWinning) {
+
+
+		if (comingSoon) {
+		  hideHeaderMessage();
+		} else if (iAmWinning) {
 		  showHeaderMessage("win", "🏆 Congratulations!🎉 You are currently winning this item.", 0);
 		} else {
 		  // if I have bid before AND I'm not winning => persistent outbid
-		  const iBidBefore = await hasMyBid(product.id); 
+		  const iBidBefore = await hasMyBid(product.id);
 		  if (iBidBefore) {
 			showHeaderMessage("outbid", "⚠️ You have been outbid. Place a higher bid to win.", 0); // persistent
 		  } else {
@@ -561,11 +571,20 @@
 		  showHeaderWonMessage("🏆 Congratulations!🎉 You are currently winning this item.");
 		}*/
 
-        // Countdown
-        startCountdown(product.auctionEnd);
+        if (comingSoon) {
+          // No bidding for coming-soon lots: hide the form, show the notice,
+          // flip the status chip and skip countdown / bid-increment setup.
+          qs('#bidPanel').classList.add('hidden');
+          qs('#comingSoonPanel').classList.remove('hidden');
+          if (qs('#lotStatus')) qs('#lotStatus').textContent = 'COMING SOON';
+          if (qs('#countdown')) qs('#countdown').textContent = '—';
+        } else {
+          // Countdown
+          startCountdown(product.auctionEnd);
 
-        // Bid increment
-        await loadBidIncrement();
+          // Bid increment
+          await loadBidIncrement();
+        }
 
         // Manifest
         loadManifest(product.id);
