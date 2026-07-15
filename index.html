@@ -178,12 +178,12 @@
 <body>
 
   <!-- TOP Nav section -->
-  <link rel="stylesheet" href="/css/topnav.css">
+  <link rel="stylesheet" href="/css/topnav.css?v=3">
   <div id="topnavContainer"></div>
 
   <!-- CONFIG + AUTH -->
-  <script src="/js/config.js"></script>
-  <script src="/js/auth.js?v=2" defer></script>
+  <script src="/js/config.js?v=3"></script>
+  <script src="/js/auth.js?v=3" defer></script>
 
   <!-- Owl init -->
   <script>
@@ -791,7 +791,7 @@
 
     function getPrimaryImage(p){
       const imgs = getAllImages(p);
-      return imgs[0] || 'https://via.placeholder.com/600x400?text=No+Image';
+      return imgs[0] || NO_IMAGE;
     }
 
     function warehouseForProduct(p){
@@ -820,7 +820,10 @@
       if (p && p._kind === 'buynow'){
         window.location.href = `/product-buynow.html?id=${p.id}`;
       } else {
-        window.location.href = `/product-view.html?id=${p.id}`;
+        // Carry the coming-soon flag through the URL — the /products/{id} detail
+        // endpoint doesn't always return it, and coming-soon lots must not accept bids.
+        const cs = isComingSoon(p) ? '&comingSoon=1' : '';
+        window.location.href = `/product-view.html?id=${p.id}${cs}`;
       }
     }
     function isBuyNow(p){ return p && p._kind === 'buynow'; }
@@ -1273,7 +1276,7 @@
       const isA = !isBuyNow(p);
       const comingSoon = isComingSoon(p);
       const images = getAllImages(p);
-      const img = images[0] || 'https://via.placeholder.com/600x450?text=No+Image';
+      const img = images[0] || NO_IMAGE;
       const cat = categoryName(p);
       const currentBid = (p.highestBid != null ? p.highestBid : p.basePrice);
       const priceVal = isA ? currentBid : p.basePrice;
@@ -1301,8 +1304,8 @@
         badgeStyle: comingSoon
           ? 'background:#eef0f2;color:#6b7480;'
           : (isA
-            ? 'background:rgba(31,139,87,.12);color:#177045;'
-            : 'background:#16202e;color:#fff;'),
+            ? 'background:#1f8b57;color:#fff;box-shadow:0 1px 4px rgba(16,32,46,.22);'
+            : 'background:#16202e;color:#fff;box-shadow:0 1px 4px rgba(16,32,46,.22);'),
         timeStyle: urgent ? 'color:#c0453f;font-weight:700;' : 'color:#6b7480;font-weight:600;',
         badgeDot: isA ? '#1F8B57' : '#ffffff',
         idText: 'ID #' + (p.id == null ? '—' : p.id),

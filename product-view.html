@@ -122,14 +122,14 @@
 <body>
 
   <!-- Shared Topnav -->
-  <link rel="stylesheet" href="/css/topnav.css">
+  <link rel="stylesheet" href="/css/topnav.css?v=3">
   <div id="topnavContainer"></div>
 
   <!-- 1. Load CONFIG.js (defines CONFIG.API_BASE_URL) -->
-  <script src="/js/config.js"></script>
+  <script src="/js/config.js?v=3"></script>
 
   <!-- 2. Load auth.js after config -->
-  <script src="/js/auth.js?v=2" defer></script>
+  <script src="/js/auth.js?v=3" defer></script>
 
   <div class="page">
     <div class="breadcrumbs">
@@ -363,7 +363,7 @@
       const hero = qs('#hero');
       hero.innerHTML = '';
       const img = document.createElement('img');
-      img.src = url || 'https://via.placeholder.com/800x600?text=No+Image';
+      img.src = url || NO_IMAGE;
       img.alt = 'Product';
       img.loading = 'eager';
       hero.appendChild(img);
@@ -484,6 +484,7 @@
     // ========= Load product =========
     let product = null;
     let countdownTimer = null;
+    let productComingSoon = false;   // true = bidding not open yet (browse only)
 
     async function loadProduct() {
       const id = getIdFromQuery();
@@ -520,14 +521,19 @@
 
         // De-duplicate
         const uniqueImgs = Array.from(new Set(imgs.filter(Boolean)));
-        GALLERY_IMAGES = uniqueImgs.length ? uniqueImgs : ['https://via.placeholder.com/800x600?text=No+Image'];
+        GALLERY_IMAGES = uniqueImgs.length ? uniqueImgs : [NO_IMAGE];
 
         renderHero(GALLERY_IMAGES[0]);
         renderThumbs(GALLERY_IMAGES);
         setActiveIndex(0);
 
-        // Coming soon lots: browsing only — no bidding until they open.
-        const comingSoon = Boolean(product.comingSoon);
+        // Coming soon lots: browsing only — no bidding until they open. The
+        // /products/{id} endpoint doesn't always include the flag, so also honour
+        // a ?comingSoon=1 carried from the listing and a "coming soon" status.
+        const comingSoon = Boolean(product.comingSoon)
+          || new URLSearchParams(location.search).get('comingSoon') === '1'
+          || /coming[\s_-]?soon/i.test(String(product.status || ''));
+        productComingSoon = comingSoon;
 
         // Summary
         qs('#highestBid').textContent  = fmtMoney(product.highestBid);
@@ -654,6 +660,12 @@
       const msg = qs("#bidMessage");
 
       msg.textContent = ""; msg.style.color = "";
+
+      // Coming-soon lots don't accept bids yet — block even if the form is reached.
+      if (productComingSoon) {
+        LF.toast("Bidding hasn't opened for this lot yet.", 'info');
+        return;
+      }
 
       const token = localStorage.getItem('token');
       const userid = localStorage.getItem('userid');

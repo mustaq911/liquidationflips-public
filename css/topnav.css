@@ -47,6 +47,7 @@ h1, h2, h3, h4,
   border-bottom: 1px solid #e6e8ec;
 }
 .lf-head-inner { max-width: 1400px; margin: 0 auto; padding: 15px 28px; display: flex; align-items: center; gap: 34px; }
+.page { max-width: 1400px; margin: 0 auto; padding-left: 28px; padding-right: 28px; box-sizing: border-box; }
 .lf-header .burger { font-size: 22px; line-height: 1; cursor: pointer; user-select: none; display: none; color: #16202e; }
 
 .lf-brand { display: flex; align-items: center; gap: 11px; text-decoration: none; flex-shrink: 0; color: #16202e; cursor: pointer; }
@@ -300,6 +301,9 @@ h1, h2, h3, h4,
 .ad-qb:hover { background: #1f8b57; color: #fff; }
 .ad-qb:hover svg { fill: #fff; }
 .ad-qb:disabled { opacity: .6; cursor: default; }
+.ad-pay { margin-top: 7px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid #16a34a; background: #16a34a; color: #fff; font-family: inherit; font-weight: 700; font-size: 11.5px; padding: 5px 10px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.ad-pay:hover { background: #15803d; border-color: #15803d; }
+.ad-pay svg { fill: #fff; }
 
 .ad-footer { border-top: 1px solid #eef0f2; padding: 16px 18px; flex-shrink: 0; }
 .ad-subrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }

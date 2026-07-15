@@ -5,7 +5,7 @@
   <title>Secure Payment - Liquidation Flips</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="/css/topnav.css">
+  <link rel="stylesheet" href="/css/topnav.css?v=3">
 
   <style>
     :root{
@@ -23,7 +23,7 @@
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
 
-    .page{max-width:1100px;margin:22px auto;padding:0 16px;}
+    .page{max-width:1400px;margin:22px auto;padding:0 28px;}
     .grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -135,8 +135,8 @@
   <!-- Stripe.js -->
   <script src="https://js.stripe.com/v3/"></script>
 
-  <script src="/js/config.js"></script>
-  <script src="/js/auth.js?v=2" defer></script>
+  <script src="/js/config.js?v=3"></script>
+  <script src="/js/auth.js?v=3" defer></script>
 
   <div class="page">
     <div class="grid">
@@ -190,6 +190,8 @@
         </button>
 
         <div id="pay-message" class="msg" role="status"></div>
+
+        <p style="font-size:12.5px;color:#6b7280;text-align:center;margin:12px 0 0;line-height:1.5;">By completing your purchase, you agree to our <a href="/terms.html" target="_blank" rel="noopener" style="color:#1F8B57;text-decoration:underline;">Terms &amp; Conditions</a> and <a href="/agreement.html" target="_blank" rel="noopener" style="color:#1F8B57;text-decoration:underline;">User &amp; Purchase Agreement</a>.</p>
       </div>
     </div>
   </div>

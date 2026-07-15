@@ -168,7 +168,7 @@
 
 <body>
   <!-- Shared Topnav -->
-  <link rel="stylesheet" href="/css/topnav.css">
+  <link rel="stylesheet" href="/css/topnav.css?v=3">
   <div id="topnavContainer"></div>
   <script>
     fetch("/topnav.html")
@@ -176,8 +176,8 @@
       .then(html => { document.getElementById("topnavContainer").innerHTML = html; });
   </script>
 
-  <script src="/js/config.js"></script>
-  <script src="/js/auth.js?v=2" defer></script>
+  <script src="/js/config.js?v=3"></script>
+  <script src="/js/auth.js?v=3" defer></script>
 
   <div class="page">
     <div class="hero">
@@ -449,7 +449,7 @@
         const p = entry.product || {};
         const bids = entry.bids || [];
         const myMax = getMyMaxBid(bids);
-        const img = p.imageUrl || "https://via.placeholder.com/80x80?text=No+Img";
+        const img = p.imageUrl || NO_IMAGE;
         const cat = (p.category && p.category.name) || p.categoryName || "—";
         const ends = fmtDateTime(p.auctionEnd);
         const left = timeLeftLabel(p.auctionEnd);

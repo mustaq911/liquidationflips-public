@@ -165,7 +165,7 @@
 	  // Load the shared account drawer (Bids / Watchlist / Cart / Orders) once.
 	  if (!document.querySelector('script[data-account-drawer]')) {
 		const ad = document.createElement('script');
-		ad.src = '/js/account-drawer.js';
+		ad.src = '/js/account-drawer.js?v=3';
 		ad.defer = true;
 		ad.setAttribute('data-account-drawer', '1');
 		document.body.appendChild(ad);

@@ -147,9 +147,15 @@
                  (mine != null && p.highestBid != null && Number(mine) >= Number(p.highestBid));
       var st = ended ? (high ? { label: 'Won', cls: 'ok' } : { label: 'Lost', cls: 'mut' })
                      : (high ? { label: 'Winning', cls: 'ok' } : { label: 'Outbid', cls: 'bad' });
-      // Quick Bid only when you're outbid on a still-live auction.
+      // Pay now: you won and there's an unpaid order for the lot (same gate the
+      // full My Bids page uses). Quick Bid: only when outbid on a still-live auction.
+      var canPay = ended && high && e.paymentRequired === true && e.orderId != null;
       var canQuick = !ended && !high && p.highestBid != null && p.id != null;
-      var action = canQuick
+      var action = canPay
+        ? '<button type="button" class="ad-pay" data-payorder="' + esc(e.orderId) + '">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4H4V6h16v2zm0 4v6H4v-6h16z"></path></svg>' +
+            '<span>Pay now</span></button>'
+        : canQuick
         ? '<button type="button" class="ad-qb" data-qbid="' + p.id + '" data-high="' + p.highestBid + '">' +
             '<svg width="12" height="12" viewBox="0 0 24 24" fill="#1f8b57"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg>' +
             '<span>Quick Bid</span></button>'
@@ -162,6 +168,19 @@
       });
     }).join('');
     wireQuickBids();
+    wirePayButtons();
+  }
+
+  // Won lots with an unpaid order: jump straight to checkout for that order.
+  function wirePayButtons() {
+    Array.prototype.forEach.call(bodyEl.querySelectorAll('.ad-pay'), function (btn) {
+      btn.addEventListener('click', function (ev) {
+        ev.preventDefault();     // the row is a link — don't navigate to the product
+        ev.stopPropagation();
+        var oid = btn.getAttribute('data-payorder');
+        if (oid) window.location.href = '/checkout.html?orderId=' + encodeURIComponent(oid);
+      });
+    });
   }
 
   // Next allowed bid = current highest + server increment (same endpoint the
@@ -239,9 +258,11 @@
         return Promise.all(list.map(function (w) {
           var pid = w.productId != null ? w.productId : w.product && w.product.id;
           if (w.product && w.product.title) return Promise.resolve(w.product);
+          // A deleted/missing product returns non-OK (e.g. 500) — flag it so it
+          // isn't rendered as a phantom "Product #N" row.
           return fetch(API + '/products/' + pid, { headers: authHeaders() })
-            .then(function (r) { return r.ok ? r.json() : { id: pid }; })
-            .catch(function () { return { id: pid }; });
+            .then(function (r) { return r.ok ? r.json() : { id: pid, _missing: true }; })
+            .catch(function () { return { id: pid, _missing: true }; });
         }));
       })
       .then(function (products) { RAW.watch = products; if (fresh(my)) renderWatch(); })
@@ -250,6 +271,7 @@
   function renderWatch() {
     var term = q();
     var rows = (RAW.watch || []).filter(function (p) {
+      if (p && p._missing) return false;   // skip lots that no longer exist
       if (!term) return true;
       return String((p.title || '') + ' ' + (p.id || '')).toLowerCase().indexOf(term) >= 0;
     });

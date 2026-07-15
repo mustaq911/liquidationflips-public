@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git --no-pager diff index.html)",
+      "Bash(grep -nE 'id=\"pay|btn.*[Pp]ay|<button|Place order|Pay \\\\$|submit' checkout-payment.html)",
+      "Bash(grep -nE 'id=\"pay|btn.*[Pp]ay|<button|Place order|Pay \\\\$|Proceed|Continue' checkout.html)"
+    ]
+  }
+}

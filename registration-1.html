@@ -6,7 +6,7 @@
   <title>Account Verification - Liquidation Flips</title>
   <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
 
-  <script src="/js/config.js"></script>
+  <script src="/js/config.js?v=3"></script>
   <script src="https://js.stripe.com/v3/"></script>
 
   <style>
@@ -19,9 +19,10 @@
     }
 
     .section {
-      padding: 30px 20px;
-      max-width: 960px;
+      padding: 30px 28px;
+      max-width: 1400px;
       margin: 0 auto;
+      box-sizing: border-box;
     }
 
     .progress {
@@ -242,7 +243,7 @@
       color: #8a1f1f;
     }
   </style>
-  <link rel="stylesheet" href="/css/topnav.css">
+  <link rel="stylesheet" href="/css/topnav.css?v=3">
   <link rel="stylesheet" href="/css/account-pages.css">
 </head>
 <body>
@@ -310,10 +311,10 @@
 
     <div class="terms">
       <h2>Terms</h2>
-      <p>Be sure to read all of the Buyer’s Info &amp; our <a href="#" style="color:#2196f3; text-decoration:underline;">Terms of Use</a>.</p>
-      <label><input type="checkbox"> I agree to the Terms of Use</label>
+      <p>Be sure to read all of the <a href="/agreement.html" target="_blank" rel="noopener" style="color:#2196f3; text-decoration:underline;">Buyer’s Info</a> &amp; our <a href="/terms.html" target="_blank" rel="noopener" style="color:#2196f3; text-decoration:underline;">Terms of Use</a>.</p>
+      <label><input type="checkbox"> I agree to the <a href="/terms.html" target="_blank" rel="noopener" style="color:#2196f3; text-decoration:underline;">Terms of Use</a></label>
       <label><input type="checkbox"> I'm over 18 years old</label>
-      <label><input type="checkbox"> I understand the following policy</label>
+      <label><input type="checkbox"> I understand the following <a href="/agreement.html" target="_blank" rel="noopener" style="color:#2196f3; text-decoration:underline;">policy</a></label>
       <label><input type="checkbox"> Sign up for our newsletter</label>
     </div>
 

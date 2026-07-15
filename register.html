@@ -6,8 +6,8 @@
   <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <link rel="stylesheet" href="/css/topnav.css">
-  <script src="/js/config.js"></script>
+  <link rel="stylesheet" href="/css/topnav.css?v=3">
+  <script src="/js/config.js?v=3"></script>
   <script src="/js/ui.js"></script>
 
   <style>
@@ -25,7 +25,7 @@
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
     a{color:var(--panel);text-decoration:none}
-    .page{max-width:960px;margin:0 auto;padding:16px}
+    .page{max-width:1400px;margin:0 auto;padding:16px 28px}
     .card{
       max-width:640px;margin:32px auto;background:var(--panel);border:1px solid var(--border);
       border-radius:16px;box-shadow:var(--shadow);padding:28px 28px 24px;
@@ -59,6 +59,7 @@
     .msg.error{color:var(--danger)}
     .msg.ok{color:var(--success)}
     .small{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
+    .small a{color:var(--brand);text-decoration:underline}
     .email-status{display:flex;align-items:center;margin-top:4px;font-size:14px;padding-left:4px}
     .field .email-status span{color:inherit !important;font-size:inherit !important;display:inline;margin:0}
     .email-status .icon{margin-right:6px;width:16px;height:16px}
@@ -111,6 +112,8 @@
           <input id="newsletter" type="checkbox" checked />
           <span>Sign up for our newsletter to stay in the loop about upcoming auctions, hot deals, new products, and more. Don’t worry, you can unsubscribe any time.</span>
         </label>
+
+        <div class="small">By creating an account, you agree to our <a href="/terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="/agreement.html" target="_blank" rel="noopener">User &amp; Purchase Agreement</a>.</div>
 
         <button id="submitBtn" class="btn" type="submit">CREATE ACCOUNT ▸</button>
         <div id="formMsg" class="msg" role="status"></div>

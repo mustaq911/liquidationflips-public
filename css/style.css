@@ -23,7 +23,8 @@ a {
 .muted  { color: #6b7280; }
 
 .page {
-  max-width: 1500px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 18px 20px 26px;
+  padding: 18px 28px 26px;
+  box-sizing: border-box;
 }
