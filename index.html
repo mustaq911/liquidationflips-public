@@ -59,15 +59,6 @@
     .lf-cta.dark{background:#16202e;color:#fff;border:1px solid #16202e}
     .lf-cta.dark:hover{opacity:.9}
 
-    /* Hero search (feeds the main listing filter below) */
-    .lf-herosearch{display:flex;gap:8px;max-width:480px;margin-bottom:22px}
-    .lf-herosearch .wrap{position:relative;flex:1;min-width:0}
-    .lf-herosearch .wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%)}
-    .lf-herosearch input{width:100%;min-width:0;border:1px solid #dfe2e6;background:#fff;border-radius:10px;padding:12px 14px 12px 38px;font-family:inherit;font-size:14px;color:#16202e;outline:none}
-    .lf-herosearch input:focus{border-color:#1f8b57;box-shadow:0 0 0 3px rgba(31,139,87,.12)}
-    .lf-herosearch button{border:1px solid #1f8b57;background:#1f8b57;color:#fff;font-family:inherit;font-weight:700;font-size:14px;padding:12px 18px;border-radius:10px;cursor:pointer}
-    .lf-herosearch button:hover{background:#177045}
-
     /* Trust checkmarks */
     .lf-trust{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;max-width:480px;margin-bottom:22px}
     .lf-trust div{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:600;color:#16202e}
@@ -348,14 +339,6 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L4.5 12.5H11L9 22l8.5-10.5H12z" fill="currentColor" stroke="none"/></svg>
               Shop Buy Now
             </button>
-          </div>
-
-          <div class="lf-herosearch">
-            <div class="wrap">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa1ab" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
-              <input id="heroSearch" type="text" placeholder="Search lots, brands or categories…" />
-            </div>
-            <button type="button" id="heroSearchBtn">Search</button>
           </div>
 
           <div class="lf-trust">
@@ -2106,22 +2089,10 @@
     })();
   </script>
 
-  <!-- Hero search + CTA wiring: both feed the existing listing filter below -->
+  <!-- Hero CTA wiring: switch the type tab (via .view-nav) and scroll to the listings -->
   <script>
     (function(){
-      var hs = document.getElementById('heroSearch');
-      var hsBtn = document.getElementById('heroSearchBtn');
       var listings = document.getElementById('listings');
-      function applyHeroSearch(){
-        var sb = document.getElementById('searchBox');
-        if (!hs || !sb) return;
-        sb.value = hs.value;
-        sb.dispatchEvent(new Event('input', { bubbles: true }));
-        if (listings) listings.scrollIntoView({ behavior: 'smooth' });
-      }
-      if (hsBtn) hsBtn.addEventListener('click', applyHeroSearch);
-      if (hs) hs.addEventListener('keydown', function(e){ if (e.key === 'Enter') applyHeroSearch(); });
-      // CTAs already switch the type tab via their .view-nav class — add the scroll.
       ['ctaAuctions', 'ctaBuyNow'].forEach(function(id){
         var b = document.getElementById(id);
         if (b && listings) b.addEventListener('click', function(){ listings.scrollIntoView({ behavior: 'smooth' }); });
