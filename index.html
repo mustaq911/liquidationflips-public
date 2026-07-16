@@ -222,10 +222,19 @@
       .lf-select{width:100%}
       .lf-viewtoggle{width:100%;justify-content:center}
     }
+    /* "More filters" toggle — hidden except on phone */
+    .lf-morefilters{display:none;align-items:center;justify-content:center;gap:8px;width:100%;border:1px dashed #dfe2e6;background:#fff;border-radius:9px;padding:11px;font-family:inherit;font-weight:700;font-size:13px;color:#6b7480;cursor:pointer}
+    .lf-morefilters .mf-count{background:#1f8b57;color:#fff;border-radius:999px;font-size:11px;font-weight:800;padding:2px 7px;line-height:1.4}
+    .lf-morefilters .mf-chev{transition:transform .25s ease}
+    .lf-filter.open .mf-chev{transform:rotate(180deg)}
     @media (max-width:560px){
       .lf-field{flex-basis:100%}                         /* stack every control on phone */
       .lf-field-view{display:none}                       /* grid by default; hide grid/list toggle */
       .lf-countrow{gap:8px}
+      .lf-sortedby{display:none}                         /* duplicates the Sort select */
+      .lf-morefilters{display:flex}
+      .lf-field-extra{display:none}                      /* Category/Warehouse/Sort behind the toggle */
+      .lf-filter.open .lf-field-extra{display:flex}
     }
     @media (max-width:640px){.lf-hero-sec{padding:24px 0 6px}.lf-list-sec{padding:20px 0 0}.lf-grid-sec{padding:0 0 16px}.lf-intro-sec{padding:28px 0 4px}}
   </style>
@@ -416,17 +425,26 @@
           </div>
         </label>
 
-        <label class="lf-field">
+        <!-- Phone-only: Category/Warehouse/Sort collapse behind this toggle so the
+             filter bar doesn't fill the whole screen before any products show -->
+        <button type="button" class="lf-morefilters" id="moreFiltersBtn" aria-expanded="false">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 5h18M7 12h10M10 19h4"/></svg>
+          <span id="mfLabel">More filters</span>
+          <span class="mf-count hidden" id="mfCount">0</span>
+          <svg class="mf-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+
+        <label class="lf-field lf-field-extra">
           <span class="lf-fieldcap">Category</span>
           <select id="categorySelect" name="categoryId" class="lf-select"></select>
         </label>
 
-        <label class="lf-field">
+        <label class="lf-field lf-field-extra">
           <span class="lf-fieldcap">Warehouse</span>
           <select id="warehouseSelect" class="lf-select"><option value="all">All Warehouses</option></select>
         </label>
 
-        <label class="lf-field">
+        <label class="lf-field lf-field-extra">
           <span class="lf-fieldcap">Sort by</span>
           <select id="sortSelect" class="lf-select">
             <option value="endingSoon" selected>Ending soonest</option>
@@ -2110,6 +2128,29 @@
         var b = document.getElementById(id);
         if (b && listings) b.addEventListener('click', function(){ listings.scrollIntoView({ behavior: 'smooth' }); });
       });
+
+      // Phone "More filters" toggle — badge counts non-default filters so users
+      // know something is filtering their results even while collapsed.
+      var mf = document.getElementById('moreFiltersBtn');
+      var filterBar = document.querySelector('.lf-filter');
+      function mfUpdate(){
+        var n = 0;
+        var c = document.getElementById('categorySelect'); if (c && c.value) n++;
+        var w = document.getElementById('warehouseSelect'); if (w && w.value !== 'all') n++;
+        var s = document.getElementById('sortSelect'); if (s && s.value !== 'endingSoon') n++;
+        var badge = document.getElementById('mfCount');
+        if (badge){ badge.textContent = n; badge.classList.toggle('hidden', n === 0); }
+      }
+      if (mf && filterBar){
+        mf.addEventListener('click', function(){
+          var open = filterBar.classList.toggle('open');
+          mf.setAttribute('aria-expanded', open ? 'true' : 'false');
+          document.getElementById('mfLabel').textContent = open ? 'Hide filters' : 'More filters';
+          mfUpdate();
+        });
+        filterBar.addEventListener('change', mfUpdate);
+        mfUpdate();
+      }
     })();
   </script>
 
