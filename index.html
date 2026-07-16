@@ -44,31 +44,72 @@
     .lf-btn:active{transform:translateY(1px)}
 
     /* Hero */
-    .lf-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-    .lf-eyebrow-rule{width:24px;height:1px;background:#1f8b57;display:inline-block}
-    .lf-eyebrow>span:last-child{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:#1f8b57}
-    .lf-hero-title{font-weight:800;font-size:clamp(23px,2.9vw,37px);line-height:1.08;letter-spacing:-.02em;margin:0 0 24px;color:#16202e;max-width:820px}
+    .lf-hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(31,139,87,.1);border:1px solid rgba(31,139,87,.25);color:#177045;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:8px 14px;border-radius:999px;margin-bottom:16px}
+    .lf-hero-title{font-weight:800;font-size:clamp(26px,3.1vw,40px);line-height:1.1;letter-spacing:-.02em;margin:0 0 14px;color:#16202e;max-width:560px}
     .lf-hero-title span{color:#1f8b57}
-    .lf-hero{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
-    .lf-hero-sub{font-size:15px;line-height:1.6;color:#6b7480;margin:0 0 18px;max-width:480px}
-    .lf-hilite{min-height:66px}
-    .lf-hilite-row{display:flex;align-items:flex-start;gap:11px}
-    .lf-hilite-dot{flex-shrink:0;width:8px;height:8px;border-radius:999px;background:#1f8b57;margin-top:6px}
+    .lf-hero{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:stretch}
+    .lf-hero-sub{font-size:15px;line-height:1.6;color:#6b7480;margin:0 0 20px;max-width:480px}
+
+    /* CTAs */
+    .lf-cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+    .lf-cta{display:inline-flex;align-items:center;gap:9px;font-family:inherit;font-weight:700;font-size:14.5px;padding:13px 22px;border-radius:10px;cursor:pointer;text-decoration:none;transition:opacity .18s ease,background .18s ease}
+    .lf-cta:active{transform:translateY(1px)}
+    .lf-cta.green{background:#1f8b57;color:#fff;border:1px solid #1f8b57}
+    .lf-cta.green:hover{background:#177045;border-color:#177045}
+    .lf-cta.dark{background:#16202e;color:#fff;border:1px solid #16202e}
+    .lf-cta.dark:hover{opacity:.9}
+
+    /* Hero search (feeds the main listing filter below) */
+    .lf-herosearch{display:flex;gap:8px;max-width:480px;margin-bottom:22px}
+    .lf-herosearch .wrap{position:relative;flex:1;min-width:0}
+    .lf-herosearch .wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%)}
+    .lf-herosearch input{width:100%;min-width:0;border:1px solid #dfe2e6;background:#fff;border-radius:10px;padding:12px 14px 12px 38px;font-family:inherit;font-size:14px;color:#16202e;outline:none}
+    .lf-herosearch input:focus{border-color:#1f8b57;box-shadow:0 0 0 3px rgba(31,139,87,.12)}
+    .lf-herosearch button{border:1px solid #1f8b57;background:#1f8b57;color:#fff;font-family:inherit;font-weight:700;font-size:14px;padding:12px 18px;border-radius:10px;cursor:pointer}
+    .lf-herosearch button:hover{background:#177045}
+
+    /* Trust checkmarks */
+    .lf-trust{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;max-width:480px;margin-bottom:22px}
+    .lf-trust div{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:600;color:#16202e}
+    .lf-trust svg{flex-shrink:0;color:#1f8b57}
+
+    /* Social-proof stats */
+    .lf-stats{display:flex;gap:26px;flex-wrap:wrap;border-top:1px solid #eef0f2;padding-top:18px}
+    .lf-stat .lf-statnum{font-weight:800;font-size:20px;letter-spacing:-.01em;color:#16202e}
+    .lf-stat .lf-statnum b{color:#1f8b57;font-weight:800}
+    .lf-stat .lf-statlab{font-size:12px;color:#6b7480;font-weight:600;margin-top:2px}
+    .lf-stat.live .lf-statnum{color:#1f8b57}
+    .lf-stat.live .lf-statnum::before{content:"";display:inline-block;width:8px;height:8px;border-radius:999px;background:#1f8b57;margin-right:7px;animation:lfpulse 1.6s ease-in-out infinite}
+    @keyframes lfpulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+    /* Right: rotating image with slide caption overlaid (connects copy + visual) */
+    .lf-heroright{display:flex;flex-direction:column;gap:12px;min-width:0}
+    .lf-heroimg{position:relative;flex:1;min-height:340px;border-radius:16px;overflow:hidden;background:#f3f4f6}
+    /* right-anchored crop: the 3:1 banner art has baked-in text on the left and the
+       pallet/warehouse visuals on the right — in this taller box we show the visuals
+       and let the overlaid caption carry the message */
+    .lf-herolayer{position:absolute;inset:0;background-position:right center;background-size:cover;background-repeat:no-repeat;transition:opacity .5s ease;opacity:0}
+    .lf-herolayer.on{opacity:1}
+    .lf-heroshade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,32,46,0) 35%,rgba(22,32,46,.72) 100%)}
+    .lf-heropill{position:absolute;left:16px;top:16px;display:inline-flex;align-items:center;gap:8px;background:#fff;color:#16202e;font-size:12px;font-weight:700;letter-spacing:.03em;padding:9px 14px;border-radius:999px;box-shadow:0 6px 18px -8px rgba(22,32,46,.45)}
+    .lf-heropill i{width:7px;height:7px;border-radius:999px;background:#1f8b57;display:inline-block;animation:lfpulse 1.6s ease-in-out infinite}
+    .lf-slidecap{position:absolute;left:18px;right:18px;bottom:16px;color:#fff}
     /* Fixed 1-line title + 2-line subtitle so the hero height never changes as
        slides (with different-length copy) rotate — esp. in tablet/narrow views. */
-    .lf-hilite-t{font-weight:700;font-size:16px;color:#16202e;line-height:1.3;
+    .lf-hilite-t{font-weight:800;font-size:17px;line-height:1.3;color:#fff;
       display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
-    .lf-hilite-s{font-size:13.5px;color:#6b7480;line-height:1.5;margin-top:2px;min-height:41px;
+    .lf-hilite-s{font-size:13px;color:rgba(255,255,255,.85);line-height:1.5;margin-top:3px;min-height:39px;
       display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-    .lf-dots{display:flex;gap:6px;margin-top:16px}
-    .lf-dots button{height:7px;width:7px;border-radius:999px;border:none;cursor:pointer;padding:0;background:#d7dbe0;transition:width .35s ease,background .35s ease}
-    .lf-dots button.on{width:22px;background:#1f8b57}
-    .lf-heroimg{position:relative;aspect-ratio:3/1;border-radius:14px;overflow:hidden;background:#f3f4f6}
-    .lf-herolayer{position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat;transition:opacity .5s ease;opacity:0}
-    .lf-herolayer.on{opacity:1}
-    .lf-heroshade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,32,46,0) 50%,rgba(22,32,46,.5) 100%)}
-    .lf-heropill{position:absolute;left:16px;bottom:16px;display:inline-flex;align-items:center;gap:8px;background:#fff;color:#16202e;font-size:12px;font-weight:700;letter-spacing:.03em;padding:9px 14px;border-radius:999px}
-    .lf-heropill i{width:7px;height:7px;border-radius:999px;background:#1f8b57;display:inline-block}
+
+    /* Carousel controls: bigger dots + arrows + counter */
+    .lf-heroctrl{display:flex;align-items:center;gap:14px}
+    .lf-dots{display:flex;gap:8px}
+    .lf-dots button{height:9px;width:9px;border-radius:999px;border:none;cursor:pointer;padding:0;background:#c4cad2;transition:width .35s ease,background .35s ease}
+    .lf-dots button.on{width:26px;background:#1f8b57}
+    .lf-herocount{font-size:12.5px;font-weight:700;color:#6b7480;font-variant-numeric:tabular-nums;margin-left:auto}
+    .lf-heronav{display:flex;gap:8px}
+    .lf-heronav button{width:34px;height:34px;border-radius:999px;border:1px solid #dfe2e6;background:#fff;color:#16202e;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .18s ease,color .18s ease}
+    .lf-heronav button:hover{border-color:#1f8b57;color:#1f8b57}
 
     /* Intro */
     .lf-intro-h{font-weight:800;font-size:24px;letter-spacing:-.01em;margin:0 0 4px;color:#16202e}
@@ -157,7 +198,16 @@
     .lf-pageinfo span{color:#16202e;font-weight:700}
 
     /* Responsive */
-    @media (max-width:820px){.lf-hero{grid-template-columns:1fr!important;gap:20px!important}}
+    @media (max-width:820px){
+      .lf-hero{grid-template-columns:minmax(0,1fr)!important;gap:22px!important}
+      .lf-heroimg{flex:none;min-height:0;aspect-ratio:16/10}
+      .lf-hero-title{max-width:none}
+    }
+    @media (max-width:480px){
+      .lf-trust{grid-template-columns:minmax(0,1fr)}
+      .lf-stats{gap:18px}
+      .lf-cta-row .lf-cta{flex:1;justify-content:center}
+    }
     @media (max-width:880px){.lf-listrow{flex-direction:column!important}.lf-listrow>div:first-child{width:100%!important;height:200px}.lf-listrow .lf-side{width:100%!important;border-left:none!important;border-top:1px solid #e6e8ec}.lf-metagrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
     /* Inventory filter — tidy for tablet/phone so it doesn't feel cluttered */
     @media (max-width:900px){
@@ -282,28 +332,66 @@
 
     <!-- ===================== HERO ===================== -->
     <section class="lf-section lf-hero-sec">
-      <div class="lf-eyebrow">
-        <span class="lf-eyebrow-rule"></span>
-        <span>Canada&rsquo;s liquidation marketplace</span>
-      </div>
-      <h1 class="lf-hero-title">Brand-name overstock &amp; returns — <span>bid live or buy now.</span></h1>
-
       <div class="lf-hero">
         <div>
-          <p class="lf-hero-sub">Canada&rsquo;s marketplace for wholesale lots, customer returns and overstock. Bid live or buy now — shipped fast, coast to coast.</p>
-          <!-- TODO(backend): hero highlights are static marketing slides (rotated client-side) -->
-          <div class="lf-hilite">
-            <div class="lf-hilite-row">
-              <span class="lf-hilite-dot"></span>
-              <div>
-                <div class="lf-hilite-t" id="heroHiliteT">Up to 70% off retail</div>
-                <div class="lf-hilite-s" id="heroHiliteS">Tested electronics, appliances and home goods from trusted Canadian sellers.</div>
-              </div>
+          <!-- 🍁 not 🇨🇦: Windows doesn't render flag emojis (falls back to "CA" letters) -->
+          <div class="lf-hero-badge">🍁 Canada&rsquo;s Liquidation Marketplace</div>
+          <h1 class="lf-hero-title">Save <span>up to 70%</span> on retail returns, overstock &amp; wholesale pallets</h1>
+          <p class="lf-hero-sub">Bid live on auctions or buy instantly from thousands of brand-name lots — shipped fast, coast to coast.</p>
+
+          <div class="lf-cta-row">
+            <button type="button" class="lf-cta green view-nav" data-target="auction" id="ctaAuctions">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 13l7 7"/><path d="M9 4l7 7"/><path d="M6 7l5 5-3 3-5-5z" fill="currentColor" stroke="none"/><path d="M3 21h9"/></svg>
+              Browse Auctions
+            </button>
+            <button type="button" class="lf-cta dark view-nav" data-target="buynow" id="ctaBuyNow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L4.5 12.5H11L9 22l8.5-10.5H12z" fill="currentColor" stroke="none"/></svg>
+              Shop Buy Now
+            </button>
+          </div>
+
+          <div class="lf-herosearch">
+            <div class="wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa1ab" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+              <input id="heroSearch" type="text" placeholder="Search lots, brands or categories…" />
             </div>
-            <div class="lf-dots" id="heroDots"></div>
+            <button type="button" id="heroSearchBtn">Search</button>
+          </div>
+
+          <div class="lf-trust">
+            <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="10" fill="rgba(31,139,87,.12)" stroke="none"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>Fast Canada-wide shipping</div>
+            <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="10" fill="rgba(31,139,87,.12)" stroke="none"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>New lots added daily</div>
+            <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="10" fill="rgba(31,139,87,.12)" stroke="none"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>Tested &amp; verified lots</div>
+            <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="10" fill="rgba(31,139,87,.12)" stroke="none"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>Pallets &amp; single items</div>
+          </div>
+
+          <div class="lf-stats">
+            <div class="lf-stat"><div class="lf-statnum">18,000<b>+</b></div><div class="lf-statlab">Lots sold</div></div>
+            <div class="lf-stat"><div class="lf-statnum">4.8<b>★</b></div><div class="lf-statlab">Buyer rating</div></div>
+            <div class="lf-stat"><div class="lf-statnum">70<b>%</b></div><div class="lf-statlab">Avg. savings</div></div>
+            <div class="lf-stat live hidden" id="statLive"><div class="lf-statnum" id="statLiveNum">—</div><div class="lf-statlab">Live auctions now</div></div>
           </div>
         </div>
-        <div class="lf-heroimg" id="heroImg"></div>
+
+        <div class="lf-heroright">
+          <!-- TODO(backend): hero slides are static marketing images (rotated client-side) -->
+          <div class="lf-heroimg" id="heroImg">
+            <div class="lf-heroshade"></div>
+            <div class="lf-heropill"><i></i>New lots daily</div>
+            <div class="lf-slidecap">
+              <div class="lf-hilite-t" id="heroHiliteT">Up to 70% off retail</div>
+              <div class="lf-hilite-s" id="heroHiliteS">Tested electronics, appliances and home goods from trusted Canadian sellers.</div>
+            </div>
+          </div>
+          <div class="lf-heroctrl">
+            <div class="lf-dots" id="heroDots"></div>
+            <span class="lf-herocount" id="heroCounter">1 / 3</span>
+            <div class="lf-heronav">
+              <button type="button" id="heroPrev" aria-label="Previous slide"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></button>
+              <button type="button" id="heroNext" aria-label="Next slide"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -904,6 +992,14 @@
 
         ALL_PRODUCTS = mergeSmooth(auctions, buynow);
         PRODUCTS_LOADED = true;   // real data is in — render() may now show the empty state
+
+        // Hero "live auctions" stat — real count, only shown when there are some.
+        const liveWrap = document.getElementById('statLive');
+        if (liveWrap && auctions.length > 0){
+          document.getElementById('statLiveNum').textContent = auctions.length;
+          liveWrap.classList.remove('hidden');
+        }
+
         applyFilters();
       }catch(err){
         // API unreachable / errored — send to the error page instead of
@@ -1990,17 +2086,46 @@
         return d;
       });
       var dots = Array.prototype.slice.call(dotsEl.children);
+      var cntEl = document.getElementById('heroCounter');
       var cur = 0, timer = null;
       function paint(){
         layers.forEach(function(l,i){ l.classList.toggle('on', i===cur); });
         dots.forEach(function(dd,i){ dd.classList.toggle('on', i===cur); });
         tEl.textContent = slides[cur].t;
         sEl.textContent = slides[cur].s;
+        if (cntEl) cntEl.textContent = (cur + 1) + ' / ' + slides.length;
       }
       function go(i){ cur = (i + slides.length) % slides.length; paint(); restart(); }
       function next(){ go(cur + 1); }
       function restart(){ if(timer) clearInterval(timer); timer = setInterval(next, 5000); }
+      var prevBtn = document.getElementById('heroPrev');
+      var nextBtn = document.getElementById('heroNext');
+      if (prevBtn) prevBtn.addEventListener('click', function(){ go(cur - 1); });
+      if (nextBtn) nextBtn.addEventListener('click', function(){ go(cur + 1); });
       paint(); restart();
+    })();
+  </script>
+
+  <!-- Hero search + CTA wiring: both feed the existing listing filter below -->
+  <script>
+    (function(){
+      var hs = document.getElementById('heroSearch');
+      var hsBtn = document.getElementById('heroSearchBtn');
+      var listings = document.getElementById('listings');
+      function applyHeroSearch(){
+        var sb = document.getElementById('searchBox');
+        if (!hs || !sb) return;
+        sb.value = hs.value;
+        sb.dispatchEvent(new Event('input', { bubbles: true }));
+        if (listings) listings.scrollIntoView({ behavior: 'smooth' });
+      }
+      if (hsBtn) hsBtn.addEventListener('click', applyHeroSearch);
+      if (hs) hs.addEventListener('keydown', function(e){ if (e.key === 'Enter') applyHeroSearch(); });
+      // CTAs already switch the type tab via their .view-nav class — add the scroll.
+      ['ctaAuctions', 'ctaBuyNow'].forEach(function(id){
+        var b = document.getElementById(id);
+        if (b && listings) b.addEventListener('click', function(){ listings.scrollIntoView({ behavior: 'smooth' }); });
+      });
     })();
   </script>
 
