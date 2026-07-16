@@ -227,10 +227,31 @@ h1, h2, h3, h4,
   .lf-nav { display: none; }
 }
 
+/* ---- Mobile nav strip (pill row under the header bar) ---- */
+.lf-mnav { display: none; }
+@media (max-width: 900px) {
+  .lf-mnav {
+    display: flex; gap: 6px; align-items: center;
+    padding: 0 18px 10px; overflow-x: auto;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .lf-mnav::-webkit-scrollbar { display: none; }
+  .lf-mnav-link {
+    flex-shrink: 0; text-decoration: none; white-space: nowrap;
+    color: #6b7480; font-weight: 600; font-size: 13px;
+    padding: 7px 13px; border-radius: 999px;
+    border: 1px solid #e6e8ec; background: #fff;
+  }
+  .lf-mnav-link.is-active {
+    color: #177045; font-weight: 700;
+    background: rgba(31,139,87,.1); border-color: rgba(31,139,87,.25);
+  }
+}
+
 @media (max-width: 760px) {
   .lf-head-inner { gap: 12px; }
   /* No hamburger / left filter panel on phone — filtering is done on the
-     inventory page's own filter bar instead. */
+     inventory page's own filter bar, and page links live in the .lf-mnav strip. */
   .lf-header .burger { display: none; }
   .lf-nav { display: none; }
   /* Keep the auth actions (Sign in / Register / cart / account chip) in the
@@ -243,10 +264,13 @@ h1, h2, h3, h4,
 }
 
 @media (max-width: 400px) {
-  .lf-wordmark { display: none; }
+  /* Keep the "Liquidation Flips" wordmark visible on phones — just smaller,
+     with tighter actions so everything still fits down to 320px. */
+  .lf-wordmark { font-size: 14px; }
+  .lf-brand { gap: 8px; }
   .lf-actions { gap: 6px; }
-  .lf-signin { padding: 8px 10px; font-size: 13px; }
-  .lf-register { padding: 9px 11px; font-size: 13px; }
+  .lf-signin { padding: 8px 9px; font-size: 12.5px; }
+  .lf-register { padding: 8px 10px; font-size: 12.5px; }
   .lf-userchip .greet { display: none; }
 }
 

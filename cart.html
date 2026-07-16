@@ -102,7 +102,13 @@
 
     .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0;}
     @media(max-width:950px){.kpis{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:520px){.kpis{grid-template-columns:1fr}}
+    /* Phone: compact 2×2 KPI tiles instead of full-width rows */
+    @media(max-width:520px){
+      .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .kpi{padding:12px}
+      .kpi .val{font-size:16px}
+      .kpi .hint{display:none}
+    }
 
     .kpi{
       border-radius:var(--radius);
@@ -175,6 +181,21 @@
       background:rgba(220,38,38,.06);
       color:#991b1b;padding:12px;border-radius:14px;
       font-size:13px;margin-top:10px;display:none;
+    }
+
+    /* Phone: each cart line becomes a stacked card with labelled rows
+       (column order: Item, Unit, Line total, Qty & actions). */
+    @media (max-width:700px){
+      thead{display:none}
+      table,tbody,tbody tr{display:block;width:100%}
+      tbody td[colspan]{display:block;text-align:center}
+      tr[data-item-id]{padding:4px 0 10px;border-bottom:1px solid var(--border)}
+      tr[data-item-id] td{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:none;padding:4px 10px;white-space:normal;text-align:left}
+      tr[data-item-id] td::before{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:900;flex-shrink:0}
+      tr[data-item-id] td:first-child{display:block;padding:12px 10px 6px}
+      tr[data-item-id] td:nth-child(2)::before{content:"Unit price"}
+      tr[data-item-id] td:nth-child(3)::before{content:"Line total"}
+      tr[data-item-id] td:last-child{justify-content:flex-end;padding-top:8px}
     }
 
     @media print{

@@ -104,7 +104,13 @@
 
     .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0;}
     @media(max-width:950px){.kpis{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:520px){.kpis{grid-template-columns:1fr}}
+    /* Phone: compact 2×2 KPI tiles instead of full-width rows */
+    @media(max-width:520px){
+      .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .kpi{padding:12px}
+      .kpi .val{font-size:16px}
+      .kpi .hint{display:none}
+    }
 
     .kpi{
       border-radius:var(--radius);
@@ -164,6 +170,25 @@
       padding:12px;border-radius:14px;
       font-size:13px;
       display:none;
+    }
+
+    /* Phone: each watchlist item becomes a stacked card — thumb anchored left,
+       title beside it, labelled rows below (column order: Item, Title, Type,
+       Product ID, Added, Actions). */
+    @media (max-width:700px){
+      table{min-width:0}
+      thead{display:none}
+      table,tbody,tbody tr{display:block;width:100%}
+      tbody td[colspan]{display:block;text-align:center}
+      tr.itemRow{position:relative;padding:6px 0 10px;border-bottom:1px solid var(--border)}
+      tr.itemRow td{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:none;padding:4px 12px;white-space:normal;text-align:left}
+      tr.itemRow td::before{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:900;flex-shrink:0}
+      tr.itemRow td:first-child{position:absolute;left:12px;top:14px;display:block;padding:0}
+      tr.itemRow td:nth-child(2){display:block;padding:12px 12px 8px 66px;min-height:54px;font-size:13.5px}
+      tr.itemRow td:nth-child(3)::before{content:"Type"}
+      tr.itemRow td:nth-child(4)::before{content:"Product ID"}
+      tr.itemRow td:nth-child(5)::before{content:"Added"}
+      tr.itemRow td:last-child{justify-content:flex-end;gap:8px;padding-top:10px}
     }
 
     @media print{

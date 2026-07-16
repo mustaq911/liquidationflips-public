@@ -107,7 +107,13 @@
 
     .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0;}
     @media(max-width:950px){.kpis{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:520px){.kpis{grid-template-columns:1fr}}
+    /* Phone: compact 2×2 KPI tiles instead of full-width rows */
+    @media(max-width:520px){
+      .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .kpi{padding:12px}
+      .kpi .val{font-size:16px}
+      .kpi .hint{display:none}
+    }
 
     .kpi{
       border-radius:var(--radius);
@@ -202,6 +208,24 @@
       padding:12px;border-radius:14px;
       font-size:13px;
       display:none;
+    }
+
+    /* Phone: each order becomes a stacked card with labelled rows
+       (column order: Order, Status, Created, Items, Total, Action). */
+    @media (max-width:700px){
+      table{min-width:0}
+      thead{display:none}
+      table,tbody,tbody tr{display:block;width:100%}
+      tbody td[colspan]{display:block;text-align:center}
+      tr.orderRow{padding:4px 0 10px;border-bottom:1px solid var(--border)}
+      tr.orderRow td{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:none;padding:4px 12px;white-space:normal;text-align:left}
+      tr.orderRow td::before{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:900;flex-shrink:0}
+      tr.orderRow td:first-child{display:block;padding:12px 12px 6px;font-size:15px}
+      tr.orderRow td:nth-child(2)::before{content:"Status"}
+      tr.orderRow td:nth-child(3)::before{content:"Created"}
+      tr.orderRow td:nth-child(4)::before{content:"Items"}
+      tr.orderRow td:nth-child(5)::before{content:"Total"}
+      tr.orderRow td:last-child{justify-content:flex-end;gap:8px;padding-top:10px}
     }
 
     @media print{

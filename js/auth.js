@@ -162,7 +162,7 @@
 	  // "Our Inventory" hardcoded as active, which is only right on the homepage).
 	  (function markActiveNavLink(){
 		const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-		container.querySelectorAll('.lf-navlink').forEach(a => {
+		container.querySelectorAll('.lf-navlink, .lf-mnav-link').forEach(a => {
 		  const target = (a.getAttribute('href') || '').split('/').pop().split('?')[0].toLowerCase();
 		  a.classList.toggle('is-active', target === here);
 		});
