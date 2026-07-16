@@ -194,10 +194,18 @@
       .lf-heroimg{flex:none;min-height:0;aspect-ratio:16/10}
       .lf-hero-title{max-width:none}
     }
+    /* Phone: tighter rhythm — CTAs side by side on one line, trust list compact,
+       stats in a balanced 2×2 grid (keeps the live counter from dangling alone) */
     @media (max-width:480px){
-      .lf-trust{grid-template-columns:minmax(0,1fr)}
-      .lf-stats{gap:18px}
-      .lf-cta-row .lf-cta{flex:1;justify-content:center}
+      .lf-hero-badge{font-size:10.5px;padding:7px 12px;margin-bottom:12px}
+      .lf-hero-title{font-size:24px;margin-bottom:10px}
+      .lf-hero-sub{font-size:14px;margin-bottom:16px}
+      .lf-cta-row{gap:9px;margin-bottom:18px}
+      .lf-cta-row .lf-cta{flex:1;justify-content:center;white-space:nowrap;padding:13px 8px;font-size:13.5px}
+      .lf-trust{grid-template-columns:minmax(0,1fr);gap:9px;margin-bottom:18px}
+      .lf-trust div{font-size:13px}
+      .lf-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px;padding-top:16px}
+      .lf-stat .lf-statnum{font-size:19px}
     }
     @media (max-width:880px){.lf-listrow{flex-direction:column!important}.lf-listrow>div:first-child{width:100%!important;height:200px}.lf-listrow .lf-side{width:100%!important;border-left:none!important;border-top:1px solid #e6e8ec}.lf-metagrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
     /* Inventory filter — tidy for tablet/phone so it doesn't feel cluttered */
