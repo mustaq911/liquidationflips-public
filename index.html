@@ -31,11 +31,13 @@
     .muted{color:#6b7480}
     input::placeholder{color:#9aa1ab}
 
+    /* Horizontal gutters come from the .page wrapper (topnav.css) so content
+       lines up with the header/footer on every page — sections only pad vertically. */
     .lf-section{max-width:1400px;margin:0 auto}
-    .lf-hero-sec{padding:28px 28px 6px}
-    .lf-intro-sec{padding:36px 28px 8px}
-    .lf-list-sec{padding:24px 28px 0}
-    .lf-grid-sec{padding:0 28px 16px}
+    .lf-hero-sec{padding:28px 0 6px}
+    .lf-intro-sec{padding:36px 0 8px}
+    .lf-list-sec{padding:24px 0 0}
+    .lf-grid-sec{padding:0 0 16px}
 
     .lf-btn{transition:opacity .18s ease,border-color .18s ease,background .18s ease,color .18s ease}
     .lf-btn:hover{opacity:.9}
@@ -171,7 +173,7 @@
       .lf-field-view{display:none}                       /* grid by default; hide grid/list toggle */
       .lf-countrow{gap:8px}
     }
-    @media (max-width:640px){.lf-hero-sec{padding:24px 18px 6px}.lf-list-sec{padding:20px 18px 0}.lf-grid-sec{padding:0 18px 16px}.lf-intro-sec{padding:28px 18px 4px}}
+    @media (max-width:640px){.lf-hero-sec{padding:24px 0 6px}.lf-list-sec{padding:20px 0 0}.lf-grid-sec{padding:0 0 16px}.lf-intro-sec{padding:28px 0 4px}}
   </style>
 </head>
 
@@ -904,9 +906,10 @@
         PRODUCTS_LOADED = true;   // real data is in — render() may now show the empty state
         applyFilters();
       }catch(err){
+        // API unreachable / errored — send to the error page instead of
+        // reloading index.html (which caused an infinite reload loop).
         console.error('Failed to load products', err);
-        LF.toast('You must be logged in to view products.', 'error');
-        window.location.href = "/index.html";
+        window.location.href = "/404.html?reason=api";
       }
     }
 

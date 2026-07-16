@@ -158,6 +158,16 @@
 	  const res = await fetch('/topnav.html');
 	  container.innerHTML = stripInjectedScripts(await res.text());
 	  
+	  // Highlight the nav link matching the current page (topnav.html ships with
+	  // "Our Inventory" hardcoded as active, which is only right on the homepage).
+	  (function markActiveNavLink(){
+		const here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+		container.querySelectorAll('.lf-navlink').forEach(a => {
+		  const target = (a.getAttribute('href') || '').split('/').pop().split('?')[0].toLowerCase();
+		  a.classList.toggle('is-active', target === here);
+		});
+	  })();
+
 	  // Calling Lef-Panel
 	  await initLeftPanel(); 	 // your existing function
 	  await initFooter();      // ✅ add this line

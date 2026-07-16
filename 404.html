@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Page Not Found — Liquidation Flips</title>
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#fff;color:#16202e}
+
+    .nf-wrap{max-width:1400px;margin:0 auto;padding:64px 28px 96px;text-align:center}
+    .nf-eyebrow{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px}
+    .nf-eyebrow i{width:24px;height:1px;background:#1f8b57;display:inline-block}
+    .nf-eyebrow span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:#1f8b57}
+
+    .nf-code{font-weight:800;font-size:clamp(84px,18vw,150px);line-height:1;letter-spacing:-.03em;margin:0;color:#16202e}
+    .nf-code b{color:#1f8b57;font-weight:800}
+    .nf-title{font-weight:800;font-size:clamp(20px,3vw,28px);letter-spacing:-.01em;margin:18px 0 10px}
+    .nf-sub{font-size:15px;line-height:1.65;color:#6b7480;max-width:480px;margin:0 auto 30px}
+
+    .nf-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .nf-btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14px;
+      padding:13px 22px;border-radius:10px;text-decoration:none;cursor:pointer;
+      transition:opacity .18s ease,background .18s ease,border-color .18s ease}
+    .nf-btn:active{transform:translateY(1px)}
+    .nf-btn.dark{background:#16202e;color:#fff;border:1px solid #16202e}
+    .nf-btn.dark:hover{opacity:.9}
+    .nf-btn.line{background:#fff;color:#16202e;border:1px solid #dfe2e6}
+    .nf-btn.line:hover{border-color:#1f8b57;color:#1f8b57}
+
+    .nf-hint{margin-top:34px;font-size:13px;color:#97a0ab}
+    .nf-hint a{color:#1f8b57;font-weight:700;text-decoration:none}
+
+    @media (max-width:640px){
+      .nf-wrap{padding:44px 18px 72px}
+      .nf-actions{flex-direction:column;align-items:stretch;max-width:320px;margin:0 auto}
+      .nf-btn{justify-content:center}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Shared Topnav (also injects the footer via auth.js) -->
+  <link rel="stylesheet" href="/css/topnav.css?v=3">
+  <div id="topnavContainer"></div>
+  <script src="/js/config.js?v=3"></script>
+  <script src="/js/auth.js?v=3" defer></script>
+
+  <div class="nf-wrap">
+    <div class="nf-eyebrow"><i></i><span id="nfEyebrow">Error 404</span></div>
+    <h1 class="nf-code">4<b>0</b>4</h1>
+    <h2 class="nf-title" id="nfTitle">This page couldn't be found</h2>
+    <p class="nf-sub" id="nfSub">The page you're looking for doesn't exist or may have moved. Head back to the inventory to keep browsing live lots.</p>
+
+    <div class="nf-actions">
+      <a class="nf-btn dark" href="/index.html">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg>
+        Back to inventory
+      </a>
+      <a class="nf-btn line" href="/support.html">Contact support</a>
+    </div>
+
+    <div class="nf-hint">Need help? Email <a href="mailto:info@liquidationflips.ca">info@liquidationflips.ca</a></div>
+  </div>
+
+  <script>
+    // When reached because the products API was unreachable (index.html sends
+    // ?reason=api), show a "temporarily unavailable" message instead of the
+    // generic missing-page copy.
+    (function(){
+      if (new URLSearchParams(location.search).get('reason') === 'api'){
+        document.getElementById('nfEyebrow').textContent = 'Service unavailable';
+        document.getElementById('nfTitle').textContent = "We couldn't load the marketplace";
+        document.getElementById('nfSub').textContent =
+          'Our servers are temporarily unreachable. Please try again in a moment — your bids and account are safe.';
+        document.querySelector('.nf-btn.dark').textContent = 'Try again';
+        document.querySelector('.nf-btn.dark').setAttribute('href', '/index.html');
+      }
+    })();
+  </script>
+
+</body>
+</html>

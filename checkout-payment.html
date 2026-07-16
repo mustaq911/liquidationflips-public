@@ -24,14 +24,15 @@
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
 
     .page{max-width:1400px;margin:22px auto;padding:0 28px;}
+    /* minmax(0,·) keeps wide content from forcing a column past the phone width */
     .grid{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0,1fr) minmax(0,1fr);
       gap:18px;
       align-items:start;
     }
     @media (max-width: 900px){
-      .grid{grid-template-columns:1fr;}
+      .grid{grid-template-columns:minmax(0,1fr);}
     }
 
     .card{

@@ -47,6 +47,10 @@ h1, h2, h3, h4,
   border-bottom: 1px solid #e6e8ec;
 }
 .lf-head-inner { max-width: 1400px; margin: 0 auto; padding: 15px 28px; display: flex; align-items: center; gap: 34px; }
+/* .page is the single authority on horizontal gutters — it always matches
+   .lf-head-inner (28px, 18px under 1000px) so content aligns with the header
+   and footer on every page. This sheet loads after each page's inline styles,
+   so it wins over their own .page padding. */
 .page { max-width: 1400px; margin: 0 auto; padding-left: 28px; padding-right: 28px; box-sizing: border-box; }
 .lf-header .burger { font-size: 22px; line-height: 1; cursor: pointer; user-select: none; display: none; color: #16202e; }
 
@@ -214,6 +218,7 @@ h1, h2, h3, h4,
 @media (max-width: 1000px) {
   .lf-nav { gap: 18px; }
   .lf-head-inner { padding-left: 18px; padding-right: 18px; }
+  .page { padding-left: 18px; padding-right: 18px; } /* keep content aligned with header */
 }
 
 /* Hide the primary nav links below tablet so the brand + auth actions always

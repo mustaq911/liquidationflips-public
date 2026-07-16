@@ -41,11 +41,16 @@
     }
 
     .hero{
-      display:flex;align-items:flex-start;gap:14px;
+      display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;
       padding:16px 18px;border-radius:var(--radius);
       border:1px solid var(--border);
       background:#f5f8f6;
       margin-bottom:16px;
+    }
+    /* Phone: tighter page gutters, full-width search so nothing overflows */
+    @media(max-width:640px){
+      .page{padding:18px 16px 32px}
+      .input{min-width:0;width:100%;flex:1 1 auto}
     }
     .heroIcon{
       width:44px;height:44px;border-radius:12px;
@@ -112,8 +117,9 @@
     /* One neutral tile treatment — colour comes only from the green icon. */
     .kpi.blue,.kpi.green,.kpi.amber,.kpi.red{border:1px solid var(--border);background:#fff}
 
-    .layout{display:grid;grid-template-columns:1.4fr .8fr;gap:16px;}
-    @media(max-width:900px){.layout{grid-template-columns:1fr;}}
+    /* minmax(0,·) keeps wide table content from forcing the column past the phone width */
+    .layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,.8fr);gap:16px;}
+    @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);}}
 
     table{width:100%;border-collapse:collapse;font-size:13px}
     th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;vertical-align:middle}

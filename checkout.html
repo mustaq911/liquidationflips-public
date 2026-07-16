@@ -77,14 +77,15 @@
     }
 
     /* Layout */
+    /* minmax(0,·) keeps wide content from forcing a column past the phone width */
     .layout{
       display:grid;
-      grid-template-columns:1.2fr .8fr;
+      grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);
       gap:18px;
     }
     @media(max-width:900px){
       .layout{
-        grid-template-columns:1fr;
+        grid-template-columns:minmax(0,1fr);
       }
     }
 
