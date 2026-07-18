@@ -121,6 +121,16 @@
 
   @media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr);gap:22px}.pickup-grid{grid-template-columns:1fr}}
   @media (max-width:640px){.page{padding:20px 18px 32px}.info-cards{grid-template-columns:1fr}}
+  /* Small phones: stop the MSRP + Time-left header from colliding, and give the
+     summary rows more vertical breathing room. */
+  @media (max-width:480px){
+    .sum-msrprow{flex-direction:column;align-items:stretch;gap:4px;padding-bottom:18px}
+    .sum-msrprow>div:last-child{text-align:left!important}
+    .price{font-size:21px}
+    .countdown{font-size:15px}
+    .row{padding:16px 0}
+    .lot-title{font-size:19px}
+  }
 </style>
 
 </head>

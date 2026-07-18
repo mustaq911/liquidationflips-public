@@ -48,6 +48,8 @@
       border:1px solid rgba(31,139,87,.20);
       color:var(--brand);font-size:18px;flex:0 0 auto;
     }
+    .heroHead{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .heroHead h1{margin:0}
     h1{font-size:22px;margin:0 0 6px;}
     .muted{color:var(--muted);font-size:13px;line-height:1.45}
     .chip{
@@ -219,9 +221,11 @@
 
   <div class="page">
     <div class="hero">
-      <div class="heroIcon"><i class="fa-solid fa-gavel"></i></div>
       <div style="flex:1">
-        <h1>My Bids</h1>
+        <div class="heroHead">
+          <div class="heroIcon"><i class="fa-solid fa-gavel"></i></div>
+          <h1>My Bids</h1>
+        </div>
         <div class="muted">Ongoing bids (Winning/Outbid), Won, and Lost — click a row to expand bid history.</div>
 
         <div class="toolbar">
