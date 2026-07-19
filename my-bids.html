@@ -60,6 +60,9 @@
     .chip i{color:var(--brand)}
 
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+    /* Lock search box + buttons to one height so the toolbar lines up (topnav.css
+       .btn overrides the inline padding, which otherwise made buttons taller). */
+    .toolbar .input,.toolbar .btn{height:44px;padding-top:0;padding-bottom:0}
     .input{
       background:#fff;border:1px solid var(--border);border-radius:12px;
       padding:10px 12px;font-size:13px;outline:none;min-width:240px;
