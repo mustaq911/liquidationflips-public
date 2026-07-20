@@ -1,0 +1,2 @@
+# Local-only load/stress testing — never commit (contains test creds, not part of the site)
+loadtest/
