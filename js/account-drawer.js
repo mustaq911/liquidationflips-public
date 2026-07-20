@@ -51,9 +51,9 @@
   var seq = 0;         // guards against out-of-order async renders
 
   function els() {
-    overlay = $('adOverlay'); panel = $('adPanel'); bodyEl = $('adBody');
-    footerEl = $('adFooter'); searchInput = $('adSearch'); statusSel = $('adStatus');
-    closeBtn = $('adClose'); viewAll = $('adViewAll');
+    overlay = $('acctOverlay'); panel = $('acctPanel'); bodyEl = $('acctBody');
+    footerEl = $('acctFooter'); searchInput = $('acctSearch'); statusSel = $('acctStatus');
+    closeBtn = $('acctClose'); viewAll = $('acctViewAll');
   }
 
   /* ---- open / close ---- */
@@ -77,8 +77,8 @@
 
   function setTab(tab) {
     activeTab = tab;
-    Array.prototype.forEach.call(panel.querySelectorAll('.ad-tab'), function (b) {
-      b.classList.toggle('on', b.getAttribute('data-adtab') === tab);
+    Array.prototype.forEach.call(panel.querySelectorAll('.acct-tab'), function (b) {
+      b.classList.toggle('on', b.getAttribute('data-accttab') === tab);
     });
     if (searchInput) searchInput.value = '';
     if (viewAll) {
@@ -92,18 +92,18 @@
   }
 
   /* ---- shared row + state markup ---- */
-  function loadingHTML() { return '<div class="ad-empty">Loading…</div>'; }
-  function emptyHTML(msg) { return '<div class="ad-empty">' + esc(msg) + '</div>'; }
+  function loadingHTML() { return '<div class="acct-empty">Loading…</div>'; }
+  function emptyHTML(msg) { return '<div class="acct-empty">' + esc(msg) + '</div>'; }
   function rowHTML(o) {
-    var thumb = '<div class="ad-thumb"' + (o.photo ? ' style="background-image:url(\'' + esc(o.photo) + '\')"' : '') + '></div>';
-    var right = '<div class="ad-rright"><div class="ad-rval">' + (o.right || '') + '</div>' +
-      (o.status ? '<div class="ad-status ' + o.status.cls + '">' + esc(o.status.label) + '</div>' : '') +
+    var thumb = '<div class="acct-thumb"' + (o.photo ? ' style="background-image:url(\'' + esc(o.photo) + '\')"' : '') + '></div>';
+    var right = '<div class="acct-rright"><div class="acct-rval">' + (o.right || '') + '</div>' +
+      (o.status ? '<div class="acct-status ' + o.status.cls + '">' + esc(o.status.label) + '</div>' : '') +
       (o.action || '') + '</div>';
-    var mid = '<div class="ad-rmid"><div class="ad-rtitle">' + esc(o.title) + '</div>' +
-      (o.sub ? '<div class="ad-rsub">' + esc(o.sub) + '</div>' : '') + '</div>';
+    var mid = '<div class="acct-rmid"><div class="acct-rtitle">' + esc(o.title) + '</div>' +
+      (o.sub ? '<div class="acct-rsub">' + esc(o.sub) + '</div>' : '') + '</div>';
     var inner = thumb + mid + right;
-    return o.href ? '<a class="ad-row" href="' + esc(o.href) + '">' + inner + '</a>'
-                  : '<div class="ad-row">' + inner + '</div>';
+    return o.href ? '<a class="acct-row" href="' + esc(o.href) + '">' + inner + '</a>'
+                  : '<div class="acct-row">' + inner + '</div>';
   }
   function q() { return (searchInput && searchInput.value || '').trim().toLowerCase(); }
 
@@ -152,11 +152,11 @@
       var canPay = ended && high && e.paymentRequired === true && e.orderId != null;
       var canQuick = !ended && !high && p.highestBid != null && p.id != null;
       var action = canPay
-        ? '<button type="button" class="ad-pay" data-payorder="' + esc(e.orderId) + '">' +
+        ? '<button type="button" class="acct-pay" data-payorder="' + esc(e.orderId) + '">' +
             '<svg width="12" height="12" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4H4V6h16v2zm0 4v6H4v-6h16z"></path></svg>' +
             '<span>Pay now</span></button>'
         : canQuick
-        ? '<button type="button" class="ad-qb" data-qbid="' + p.id + '" data-high="' + p.highestBid + '">' +
+        ? '<button type="button" class="acct-qb" data-qbid="' + p.id + '" data-high="' + p.highestBid + '">' +
             '<svg width="12" height="12" viewBox="0 0 24 24" fill="#1f8b57"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg>' +
             '<span>Quick Bid</span></button>'
         : '';
@@ -173,7 +173,7 @@
 
   // Won lots with an unpaid order: jump straight to checkout for that order.
   function wirePayButtons() {
-    Array.prototype.forEach.call(bodyEl.querySelectorAll('.ad-pay'), function (btn) {
+    Array.prototype.forEach.call(bodyEl.querySelectorAll('.acct-pay'), function (btn) {
       btn.addEventListener('click', function (ev) {
         ev.preventDefault();     // the row is a link — don't navigate to the product
         ev.stopPropagation();
@@ -220,7 +220,7 @@
 
   // Load each Quick Bid button's amount, and wire it to place the bid.
   function wireQuickBids() {
-    Array.prototype.forEach.call(bodyEl.querySelectorAll('.ad-qb'), function (btn) {
+    Array.prototype.forEach.call(bodyEl.querySelectorAll('.acct-qb'), function (btn) {
       var high = Number(btn.getAttribute('data-high'));
       var labelEl = btn.querySelector('span');
 
@@ -309,7 +309,7 @@
     var subtotal = items.reduce(function (s, it) { return s + Number(it.lineTotal != null ? it.lineTotal : (it.unitPrice || 0) * (it.quantity || 1)); }, 0);
     if (footerEl) {
       footerEl.style.display = '';
-      $('adSubtotal').textContent = money(subtotal);
+      $('acctSubtotal').textContent = money(subtotal);
     }
   }
 
@@ -362,8 +362,8 @@
     if (overlay) overlay.addEventListener('click', close);
     if (closeBtn) closeBtn.addEventListener('click', close);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && panel && panel.classList.contains('open')) close(); });
-    Array.prototype.forEach.call(panel.querySelectorAll('.ad-tab'), function (b) {
-      b.addEventListener('click', function () { setTab(b.getAttribute('data-adtab')); });
+    Array.prototype.forEach.call(panel.querySelectorAll('.acct-tab'), function (b) {
+      b.addEventListener('click', function () { setTab(b.getAttribute('data-accttab')); });
     });
     if (searchInput) searchInput.addEventListener('input', function () {
       if (activeTab === 'bids') renderBids();
@@ -372,7 +372,7 @@
       else if (activeTab === 'orders') renderOrders();
     });
     if (statusSel) statusSel.addEventListener('change', renderOrders);
-    var checkout = $('adCheckout');
+    var checkout = $('acctCheckout');
     if (checkout) checkout.addEventListener('click', function () { window.location.href = '/cart.html'; });
   }
 

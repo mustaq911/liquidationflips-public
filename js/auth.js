@@ -155,7 +155,7 @@
 	  if (!container) return;
 	
 	  // Absolute path so injection works from any page depth.
-	  const res = await fetch('/topnav.html');
+	  const res = await fetch('/topnav.html?v=4');
 	  container.innerHTML = stripInjectedScripts(await res.text());
 	  
 	  // Highlight the nav link matching the current page (topnav.html ships with
@@ -175,7 +175,7 @@
 	  // Load the shared account drawer (Bids / Watchlist / Cart / Orders) once.
 	  if (!document.querySelector('script[data-account-drawer]')) {
 		const ad = document.createElement('script');
-		ad.src = '/js/account-drawer.js?v=3';
+		ad.src = '/js/account-drawer.js?v=4';
 		ad.defer = true;
 		ad.setAttribute('data-account-drawer', '1');
 		document.body.appendChild(ad);

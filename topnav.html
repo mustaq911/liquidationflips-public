@@ -156,41 +156,41 @@
 </div>
 
 <!-- ===== Account drawer (Bids / Watchlist / Cart / Orders) — wired in /js/account-drawer.js ===== -->
-<div id="adOverlay" class="ad-overlay"></div>
-<aside id="adPanel" class="ad-panel" role="dialog" aria-modal="true" aria-label="My account">
-  <div class="ad-head">
-    <span class="ad-title">My account</span>
-    <button type="button" id="adClose" class="ad-close" aria-label="Close">
+<div id="acctOverlay" class="acct-overlay"></div>
+<aside id="acctPanel" class="acct-panel" role="dialog" aria-modal="true" aria-label="My account">
+  <div class="acct-head">
+    <span class="acct-title">My account</span>
+    <button type="button" id="acctClose" class="acct-close" aria-label="Close">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"></path></svg>
     </button>
   </div>
-  <div class="ad-tabs">
-    <button type="button" class="ad-tab on" data-adtab="bids">Bids</button>
-    <button type="button" class="ad-tab" data-adtab="watch">Watchlist</button>
-    <button type="button" class="ad-tab" data-adtab="cart">Cart</button>
-    <button type="button" class="ad-tab" data-adtab="orders">Orders</button>
+  <div class="acct-tabs">
+    <button type="button" class="acct-tab on" data-accttab="bids">Bids</button>
+    <button type="button" class="acct-tab" data-accttab="watch">Watchlist</button>
+    <button type="button" class="acct-tab" data-accttab="cart">Cart</button>
+    <button type="button" class="acct-tab" data-accttab="orders">Orders</button>
   </div>
-  <div class="ad-searchrow">
-    <span class="ad-searchwrap">
+  <div class="acct-searchrow">
+    <span class="acct-searchwrap">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9aa1ab" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
-      <input id="adSearch" type="text" placeholder="Search…" />
+      <input id="acctSearch" type="text" placeholder="Search…" />
     </span>
-    <select id="adStatus" style="display:none;">
+    <select id="acctStatus" style="display:none;">
       <option value="ALL">All status</option>
       <option value="PENDING_PAYMENT">Pending</option>
       <option value="PAID">Paid</option>
       <option value="CANCELLED">Cancelled</option>
     </select>
   </div>
-  <div class="ad-viewallrow">
-    <a id="adViewAll" class="ad-viewall" href="/my-bids.html">
+  <div class="acct-viewallrow">
+    <a id="acctViewAll" class="acct-viewall" href="/my-bids.html">
       Open full page
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17L17 7M17 7H8M17 7v9"></path></svg>
     </a>
   </div>
-  <div id="adBody" class="ad-body"><div class="ad-empty">Loading…</div></div>
-  <div id="adFooter" class="ad-footer" style="display:none;">
-    <div class="ad-subrow"><span>Subtotal</span><span id="adSubtotal">$—</span></div>
-    <button type="button" id="adCheckout" class="ad-checkout">Checkout</button>
+  <div id="acctBody" class="acct-body"><div class="acct-empty">Loading…</div></div>
+  <div id="acctFooter" class="acct-footer" style="display:none;">
+    <div class="acct-subrow"><span>Subtotal</span><span id="acctSubtotal">$—</span></div>
+    <button type="button" id="acctCheckout" class="acct-checkout">Checkout</button>
   </div>
 </aside>
