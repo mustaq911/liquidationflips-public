@@ -177,7 +177,7 @@
 
         <div class="sum-msrprow" style="margin-top:16px;">
           <div><div class="totalMsrpDisplay">Total MSRP</div><div class="price" id="totalMsrpDisplay">$—</div></div>
-          <div style="text-align:right;"><div class="totalMsrpDisplay">Time left</div><div class="countdown" id="countdown">—</div></div>
+          <div style="text-align:right;"><div class="totalMsrpDisplay" id="countdownLabel">Time left</div><div class="countdown" id="countdown">—</div></div>
         </div>
 
         <div class="row"><div class="muted">Highest bid</div><div id="highestBid">$0.00</div></div>
@@ -500,6 +500,7 @@
     let product = null;
     let countdownTimer = null;
     let productComingSoon = false;   // true = bidding not open yet (browse only)
+    let goLiveTimer = null;          // fires when a coming-soon lot should re-check for going live
 
     async function loadProduct() {
       const id = getIdFromQuery();
@@ -545,9 +546,18 @@
         // Coming soon lots: browsing only — no bidding until they open. The
         // /products/{id} endpoint doesn't always include the flag, so also honour
         // a ?comingSoon=1 carried from the listing and a "coming soon" status.
-        const comingSoon = Boolean(product.comingSoon)
-          || new URLSearchParams(location.search).get('comingSoon') === '1'
-          || /coming[\s_-]?soon/i.test(String(product.status || ''));
+        // Server is authoritative: once auctionStart has passed the lot is live,
+        // and an explicit product.comingSoon flag wins over the (sticky) URL hint.
+        // The ?comingSoon=1 param and status text are only fallbacks for when the
+        // /products/{id} endpoint omits the flag. This ordering lets a re-fetch
+        // after go-live correctly flip the page to live (see scheduleGoLive).
+        const startPassed = !!(product.auctionStart && new Date(product.auctionStart).getTime() <= Date.now());
+        const comingSoon = !startPassed && (
+          product.comingSoon != null
+            ? Boolean(product.comingSoon)
+            : (new URLSearchParams(location.search).get('comingSoon') === '1'
+               || /coming[\s_-]?soon/i.test(String(product.status || '')))
+        );
         productComingSoon = comingSoon;
 
         // Summary
@@ -592,15 +602,29 @@
 		  showHeaderWonMessage("🏆 Congratulations!🎉 You are currently winning this item.");
 		}*/
 
+        // This block is re-runnable: a lot can flip coming-soon → live while the
+        // page stays open, so keep both panels in sync in BOTH directions and
+        // (re)arm or clear the go-live re-check accordingly.
+        if (goLiveTimer) { clearTimeout(goLiveTimer); goLiveTimer = null; }
+
         if (comingSoon) {
-          // No bidding for coming-soon lots: hide the form, show the notice,
-          // flip the status chip and skip countdown / bid-increment setup.
+          // No bidding yet: hide the form, show the notice, flip the status chip,
+          // and show a live "Starts in" countdown toward go-live (auctionStart).
           qs('#bidPanel').classList.add('hidden');
           qs('#comingSoonPanel').classList.remove('hidden');
           if (qs('#lotStatus')) qs('#lotStatus').textContent = 'COMING SOON';
-          if (qs('#countdown')) qs('#countdown').textContent = '—';
+          if (qs('#countdownLabel')) qs('#countdownLabel').textContent = 'Starts in';
+          startCountdown(product.auctionStart, 'starts');
+          scheduleGoLive(product.auctionStart);
         } else {
-          // Countdown
+          // Live now: clear any leftover coming-soon UI. This matters when we
+          // re-load after a go-live transition without a navigation.
+          qs('#comingSoonPanel').classList.add('hidden');
+          qs('#bidPanel').classList.remove('hidden');
+          if (qs('#lotStatus')) qs('#lotStatus').textContent = (product.status || 'AUCTION').toString().toUpperCase();
+          if (qs('#countdownLabel')) qs('#countdownLabel').textContent = 'Time left';
+
+          // Countdown to auction end
           startCountdown(product.auctionEnd);
 
           // Bid increment
@@ -659,11 +683,39 @@
       }
     }
 
+    // ========= Go-live re-check =========
+    // Coming-soon lots open when auctionStart passes. Instead of trusting the
+    // client clock to flip the UI, wait until that moment (+1s) and re-fetch the
+    // product so the server decides "is it live yet?". Unknown start time → poll.
+    function scheduleGoLive(startIso){
+      if (goLiveTimer) { clearTimeout(goLiveTimer); goLiveTimer = null; }
+      const start = startIso ? new Date(startIso).getTime() : NaN;
+      let delay;
+      if (isFinite(start)) {
+        delay = start - Date.now() + 1000;   // fire just after it opens
+        if (delay < 0) delay = 3000;         // start already passed → re-check shortly
+      } else {
+        delay = 30000;                       // unknown start → poll every 30s
+      }
+      delay = Math.min(delay, 6 * 60 * 60 * 1000);  // cap re-check gap at 6h (setInterval overflow guard)
+      goLiveTimer = setTimeout(function(){ if (productComingSoon) loadProduct(); }, delay);
+    }
+
     // ========= Countdown =========
-    function startCountdown(endIso){
+    // mode 'ends' (default): counts down to auction end (Time left).
+    // mode 'starts': counts down to go-live for coming-soon lots (Starts in);
+    // when the start passes it shows "Starting…" until scheduleGoLive re-loads.
+    function startCountdown(iso, mode){
       if (countdownTimer) { clearInterval(countdownTimer); countdownTimer=null; }
       const el = qs('#countdown');
-      function tick(){ el.textContent = timeLeftLabel(endIso); }
+      function label(){
+        if (mode === 'starts') {
+          if (!iso) return 'Coming soon';
+          return (new Date(iso).getTime() - Date.now() <= 0) ? 'Starting…' : timeLeftLabel(iso);
+        }
+        return timeLeftLabel(iso);
+      }
+      function tick(){ el.textContent = label(); }
       tick();
       countdownTimer = setInterval(tick, 1000);
     }
@@ -1003,6 +1055,13 @@
       wireUI();
       wireManifestPageSizeControl();
       connectSocket();
+
+      // Safety net: background tabs throttle timers, so a lot may go live while
+      // this tab is hidden. Re-sync from the server the moment it's visible again
+      // (only while still coming-soon, so live browsing isn't disrupted).
+      document.addEventListener('visibilitychange', function(){
+        if (!document.hidden && productComingSoon) loadProduct();
+      });
     })();
   </script>
 

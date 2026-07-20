@@ -591,6 +591,15 @@
       return `${m}m ${s}s`;
     }
 
+    // "Starts in …" label for coming-soon lots counting down to auctionStart
+    // (mirrors the auction time-left chip, but toward go-live instead of the end).
+    function startsInLabelSeconds(startIso){
+      if(!startIso) return 'Coming soon';
+      const diff = new Date(startIso).getTime() - Date.now();
+      if (diff <= 0) return 'Starting soon';
+      return 'Starts in ' + timeLeftLabelSeconds(startIso);
+    }
+
     // Helper method for WON-ITEM-FRAME
     function hasWon(p){
       const myId = localStorage.getItem('userid');
@@ -1234,6 +1243,12 @@
         const lb = el.querySelector('[data-bind="leftBadge"]');
         if (lb) lb.textContent = label;
       });
+
+      // Coming-soon lots count down to their go-live time (auctionStart).
+      document.querySelectorAll('[data-go-live]').forEach(el => {
+        const g = el.querySelector('[data-bind="goLiveLeft"]');
+        if (g) g.textContent = startsInLabelSeconds(el.getAttribute('data-go-live'));
+      });
     }
 
     function startCountdownTicker(){
@@ -1405,9 +1420,11 @@
         catUpper: String(cat).toUpperCase(),
         title: p.title || 'Untitled',
         lotNo: 'LOT ' + String(p.id == null ? '' : p.id).padStart(3, '0'),
-        priceLabel: isA ? 'Current bid' : 'Buy now price',
+        priceLabel: isA ? (comingSoon ? 'Starting bid' : 'Current bid') : 'Buy now price',
         priceText: formatPrice(priceVal),
         timeLeft: timeLeftLabelSeconds(endIso),
+        startIso: p.auctionStart || '',
+        startsLeft: startsInLabelSeconds(p.auctionStart),
         chipBg: urgent ? '#8A2B28' : '#14263F',
         chipDot: urgent ? '#FF6B68' : '#37C0DC',
         bidsText: isA ? ((bidCount != null ? bidCount : 0) + ' bids') : 'In stock',
@@ -1568,19 +1585,24 @@
       card.setAttribute('style', 'background:#fff;border:1px solid #E0E8E2;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;');
       card.setAttribute('data-pid', p.id);
       card.setAttribute('data-auction-end', p.auctionEnd || '');
+      if (d.comingSoon && p.auctionStart) card.setAttribute('data-go-live', p.auctionStart);
       card.dataset.wonUserId = (p.wonUserId == null ? '' : String(p.wonUserId));
       if (hasWon(p)) card.classList.add('wonFrame');
 
-      const timeChip = (d.isA && !d.comingSoon)
-        ? '<div style="display:flex;align-items:center;gap:5px;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;' + d.timeStyle + '">' +
+      const timeChip = d.comingSoon
+        ? '<div style="display:flex;align-items:center;gap:5px;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;color:#6b7480;font-weight:600;">' +
             '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>' +
-            '<span data-bind="timeBoxLeft">' + d.timeLeft + '</span></div>'
-        : '';
+            '<span data-bind="goLiveLeft">' + d.startsLeft + '</span></div>'
+        : ((d.isA)
+          ? '<div style="display:flex;align-items:center;gap:5px;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;' + d.timeStyle + '">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>' +
+              '<span data-bind="timeBoxLeft">' + d.timeLeft + '</span></div>'
+          : '');
 
       const metaLine = d.isA ? (d.bidsText + ' · ' + d.condition) : ('In stock · ' + d.condition);
 
       const primaryBtn = d.comingSoon
-        ? '<div style="text-align:center;color:#6b7480;font-weight:700;font-size:13px;padding:12px;border:1px dashed #dfe2e6;border-radius:9px;background:#f6f7f8;">Coming soon</div>'
+        ? '<button class="lf-btn clickable-img" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">View Product</button>'
         : '<button data-id="' + p.id + '" class="lf-btn" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">' + (d.isA ? 'Place Bid' : 'Buy Now') + '</button>';
 
       const secondaryBtn = d.comingSoon ? ''
@@ -1599,8 +1621,11 @@
         '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;flex:1;">' +
           '<div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#aab1ba;margin-bottom:7px;">' + d.catUpper + '</div>' +
           '<h3 class="clickable-img" style="font-weight:600;font-size:15px;line-height:1.35;margin:0 0 16px;color:#16202e;min-height:40px;cursor:pointer;">' + d.title + '</h3>' +
-          '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:auto;">' +
-            '<div data-bind="currentBid" style="font-weight:800;font-size:23px;line-height:1;color:#16202e;font-variant-numeric:tabular-nums;">' + d.priceText + '</div>' + timeChip +
+          '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:auto;">' +
+            '<div>' +
+              '<div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#97a0ab;font-weight:700;margin-bottom:4px;">' + d.priceLabel + '</div>' +
+              '<div data-bind="currentBid" style="font-weight:800;font-size:23px;line-height:1;color:#16202e;font-variant-numeric:tabular-nums;">' + d.priceText + '</div>' +
+            '</div>' + timeChip +
           '</div>' +
           '<div style="font-size:12px;color:#aab1ba;margin-top:9px;font-weight:500;">' + metaLine + '</div>' +
           '<div style="margin-top:15px;">' + primaryBtn + '</div>' + secondaryBtn +
@@ -1618,6 +1643,7 @@
       row.setAttribute('style', 'background:#fff;border:1px solid #E0E8E2;border-radius:18px;overflow:hidden;display:flex;align-items:stretch;');
       row.setAttribute('data-pid', p.id);
       row.setAttribute('data-auction-end', p.auctionEnd || '');
+      if (d.comingSoon && p.auctionStart) row.setAttribute('data-go-live', p.auctionStart);
       row.dataset.wonUserId = (p.wonUserId == null ? '' : String(p.wonUserId));
       if (hasWon(p)) row.classList.add('wonFrame');
 
@@ -1629,13 +1655,15 @@
         '<div>' +
           '<div style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#97a0ab;font-weight:600;">' + d.priceLabel + '</div>' +
           '<div data-bind="currentBid" style="font-weight:800;font-size:26px;line-height:1;margin-top:4px;color:#16202e;font-variant-numeric:tabular-nums;">' + d.priceText + '</div>' +
-          (d.comingSoon ? '' : (d.isA
+          (d.comingSoon
+            ? '<div style="display:flex;align-items:center;gap:6px;font-size:12.5px;margin-top:9px;font-variant-numeric:tabular-nums;color:#6b7480;font-weight:600;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg><span data-bind="goLiveLeft">' + d.startsLeft + '</span></div>'
+            : (d.isA
             ? '<div style="display:flex;align-items:center;gap:6px;font-size:12.5px;margin-top:9px;font-variant-numeric:tabular-nums;' + d.timeStyle + '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg><span data-bind="timeBoxLeft">' + d.timeLeft + '</span></div>'
             : '<div style="font-size:12px;color:#6b7480;font-weight:600;margin-top:9px;display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"></path></svg>Instant checkout</div>')) +
         '</div>';
 
       const sideBtns = d.comingSoon
-        ? '<div style="text-align:center;color:#6b7480;font-weight:700;font-size:13px;padding:13px;border:1px dashed #dfe2e6;border-radius:9px;background:#fff;">Coming soon</div>'
+        ? '<button class="lf-btn clickable-img" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">View Product</button>'
         : (d.isA
           ? '<button data-id="' + p.id + '" class="lf-btn" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">Place Bid</button>' +
             '<button data-qb="' + p.id + '" data-bind="quickBidBtn" class="lf-btn lf-quick hidden" style="width:100%;font-weight:700;font-size:12.5px;padding:9px;border-radius:9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#1f8b57"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg><span data-bind="quickBidText">Quick bid</span></button>' +
