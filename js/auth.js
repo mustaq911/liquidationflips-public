@@ -204,6 +204,7 @@
 	  const userMenu     = document.getElementById('userMenu');
 	  const userDropdown = document.getElementById('userDropdown');
 	  const userEmailShort = document.getElementById('userEmailShort');
+	//   const userAvatar   = document.getElementById('userAvatar');
 
 	  // Display-only nav elements (new design): Register button + dropdown header
 	  const registerLink = document.getElementById('registerLink');
@@ -565,6 +566,11 @@
 
 			  if (greetUser && userEmailShort) {
 				  userEmailShort.textContent = shortName;
+			  }
+			  // Avatar shows the user's first initial instead of the default "U".
+			  if (userAvatar) {
+				  const initial = String(shortName || '').trim().charAt(0).toUpperCase();
+				  userAvatar.textContent = initial || 'U';
 			  }
 			  // Dropdown header (display only)
 			  if (udName)  udName.textContent  = shortName;

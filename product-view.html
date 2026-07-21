@@ -180,7 +180,7 @@
           <div style="text-align:right;"><div class="totalMsrpDisplay" id="countdownLabel">Time left</div><div class="countdown" id="countdown">—</div></div>
         </div>
 
-        <div class="row"><div class="muted">Highest bid</div><div id="highestBid">$0.00</div></div>
+        <div class="row"><div class="muted" id="highestBidLabel">Highest bid</div><div id="highestBid">$0.00</div></div>
         <div class="row"><div class="muted">Lot ID</div><div id="lotId">—</div></div>
         <div class="row"><div class="muted">Category</div><div id="lotCategory">—</div></div>
 
@@ -614,6 +614,7 @@
           qs('#comingSoonPanel').classList.remove('hidden');
           if (qs('#lotStatus')) qs('#lotStatus').textContent = 'COMING SOON';
           if (qs('#countdownLabel')) qs('#countdownLabel').textContent = 'Starts in';
+          if (qs('#highestBidLabel')) qs('#highestBidLabel').textContent = 'Starting bid';
           startCountdown(product.auctionStart, 'starts');
           scheduleGoLive(product.auctionStart);
         } else {
@@ -623,6 +624,7 @@
           qs('#bidPanel').classList.remove('hidden');
           if (qs('#lotStatus')) qs('#lotStatus').textContent = (product.status || 'AUCTION').toString().toUpperCase();
           if (qs('#countdownLabel')) qs('#countdownLabel').textContent = 'Time left';
+          if (qs('#highestBidLabel')) qs('#highestBidLabel').textContent = 'Highest bid';
 
           // Countdown to auction end
           startCountdown(product.auctionEnd);

@@ -41,6 +41,12 @@ h1, h2, h3, h4,
 .hidden { display: none !important; }
 
 /* ---- Header ---- */
+/* Never let the page scroll horizontally. `clip` (not `hidden`) prevents a
+   sideways scrollbar without turning the root into a scroll container, so the
+   sticky header below keeps working. Belt-and-suspenders against any stray
+   full-bleed/overflowing element on narrow phones. */
+html { overflow-x: clip; }
+
 .lf-header {
   position: sticky; top: 0; z-index: 40;
   background: #fff;
@@ -269,9 +275,11 @@ h1, h2, h3, h4,
   .lf-userchip .greet { max-width: 90px; }
 }
 
-@media (max-width: 400px) {
-  /* Keep the "Liquidation Flips" wordmark visible on phones — just smaller,
-     with tighter actions so everything still fits down to 320px. */
+/* ≤480 covers every common phone (S20 Ultra/Pixel 412, iPhone Pro Max 430),
+   which the old 400px cutoff missed — so the header row overflowed and the page
+   scrolled sideways on those devices. Shrink the wordmark, tighten the actions
+   and drop the username chip's label so everything fits down to 320px. */
+@media (max-width: 480px) {
   .lf-wordmark { font-size: 14px; }
   .lf-brand { gap: 8px; }
   .lf-actions { gap: 6px; }
