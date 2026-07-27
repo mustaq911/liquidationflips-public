@@ -1563,7 +1563,8 @@
             await addProductToCart(p.id, 1);
             setCartButtonState(b, 'Added to cart', true);
             if (typeof window.__updateTopnavUI === 'function') window.__updateTopnavUI();
-            if (typeof window.openAccountDrawer === 'function') window.openAccountDrawer('cart');
+            // Cart is a full page now — don't pop a drawer; the header cart badge
+            // updates and the button confirms. Users open the cart when ready.
             setTimeout(() => setCartButtonState(b, normalHtml, false), 1800);
           } catch (err) {
             setCartButtonState(b, 'Add failed', false);

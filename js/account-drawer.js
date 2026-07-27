@@ -1,11 +1,14 @@
 /* ============================================================
-   Account drawer — shared right slide-out for Bids / Watchlist /
-   Cart / Orders. Loaded by /js/auth.js after topnav.html (which
-   holds the drawer markup) is injected. Responsive: a side panel
-   on desktop/tablet, a full-width sheet on phone.
-   The separate /my-bids.html, /orders.html, /watchlist.html and
-   /cart.html pages stay as deep-link/fallback destinations and
-   share these same endpoints. Data is loaded live per tab.
+   Account drawer — quick right slide-out for the two things a
+   bidder acts on repeatedly: ONGOING bids (with Quick Bid) and
+   the WATCHLIST (with an inline unwatch icon). Responsive: a side
+   panel on desktop/tablet, a full-width sheet on phone.
+   Cart and Orders are intentionally NOT here — they open their
+   full pages (/cart.html, /orders.html) directly. The full
+   /my-bids.html and /watchlist.html pages stay as the "Open full
+   page" destinations and share these same endpoints.
+   Loaded by /js/auth.js after topnav.html (which holds the drawer
+   markup) is injected.
    ============================================================ */
 (function () {
   if (window.__accountDrawerInit) return;
@@ -31,29 +34,21 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
-  function fmtDate(d) {
-    if (!d) return '—';
-    var t = new Date(d);
-    return isNaN(t.getTime()) ? '—' : t.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-  }
 
-  var overlay, panel, bodyEl, footerEl, searchInput, statusSel, closeBtn, viewAll;
+  var overlay, panel, bodyEl, searchInput, closeBtn, viewAll;
   var activeTab = 'bids';
 
   // Full-page destination + label for each tab's "Open full page" link.
   var FULL_PAGE = {
-    bids:   { href: '/my-bids.html',   label: 'Open full Bids page' },
-    watch:  { href: '/watchlist.html', label: 'Open full Watchlist page' },
-    cart:   { href: '/cart.html',      label: 'Open full Cart page' },
-    orders: { href: '/orders.html',    label: 'Open full Orders page' }
+    bids:  { href: '/my-bids.html',   label: 'Open All Bids & Results' },
+    watch: { href: '/watchlist.html', label: 'Open full Watchlist page' }
   };
   var RAW = {};        // tab -> raw array/object
   var seq = 0;         // guards against out-of-order async renders
 
   function els() {
     overlay = $('acctOverlay'); panel = $('acctPanel'); bodyEl = $('acctBody');
-    footerEl = $('acctFooter'); searchInput = $('acctSearch'); statusSel = $('acctStatus');
-    closeBtn = $('acctClose'); viewAll = $('acctViewAll');
+    searchInput = $('acctSearch'); closeBtn = $('acctClose'); viewAll = $('acctViewAll');
   }
 
   /* ---- open / close ---- */
@@ -76,6 +71,7 @@
   }
 
   function setTab(tab) {
+    if (tab !== 'bids' && tab !== 'watch') tab = 'bids';
     activeTab = tab;
     Array.prototype.forEach.call(panel.querySelectorAll('.acct-tab'), function (b) {
       b.classList.toggle('on', b.getAttribute('data-accttab') === tab);
@@ -86,8 +82,6 @@
       viewAll.setAttribute('href', fp.href);
       viewAll.firstChild.nodeValue = fp.label + ' ';
     }
-    if (statusSel) statusSel.style.display = (tab === 'orders') ? '' : 'none';
-    if (footerEl) footerEl.style.display = 'none';
     load(tab);
   }
 
@@ -107,19 +101,24 @@
   }
   function q() { return (searchInput && searchInput.value || '').trim().toLowerCase(); }
 
+  function quickBidBtn(p) {
+    return '<button type="button" class="acct-qb" data-qbid="' + p.id + '" data-high="' + p.highestBid + '">' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="#1f8b57"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg>' +
+      '<span>Quick Bid</span></button>';
+  }
+
   /* ---- loaders ---- */
   function load(tab) {
     var my = ++seq;
     bodyEl.innerHTML = loadingHTML();
     if (tab === 'bids') return loadBids(my);
     if (tab === 'watch') return loadWatch(my);
-    if (tab === 'cart') return loadCart(my);
-    if (tab === 'orders') return loadOrders(my);
   }
 
   function fresh(my) { return my === seq && panel.classList.contains('open'); }
 
-  // BIDS
+  // BIDS — only ONGOING (live) auctions the user is bidding on. Won/lost/ended
+  // bids drop off here and live on the full My Bids page.
   function loadBids(my) {
     fetch(API + '/bids/my-bids/' + userId(), { headers: authHeaders() })
       .then(function (r) { if (!r.ok) throw 0; return r.json(); })
@@ -130,36 +129,25 @@
     var mine = (bids || []).map(function (b) { return Number(b.bidAmount || b.amount || 0); });
     return mine.length ? Math.max.apply(null, mine) : null;
   }
+  function isOngoing(p) {
+    return !!(p && p.auctionEnd) && new Date(p.auctionEnd).getTime() > Date.now();
+  }
   function renderBids() {
     var term = q();
     var rows = (RAW.bids || []).filter(function (e) {
       var p = e.product || {};
+      if (!isOngoing(p)) return false;   // ongoing only — ended/won/lost live on the full page
       if (!term) return true;
       return String((p.title || '') + ' ' + (p.id || '')).toLowerCase().indexOf(term) >= 0;
     });
-    if (!rows.length) { bodyEl.innerHTML = emptyHTML("You haven't placed any bids yet."); return; }
+    if (!rows.length) { bodyEl.innerHTML = emptyHTML('No ongoing bids right now.'); return; }
     bodyEl.innerHTML = rows.map(function (e) {
       var p = e.product || {};
       var cat = (p.category && p.category.name) || p.categoryName || 'Lot';
       var mine = myMaxBid(e.bids);
-      var ended = p.auctionEnd && new Date(p.auctionEnd).getTime() <= Date.now();
-      var high = (p.wonUserId != null && String(p.wonUserId) === String(userId())) ||
-                 (mine != null && p.highestBid != null && Number(mine) >= Number(p.highestBid));
-      var st = ended ? (high ? { label: 'Won', cls: 'ok' } : { label: 'Lost', cls: 'mut' })
-                     : (high ? { label: 'Winning', cls: 'ok' } : { label: 'Outbid', cls: 'bad' });
-      // Pay now: you won and there's an unpaid order for the lot (same gate the
-      // full My Bids page uses). Quick Bid: only when outbid on a still-live auction.
-      var canPay = ended && high && e.paymentRequired === true && e.orderId != null;
-      var canQuick = !ended && !high && p.highestBid != null && p.id != null;
-      var action = canPay
-        ? '<button type="button" class="acct-pay" data-payorder="' + esc(e.orderId) + '">' +
-            '<svg width="12" height="12" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4H4V6h16v2zm0 4v6H4v-6h16z"></path></svg>' +
-            '<span>Pay now</span></button>'
-        : canQuick
-        ? '<button type="button" class="acct-qb" data-qbid="' + p.id + '" data-high="' + p.highestBid + '">' +
-            '<svg width="12" height="12" viewBox="0 0 24 24" fill="#1f8b57"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg>' +
-            '<span>Quick Bid</span></button>'
-        : '';
+      var high = (mine != null && p.highestBid != null && Number(mine) >= Number(p.highestBid));
+      var st = high ? { label: 'Winning', cls: 'ok' } : { label: 'Outbid', cls: 'bad' };
+      var action = (!high && p.highestBid != null && p.id != null) ? quickBidBtn(p) : '';
       return rowHTML({
         photo: p.imageUrl, title: p.title || 'Untitled',
         sub: cat + ' · Lot #' + (p.id != null ? p.id : '—'),
@@ -168,19 +156,6 @@
       });
     }).join('');
     wireQuickBids();
-    wirePayButtons();
-  }
-
-  // Won lots with an unpaid order: jump straight to checkout for that order.
-  function wirePayButtons() {
-    Array.prototype.forEach.call(bodyEl.querySelectorAll('.acct-pay'), function (btn) {
-      btn.addEventListener('click', function (ev) {
-        ev.preventDefault();     // the row is a link — don't navigate to the product
-        ev.stopPropagation();
-        var oid = btn.getAttribute('data-payorder');
-        if (oid) window.location.href = '/checkout.html?orderId=' + encodeURIComponent(oid);
-      });
-    });
   }
 
   // Next allowed bid = current highest + server increment (same endpoint the
@@ -240,7 +215,7 @@
         placeBid(pid, amt).then(function (prod) {
           if (prod && prod.isAutoOutbid && String(prod.isAutoOutbid).trim() !== '') toast(prod.isAutoOutbid, 'error');
           else toast('✅ Bid placed!', 'success');
-          load('bids');            // refresh statuses/amounts (re-renders the list)
+          load(activeTab);          // refresh the active tab (re-renders the list)
         }).catch(function (err) {
           toast('❌ ' + ((err && err.message) || 'Bid failed'), 'error');
           stop();
@@ -249,7 +224,8 @@
     });
   }
 
-  // WATCHLIST
+  // WATCHLIST — watched lots with an inline unwatch icon (and Quick Bid on any
+  // lot that's still a live auction).
   function loadWatch(my) {
     fetch(API + '/watchlist/user/' + userId(), { headers: authHeaders() })
       .then(function (r) { if (!r.ok) throw 0; return r.json(); })
@@ -268,6 +244,11 @@
       .then(function (products) { RAW.watch = products; if (fresh(my)) renderWatch(); })
       .catch(function () { if (fresh(my)) bodyEl.innerHTML = emptyHTML('Could not load your watchlist.'); });
   }
+  function unwatchBtn(p) {
+    return '<button type="button" class="acct-unwatch" data-unwatch="' + p.id + '" aria-label="Remove from watchlist" title="Remove from watchlist">' +
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>' +
+      '</button>';
+  }
   function renderWatch() {
     var term = q();
     var rows = (RAW.watch || []).filter(function (p) {
@@ -279,82 +260,41 @@
     bodyEl.innerHTML = rows.map(function (p) {
       var isAuction = !!p.auctionEnd;
       var price = (p.highestBid != null ? p.highestBid : p.basePrice);
+      var quick = (isOngoing(p) && p.highestBid != null && p.id != null) ? quickBidBtn(p) : '';
       return rowHTML({
         photo: p.imageUrl, title: p.title || ('Product #' + p.id),
         sub: 'Lot #' + (p.id != null ? p.id : '—'),
         right: money(price),
+        action: quick + unwatchBtn(p),
         href: (isAuction ? '/product-view.html?id=' : '/product-buynow.html?id=') + p.id
       });
     }).join('');
+    wireQuickBids();
+    wireUnwatch();
   }
-
-  // CART
-  function loadCart(my) {
-    fetch(API + '/orders/cart/' + userId(), { headers: authHeaders() })
-      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
-      .then(function (order) { RAW.cart = order || {}; if (fresh(my)) renderCart(); })
-      .catch(function () { if (fresh(my)) bodyEl.innerHTML = emptyHTML('Could not load your cart.'); });
+  function removeWatch(productId) {
+    return fetch(API + '/watchlist?userId=' + encodeURIComponent(userId()) + '&productId=' + encodeURIComponent(productId),
+      { method: 'DELETE', headers: authHeaders() })
+      .then(function (r) { if (!r.ok) throw 0; });
   }
-  function renderCart() {
-    var order = RAW.cart || {};
-    var items = order.items || [];
-    if (!items.length) { bodyEl.innerHTML = emptyHTML('Your cart is empty.'); if (footerEl) footerEl.style.display = 'none'; return; }
-    bodyEl.innerHTML = items.map(function (it) {
-      return rowHTML({
-        photo: it.productImageUrl, title: it.productTitle || 'Product',
-        sub: 'Qty ' + (it.quantity != null ? it.quantity : 1) + ' · ITEM ' + it.productId,
-        right: money(it.lineTotal != null ? it.lineTotal : it.unitPrice)
+  function wireUnwatch() {
+    Array.prototype.forEach.call(bodyEl.querySelectorAll('.acct-unwatch'), function (btn) {
+      btn.addEventListener('click', function (ev) {
+        ev.preventDefault();       // the row is a link — don't navigate
+        ev.stopPropagation();
+        var pid = btn.getAttribute('data-unwatch');
+        if (!pid) return;
+        var stop = (window.LF && LF.busy) ? LF.busy(btn, '') : function () {};
+        removeWatch(pid).then(function () {
+          RAW.watch = (RAW.watch || []).filter(function (p) { return String(p.id) !== String(pid); });
+          renderWatch();
+          toast('Removed from watchlist', 'success');
+        }).catch(function () {
+          toast('Could not remove — try again', 'error');
+          stop();
+        });
       });
-    }).join('');
-    var subtotal = items.reduce(function (s, it) { return s + Number(it.lineTotal != null ? it.lineTotal : (it.unitPrice || 0) * (it.quantity || 1)); }, 0);
-    if (footerEl) {
-      footerEl.style.display = '';
-      $('acctSubtotal').textContent = money(subtotal);
-    }
-  }
-
-  // ORDERS
-  function normStatus(s) {
-    s = String(s || '').toUpperCase();
-    if (s === 'SUCCEEDED') return 'PAID';
-    if (s === 'PENDING') return 'PENDING_PAYMENT';
-    if (s === 'FAILED') return 'PAYMENT_FAILED';
-    return s;
-  }
-  function statusPill(s) {
-    var n = normStatus(s);
-    if (n === 'PAID') return { label: 'Paid', cls: 'ok' };
-    if (n === 'PENDING_PAYMENT') return { label: 'Pending', cls: 'warn' };
-    if (n === 'CANCELLED' || n === 'PAYMENT_FAILED') return { label: n === 'CANCELLED' ? 'Cancelled' : 'Failed', cls: 'bad' };
-    return { label: (s || '—'), cls: 'mut' };
-  }
-  function loadOrders(my) {
-    fetch(API + '/orders/user/' + userId(), { headers: authHeaders() })
-      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
-      .then(function (data) { RAW.orders = Array.isArray(data) ? data : []; if (fresh(my)) renderOrders(); })
-      .catch(function () { if (fresh(my)) bodyEl.innerHTML = emptyHTML('Could not load your orders.'); });
-  }
-  function renderOrders() {
-    var term = q();
-    var stf = (statusSel && statusSel.value) || 'ALL';
-    var rows = (RAW.orders || []).filter(function (o) {
-      var id = String(o.id != null ? o.id : o.orderId || '');
-      var okQ = !term || id.toLowerCase().indexOf(term) >= 0;
-      var okS = (stf === 'ALL') || normStatus(o.status) === stf;
-      return okQ && okS;
     });
-    if (!rows.length) { bodyEl.innerHTML = emptyHTML('No orders yet.'); return; }
-    bodyEl.innerHTML = rows.map(function (o) {
-      var id = o.id != null ? o.id : o.orderId;
-      var total = o.totalAmount != null ? o.totalAmount : o.total;
-      var needsPay = normStatus(o.status) === 'PENDING_PAYMENT';
-      return rowHTML({
-        photo: null, title: 'Order #' + id,
-        sub: fmtDate(o.createdAt || o.created_at),
-        right: money(total), status: statusPill(o.status),
-        href: needsPay ? ('/checkout.html?orderId=' + id) : '/orders.html'
-      });
-    }).join('');
   }
 
   /* ---- wire ---- */
@@ -368,12 +308,7 @@
     if (searchInput) searchInput.addEventListener('input', function () {
       if (activeTab === 'bids') renderBids();
       else if (activeTab === 'watch') renderWatch();
-      else if (activeTab === 'cart') renderCart();
-      else if (activeTab === 'orders') renderOrders();
     });
-    if (statusSel) statusSel.addEventListener('change', renderOrders);
-    var checkout = $('acctCheckout');
-    if (checkout) checkout.addEventListener('click', function () { window.location.href = '/cart.html'; });
   }
 
   function init() {

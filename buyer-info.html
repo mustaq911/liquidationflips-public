@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buyer Information — Liquidation Flips</title>
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="How buying works on Liquidation Flips — bidding, live bid increments, payment, pickup and conditions of sale." />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#fff;color:#16202e}
+    .bi{--accent:#1f8b57}
+    .bi a.lf-btn{transition:opacity .18s ease}
+    .bi a.lf-btn:hover{opacity:.9}
+    /* 1000px matches the header's gutter breakpoint (.lf-head-inner) so content stays aligned */
+    @media (max-width:1000px){ .bi section{padding-left:18px!important;padding-right:18px!important} }
+
+    /* Two-column info rows */
+    .bi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+    .bi-card{border:1px solid #e6e8ec;border-radius:14px;padding:26px}
+    .bi-card h3{font-weight:700;font-size:18px;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+    .bi-card p{font-size:14.5px;line-height:1.65;color:#6b7480;margin:0 0 10px}
+    .bi-card p:last-child{margin-bottom:0}
+    .bi-icon{width:40px;height:40px;border-radius:10px;background:rgba(31,139,87,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+    /* Live increment table */
+    .inc-wrap{overflow-x:auto;border:1px solid #e6e8ec;border-radius:14px}
+    table.inc-table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:360px}
+    table.inc-table th{text-align:left;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#6b7480;background:#f6f7f8;padding:14px 20px;border-bottom:1px solid #e6e8ec}
+    table.inc-table td{padding:13px 20px;border-bottom:1px solid #eef0f2;color:#16202e;font-weight:600}
+    table.inc-table td:last-child{color:#177045;font-weight:800;white-space:nowrap}
+    table.inc-table tr:last-child td{border-bottom:none}
+    .inc-note{font-size:12.5px;color:#97a0ab;margin:12px 2px 0;line-height:1.55}
+    .inc-state{padding:34px 20px;text-align:center;color:#97a0ab;font-size:14px}
+    .inc-state a{color:var(--accent);font-weight:700;text-decoration:none}
+
+    ul.bi-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:13px;max-width:640px}
+    ul.bi-list li{display:flex;align-items:flex-start;gap:12px;font-size:15px;line-height:1.5;color:#16202e;font-weight:500}
+    ul.bi-list li svg{flex-shrink:0;margin-top:2px}
+  </style>
+</head>
+<body>
+
+  <!-- Shared Topnav (also injects the footer via auth.js) -->
+  <link rel="stylesheet" href="/css/topnav.css?v=4">
+  <div id="topnavContainer"></div>
+  <script src="/js/config.js?v=4"></script>
+  <script src="/js/auth.js?v=4" defer></script>
+
+  <div class="bi">
+    <!-- hero -->
+    <section style="max-width:1400px;margin:0 auto;padding:56px 28px 12px;">
+      <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#aab1ba;font-weight:700;margin-bottom:14px;">Buyer information</div>
+      <h1 style="font-weight:800;font-size:clamp(30px,3.8vw,44px);line-height:1.07;letter-spacing:-.02em;margin:0 0 18px;max-width:820px;">Everything you need to <span style="color:var(--accent);">bid, buy and pick up.</span></h1>
+      <p style="font-size:16.5px;line-height:1.7;color:#6b7480;margin:0 0 24px;max-width:640px;">How buying works on Liquidation Flips — placing bids, current bid increments, payment, and picking up your lots. If anything's unclear, our team is one message away.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="/index.html" class="lf-btn" style="display:inline-flex;align-items:center;gap:9px;text-decoration:none;background:var(--accent);color:#fff;font-weight:700;font-size:14.5px;padding:13px 22px;border-radius:10px;">Browse inventory</a>
+        <a href="/how-it-works.html" class="lf-btn" style="display:inline-flex;align-items:center;gap:9px;text-decoration:none;border:1px solid #e6e8ec;color:#16202e;font-weight:700;font-size:14.5px;padding:13px 22px;border-radius:10px;">How it works</a>
+      </div>
+    </section>
+
+    <!-- how bidding works -->
+    <section style="max-width:1400px;margin:0 auto;padding:44px 28px;border-top:1px solid #eef0f2;">
+      <h2 style="font-weight:800;font-size:24px;letter-spacing:-.01em;margin:0 0 22px;">How bidding works</h2>
+      <div class="bi-grid">
+        <div class="bi-card">
+          <h3><span class="bi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 13l-3 3-7-7 3-3z"></path><path d="M11 10l5-5 4 4-5 5M3 21h8"></path></svg></span>Set your maximum bid</h3>
+          <p>Enter the most you're willing to pay. We bid on your behalf up to that amount, one increment at a time — so you never pay more than you need to in order to stay in front.</p>
+        </div>
+        <div class="bi-card">
+          <h3><span class="bi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg></span>Win when the timer ends</h3>
+          <p>If you're the highest bidder when the auction closes, the lot is yours. You'll see the result on your <a href="/my-bids.html" style="color:var(--accent);font-weight:700;text-decoration:none;">All Bids &amp; Results</a> page and can pay from there.</p>
+        </div>
+        <div class="bi-card">
+          <h3><span class="bi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="18" cy="20" r="1.4"></circle><path d="M6 6L5 3H2"></path></svg></span>Prefer not to wait?</h3>
+          <p>Many lots are also available at a fixed <strong>Buy Now</strong> price — add to cart and check out instantly, no bidding required.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- live bid increments -->
+    <section style="max-width:1400px;margin:0 auto;padding:44px 28px;border-top:1px solid #eef0f2;">
+      <h2 style="font-weight:800;font-size:24px;letter-spacing:-.01em;margin:0 0 8px;">Bid increments</h2>
+      <p style="font-size:15px;line-height:1.7;color:#6b7480;margin:0 0 20px;max-width:640px;">The minimum a bid can go up depends on the current bid — the higher the price, the larger the step. The table below is pulled live from our bidding system.</p>
+      <div class="inc-wrap" id="incTableWrap">
+        <div class="inc-state">Loading current increments…</div>
+      </div>
+      <p class="inc-note" id="incNote" style="display:none;">Increments are set automatically by our live bidding system and may change over time; the values above reflect the current schedule.</p>
+    </section>
+
+    <!-- fees & payment -->
+    <section style="max-width:1400px;margin:0 auto;padding:44px 28px;border-top:1px solid #eef0f2;">
+      <h2 style="font-weight:800;font-size:24px;letter-spacing:-.01em;margin:0 0 22px;">Fees &amp; payment</h2>
+      <div class="bi-grid">
+        <div class="bi-card">
+          <h3><span class="bi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M20 6L9 17l-5-5"></path></svg></span>No buyer's premium</h3>
+          <p>There is currently <strong>no buyer's premium</strong> on Liquidation Flips — your winning bid (or Buy Now price) is the price, plus applicable taxes.</p>
+        </div>
+        <div class="bi-card">
+          <h3><span class="bi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path></svg></span>Secure card checkout</h3>
+          <p>Pay securely by card at checkout — your winnings and Buy Now orders are processed through our encrypted payment provider.</p>
+          <p style="font-size:13px;color:#97a0ab;">New registrants may be asked to use an alternate payment method for their first invoice as part of standard card-security procedures.</p>
+        </div>
+        <div class="bi-card">
+          <h3><span class="bi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 1v22"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span>Taxes</h3>
+          <p>Applicable Canadian sales taxes are calculated and shown at checkout before you confirm payment.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- pickup & removal -->
+    <section style="max-width:1400px;margin:0 auto;padding:44px 28px;border-top:1px solid #eef0f2;">
+      <div style="background:#f6f7f8;border-radius:16px;padding:32px;">
+        <h2 style="display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-.01em;margin:0 0 10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>Pickup &amp; removal
+        </h2>
+        <p style="font-size:15px;color:#6b7480;margin:0 0 16px;max-width:660px;">Pick up your lots from our warehouse locations and inspect them on-site before you leave — no surprises.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+          <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #e6e8ec;border-radius:10px;padding:11px 16px;font-size:14px;font-weight:700;color:#16202e;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>Brampton, ON</span>
+          <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #e6e8ec;border-radius:10px;padding:11px 16px;font-size:14px;font-weight:700;color:#16202e;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>Dartmouth, NS</span>
+        </div>
+        <ul class="bi-list">
+          <li>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>
+            <span><strong>You have 3 days to pay for and pick up your items</strong>, measured from the time of purchase. Please arrange pickup within this window.</span>
+          </li>
+          <li>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.5 2.5 4.5-5"></path></svg>
+            <span><strong>Photo ID is required for pickup.</strong> Bring a piece of photo ID that matches your account, along with your order confirmation.</span>
+          </li>
+          <li>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.5 2.5 4.5-5"></path></svg>
+            <span>Where shipping is offered on a lot, the available options and cost are shown at checkout.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- conditions of sale -->
+    <section style="max-width:1400px;margin:0 auto;padding:44px 28px 56px;border-top:1px solid #eef0f2;">
+      <h2 style="font-weight:800;font-size:24px;letter-spacing:-.01em;margin:0 0 22px;">Conditions of sale</h2>
+      <ul class="bi-list">
+        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.5 2.5 4.5-5"></path></svg><span><strong>All sales are final.</strong> Lots are sold as-is, where-is — review each item's condition notes and photos before bidding.</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.5 2.5 4.5-5"></path></svg><span><strong>Inventory is limited</strong> and availability is first-come, first-served. Once a lot is gone, it's gone.</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.5 2.5 4.5-5"></path></svg><span><strong>Bids are commitments.</strong> Non-paying or fraudulent bidders may have their account suspended.</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.5 2.5 4.5-5"></path></svg><span>Full terms are in our <a href="/terms.html" style="color:var(--accent);font-weight:700;text-decoration:none;">Terms &amp; Conditions</a> and <a href="/agreement.html" style="color:var(--accent);font-weight:700;text-decoration:none;">User &amp; Purchase Agreement</a>.</span></li>
+      </ul>
+
+      <div style="margin-top:34px;background:#16202e;border-radius:16px;padding:30px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+        <div>
+          <div style="color:#fff;font-weight:800;font-size:19px;">Still have a question?</div>
+          <div style="color:#9aa4b1;font-size:14.5px;margin-top:5px;">Our team is happy to help before you bid or pick up.</div>
+        </div>
+        <a href="/support.html" class="lf-btn" style="text-decoration:none;background:var(--accent);color:#fff;font-weight:700;font-size:14.5px;padding:13px 22px;border-radius:10px;white-space:nowrap;">Contact support</a>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== Live bid-increment table =====
+       Samples GET /bids/increment?amount=X in parallel across representative bid
+       levels, then collapses consecutive equal increments into a clean ladder.
+       Works logged-out (token optional). Cached per session so revisits are instant.
+       A pixel-exact tier ladder would need a backend "increment schedule" endpoint;
+       this samples the live endpoint instead. -->
+  <script>
+  (function () {
+    var API = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) || '';
+    var box = document.getElementById('incTableWrap');
+    var note = document.getElementById('incNote');
+    if (!box) return;
+
+    var CK = 'lf_inc_ladder_v1';
+    var SAMPLES = [0, 10, 25, 50, 75, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000, 3000, 5000, 7500, 10000];
+
+    function token() { return localStorage.getItem('token'); }
+    function headers() { var t = token(); return t ? { Authorization: 'Bearer ' + t } : {}; }
+    function money(n) { return '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function stepAmt(n) { return '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+
+    var CACHE = {};
+    function getInc(amount) {
+      if (CACHE[amount] != null) return Promise.resolve(CACHE[amount]);
+      return fetch(API + '/bids/increment?amount=' + encodeURIComponent(amount), { headers: headers() })
+        .then(function (r) {
+          if (!r.ok) throw 0;
+          var ct = r.headers.get('content-type') || '';
+          return ct.indexOf('json') >= 0 ? r.json() : r.text().then(parseFloat);
+        })
+        .then(function (v) { v = Number(v); if (!isFinite(v)) throw 0; CACHE[amount] = v; return v; });
+    }
+
+    // Collapse consecutive equal increments into ladder rows { from, inc }.
+    function collapse(samples) {
+      var rows = [];
+      samples.forEach(function (s) {
+        if (!rows.length || rows[rows.length - 1].inc !== s.inc) rows.push({ from: s.a, inc: s.inc });
+      });
+      return rows;
+    }
+
+    function render(rows) {
+      if (!rows || !rows.length) { fail(); return; }
+      var html = '<table class="inc-table"><thead><tr><th>Current bid</th><th>Bid increment</th></tr></thead><tbody>';
+      rows.forEach(function (r, i) {
+        var next = rows[i + 1];
+        var range = next ? (money(r.from) + ' – ' + money(next.from - 0.01)) : (money(r.from) + ' and up');
+        html += '<tr><td>' + range + '</td><td>+ ' + stepAmt(r.inc) + '</td></tr>';
+      });
+      html += '</tbody></table>';
+      box.innerHTML = html;
+      if (note) note.style.display = '';
+    }
+
+    function fail() {
+      box.innerHTML = '<div class="inc-state">We couldn’t load the live increments right now. ' +
+        'The bid increment is always shown on each lot’s page — or <a href="/support.html">contact support</a>.</div>';
+    }
+
+    // Instant paint from session cache, then refresh in the background.
+    var cached = null;
+    try { cached = JSON.parse(sessionStorage.getItem(CK) || 'null'); } catch (e) {}
+    if (cached && cached.length) render(cached);
+
+    Promise.all(SAMPLES.map(function (a) {
+      return getInc(a).then(function (inc) { return { a: a, inc: inc }; }).catch(function () { return { a: a, inc: null }; });
+    })).then(function (res) {
+      var valid = res.filter(function (x) { return x.inc != null; });
+      var rows = collapse(valid);
+      if (rows.length) {
+        try { sessionStorage.setItem(CK, JSON.stringify(rows)); } catch (e) {}
+        render(rows);
+      } else if (!cached) {
+        fail();
+      }
+    }).catch(function () { if (!cached) fail(); });
+  })();
+  </script>
+
+</body>
+</html>

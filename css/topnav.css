@@ -318,7 +318,6 @@ html { overflow-x: clip; }
 .acct-searchwrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); }
 .acct-searchwrap input { width: 100%; border: 1px solid #dfe2e6; background: #fff; border-radius: 9px; padding: 9px 12px 9px 34px; font-family: inherit; font-size: 13.5px; color: #16202e; outline: none; }
 .acct-searchwrap input:focus { border-color: #1f8b57; }
-#acctStatus { border: 1px solid #dfe2e6; background: #fff; border-radius: 9px; padding: 9px 10px; font-family: inherit; font-size: 13px; color: #16202e; font-weight: 600; cursor: pointer; outline: none; }
 
 .acct-viewallrow { padding: 0 18px 8px; display: flex; justify-content: flex-end; flex-shrink: 0; }
 .acct-viewall { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; color: #1f8b57; text-decoration: none; padding: 6px 10px; border-radius: 8px; }
@@ -344,16 +343,10 @@ html { overflow-x: clip; }
 .acct-qb:hover { background: #1f8b57; color: #fff; }
 .acct-qb:hover svg { fill: #fff; }
 .acct-qb:disabled { opacity: .6; cursor: default; }
-.acct-pay { margin-top: 7px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid #16a34a; background: #16a34a; color: #fff; font-family: inherit; font-weight: 700; font-size: 11.5px; padding: 5px 10px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
-.acct-pay:hover { background: #15803d; border-color: #15803d; }
-.acct-pay svg { fill: #fff; }
-
-.acct-footer { border-top: 1px solid #eef0f2; padding: 16px 18px; flex-shrink: 0; }
-.acct-subrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.acct-subrow span:first-child { color: #6b7480; font-weight: 600; font-size: 14px; }
-.acct-subrow span:last-child { font-weight: 800; font-size: 18px; color: #16202e; }
-.acct-checkout { width: 100%; border: none; background: #16202e; color: #fff; font-weight: 700; font-size: 14px; padding: 13px; border-radius: 10px; cursor: pointer; font-family: inherit; }
-.acct-checkout:hover { opacity: .92; }
+/* Inline unwatch (remove-from-watchlist) icon button on watchlist rows. */
+.acct-unwatch { margin-top: 7px; margin-left: 6px; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid #e6e8ec; background: #fff; color: #97a0ab; border-radius: 8px; cursor: pointer; vertical-align: top; }
+.acct-unwatch:hover { border-color: #f5c2c7; color: #c0453f; background: #fff5f5; }
+.acct-unwatch:disabled { opacity: .6; cursor: default; }
 
 @media (max-width: 480px) {
   .acct-panel { max-width: 100%; }

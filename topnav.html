@@ -43,17 +43,21 @@
             <div class="ud-name" id="udName">User</div>
             <div class="ud-email" id="udEmail"></div>
           </div>
+          <!-- Ongoing Bids: opens the quick side drawer (live auctions + Quick Bid). -->
           <a href="/my-bids.html" id="bidsLink">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="2"><path d="M14 13l-3 3-7-7 3-3z"></path><path d="M11 10l5-5 4 4-5 5M3 21h8"></path></svg>My Bids <span class="badge hidden" id="ongoingBidCount">0</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg>Ongoing Bids <span class="badge hidden" id="ongoingBidCount">0</span>
           </a>
-          <a href="/orders.html" id="ordersLink">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path><path d="M3 6h18M16 10a4 4 0 01-8 0"></path></svg>My Orders <span class="badge hidden" id="ordersCount">0</span>
+          <!-- All Bids: navigates to the full bid page (ongoing + won / lost / ended history). -->
+          <a href="/my-bids.html" id="allBidsLink">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="2"><path d="M14 13l-3 3-7-7 3-3z"></path><path d="M11 10l5-5 4 4-5 5M3 21h8"></path></svg>All Bids &amp; Results
           </a>
           <a href="/watchlist.html" id="watchLink">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="2.6"></circle></svg>Watchlist <span class="badge hidden" id="watchCount">0</span>
           </a>
-          <a href="/cart.html" id="cartMenuLink">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="18" cy="20" r="1.4"></circle><path d="M6 6L5 3H2"></path></svg>My Cart <span class="badge hidden" id="cartMenuCount">0</span>
+          <!-- Buy-Now Orders: full page of buy-now purchases only (paid + pending).
+               Auction winnings are paid from the bids side, not here. -->
+          <a href="/orders.html" id="ordersLink">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path><path d="M3 6h18M16 10a4 4 0 01-8 0"></path></svg>Buy-Now Orders <span class="badge hidden" id="ordersCount">0</span>
           </a>
           <div class="ud-sep"></div>
           <a href="/account-settings.html" id="accountSettingsLink">
@@ -169,22 +173,14 @@
     </button>
   </div>
   <div class="acct-tabs">
-    <button type="button" class="acct-tab on" data-accttab="bids">Bids</button>
+    <button type="button" class="acct-tab on" data-accttab="bids">Ongoing Bids</button>
     <button type="button" class="acct-tab" data-accttab="watch">Watchlist</button>
-    <button type="button" class="acct-tab" data-accttab="cart">Cart</button>
-    <button type="button" class="acct-tab" data-accttab="orders">Orders</button>
   </div>
   <div class="acct-searchrow">
     <span class="acct-searchwrap">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9aa1ab" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
       <input id="acctSearch" type="text" placeholder="Search…" />
     </span>
-    <select id="acctStatus" style="display:none;">
-      <option value="ALL">All status</option>
-      <option value="PENDING_PAYMENT">Pending</option>
-      <option value="PAID">Paid</option>
-      <option value="CANCELLED">Cancelled</option>
-    </select>
   </div>
   <div class="acct-viewallrow">
     <a id="acctViewAll" class="acct-viewall" href="/my-bids.html">
@@ -193,8 +189,4 @@
     </a>
   </div>
   <div id="acctBody" class="acct-body"><div class="acct-empty">Loading…</div></div>
-  <div id="acctFooter" class="acct-footer" style="display:none;">
-    <div class="acct-subrow"><span>Subtotal</span><span id="acctSubtotal">$—</span></div>
-    <button type="button" id="acctCheckout" class="acct-checkout">Checkout</button>
-  </div>
 </aside>

@@ -621,11 +621,11 @@
 			  }
 		  }
 		  
+		  // Cart icon → full cart page (cart is always a full page, never the drawer).
 		  cartLink?.addEventListener('click', (e) => {
 			  e.preventDefault();
 			  if (!isLoggedIn()) { openModal(); return; }
-			  if (typeof window.openAccountDrawer === 'function') window.openAccountDrawer('cart');
-			  else window.location.href = '/cart.html';
+			  window.location.href = '/cart.html';
 		  });
 		  
 		  // Open modal on "SIGN IN / REGISTER"
@@ -637,16 +637,15 @@
 		  //====  End of signLink
 	
 		  
-		  // Account dropdown items open the shared account drawer.
-		  // The href on each link is kept as a deep-link / no-JS fallback.
-		  const ordersLink   = document.getElementById('ordersLink');
-		  const cartMenuLink = document.getElementById('cartMenuLink');
+		  // Account dropdown: My Bids + Watchlist open the quick side drawer;
+		  // My Orders keeps its plain href (/orders.html) and loads the full page.
+		  // The href on the drawer links is kept as a deep-link / no-JS fallback.
 		  function openDrawerOr(tab) {
 			if (!isLoggedIn()) { openModal(); return; }
 			if (typeof window.openAccountDrawer === 'function') window.openAccountDrawer(tab);
 			// else: allow the href to navigate to the full page (fallback)
 		  }
-		  [[bidsLink, 'bids'], [watchLink, 'watch'], [ordersLink, 'orders'], [cartMenuLink, 'cart']].forEach(pair => {
+		  [[bidsLink, 'bids'], [watchLink, 'watch']].forEach(pair => {
 			const link = pair[0], tab = pair[1];
 			link?.addEventListener('click', (e) => {
 			  if (!isLoggedIn() || typeof window.openAccountDrawer === 'function') e.preventDefault();

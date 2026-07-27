@@ -55,9 +55,11 @@
   .lot-sub{font-size:13px;color:#97a0ab;margin-top:6px}
   .sum-titlerow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
   .chip{flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.07em;padding:7px 12px;border-radius:999px;background:rgba(31,139,87,.12);color:#177045;text-transform:uppercase}
-  .headerMsg{display:flex;align-items:center;gap:8px;margin:16px 0 0;padding:11px 14px;border-radius:10px;font-size:13.5px;font-weight:700}
-  .headerMsg.win{background:rgba(31,139,87,.1);color:#177045}
-  .headerMsg.outbid{background:#fdecec;color:#c0453f}
+  .headerMsg{display:flex;align-items:center;gap:8px;margin:16px 0 0;padding:10px 13px;border-radius:9px;font-size:13px;font-weight:600;line-height:1.35}
+  .headerMsg svg{flex-shrink:0}
+  .headerMsg span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .headerMsg.win{background:rgba(31,139,87,.08);color:#177045}
+  .headerMsg.outbid{background:rgba(192,69,63,.08);color:#c0453f}
   .sum-msrprow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding-bottom:16px;border-bottom:1px solid #eef0f2}
   .totalMsrpDisplay{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#97a0ab;font-weight:700}
   .price{font-weight:800;font-size:24px;color:#16202e;margin-top:3px}
@@ -173,7 +175,7 @@
         </div>
         <div class="lot-sub" id="lotSub"></div>
 
-        <div class="headerMsg hidden" id="headerWonMsg"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 3H6v3a4 4 0 003 3.87V13H8a1 1 0 000 2h1v2H7a1 1 0 100 2h10a1 1 0 100-2h-2v-2h1a1 1 0 100-2h-1V9.87A4 4 0 0018 6zM4 5h2v2a1 1 0 01-2 0zm16 2a1 1 0 01-2 0V5h2z"></path></svg><span id="headerWonText">🏆 Congratulations! You already won</span></div>
+        <div class="headerMsg hidden" id="headerWonMsg"><svg id="headerWonIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg><span id="headerWonText">You're the highest bidder</span></div>
 
         <div class="sum-msrprow" style="margin-top:16px;">
           <div><div class="totalMsrpDisplay">Total MSRP</div><div class="price" id="totalMsrpDisplay">$—</div></div>
@@ -316,12 +318,19 @@
 	function showHeaderMessage(type, text, autoHideMs = 0){
 	  const box = document.getElementById('headerWonMsg');
 	  const t = document.getElementById('headerWonText');
+	  const icon = document.getElementById('headerWonIcon');
 	  if(!box || !t) return;
 
 	  // reset
 	  box.classList.remove('hidden', 'win', 'outbid');
 	  box.classList.add(type);  // "win" | "outbid"
 	  t.textContent = text;
+	  // Match the stroke icon to the state (check = winning, alert = outbid)
+	  if (icon) {
+	    icon.innerHTML = (type === 'outbid')
+	      ? '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>'
+	      : '<path d="M20 6L9 17l-5-5"></path>';
+	  }
 
 	  if (__headerTimer) clearTimeout(__headerTimer);
 	  __headerTimer = null;
@@ -584,12 +593,12 @@
 		if (comingSoon) {
 		  hideHeaderMessage();
 		} else if (iAmWinning) {
-		  showHeaderMessage("win", "🏆 Congratulations!🎉 You are currently winning this item.", 0);
+		  showHeaderMessage("win", "You're the highest bidder", 0);
 		} else {
 		  // if I have bid before AND I'm not winning => persistent outbid
 		  const iBidBefore = await hasMyBid(product.id);
 		  if (iBidBefore) {
-			showHeaderMessage("outbid", "⚠️ You have been outbid. Place a higher bid to win.", 0); // persistent
+			showHeaderMessage("outbid", "You've been outbid — raise your bid to win", 0); // persistent
 		  } else {
 			hideHeaderMessage();
 		  }
@@ -599,7 +608,7 @@
 		/** ✅ If already won => show green header message
 		const myId = localStorage.getItem('userid');
 		if (myId && product.wonUserId != null && String(product.wonUserId) === String(myId)) {
-		  showHeaderWonMessage("🏆 Congratulations!🎉 You are currently winning this item.");
+		  showHeaderWonMessage("You're the highest bidder");
 		}*/
 
         // This block is re-runnable: a lot can flip coming-soon → live while the
@@ -770,10 +779,10 @@
       }
       // if (wonUserId == userid) {
 	  if (wonUserId && String(wonUserId) === String(userid)) {
-        msg.textContent = `⚠️ You are already the highest bidder.`;
-        msg.style.color = "red";
-        msg.style.fontSize = "15px";
-        msg.style.fontWeight = "bold";
+        msg.textContent = `You're already the highest bidder.`;
+        msg.style.color = "#6b7480";
+        msg.style.fontSize = "14px";
+        msg.style.fontWeight = "600";
         setTimeout(() => { msg.textContent = ""; }, 4000);
         return;
       }
@@ -798,16 +807,16 @@
 
           if (prod.isAutoOutbid && String(prod.isAutoOutbid).trim() !== ""){
             msg.textContent = prod.isAutoOutbid;
-            msg.style.color = "red";
-            msg.style.fontSize = "20px";
-            msg.style.fontWeight = "bold";
+            msg.style.color = "#c0453f";
+            msg.style.fontSize = "14px";
+            msg.style.fontWeight = "600";
             msg.style.padding = "5px 0";
             setTimeout(() => { msg.textContent = ""; }, 10000);
           } else {
-            msg.textContent = "✅ Congratulations!🎉 You are the current highest bidder!";
-            msg.style.color = "green";
-            msg.style.fontSize = "20px";
-            msg.style.fontWeight = "bold";
+            msg.textContent = "Bid placed — you're the highest bidder";
+            msg.style.color = "#177045";
+            msg.style.fontSize = "14px";
+            msg.style.fontWeight = "600";
             msg.style.padding = "5px 0";
             setTimeout(() => { msg.textContent = ""; }, 5000);
           }
@@ -1016,11 +1025,11 @@
 
 			if (iAmWinningNow) {
 			  // outbid -> win OR keep win
-			  showHeaderMessage("win", "🏆 Congratulations!🎉 You are currently winning this item.", 0);
+			  showHeaderMessage("win", "You're the highest bidder", 0);
 			} else {
 			  // if I just lost leadership => temporary outbid
 			  if (iWasWinningBefore) {
-				showHeaderMessage("outbid", "⚠️ You have been outbid. Place a higher bid to win.", 0);
+				showHeaderMessage("outbid", "You've been outbid — raise your bid to win", 0);
 			  } else {
 				// If I have bid before, keep persistent outbid (no timeout)
 				// Important: don't spam API on every WS tick, only when message is empty/hidden
@@ -1030,7 +1039,7 @@
 				if (myId && (boxHidden || isCurrentlyWinMsg)) {
 				  const iBidBefore = await hasMyBid(Number(id));
 				  if (iBidBefore) {
-					showHeaderMessage("outbid", "⚠️ You have been outbid. Place a higher bid to win.", 0);
+					showHeaderMessage("outbid", "You've been outbid — raise your bid to win", 0);
 				  } else {
 					hideHeaderMessage();
 				  }
