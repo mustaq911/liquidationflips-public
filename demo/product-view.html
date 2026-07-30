@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Liquidation Flips</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- ✅ Replace ONLY your <style>...</style> with this (content/HTML stays same) -->
+<style>
+  *{box-sizing:border-box}
+  :root{--accent:#1f8b57;--ink:#16202e;--muted:#6b7480;--muted2:#97a0ab;--line:#e6e8ec;--line2:#eef0f2}
+  html,body{margin:0;padding:0}
+  body{background:#fff;color:#16202e}
+  .hidden{display:none!important}
+  .muted{color:#6b7480}
+
+  .page{max-width:1400px;margin:0 auto;padding:24px 28px 40px}
+
+  .btn{border:1px solid #dfe2e6;background:#fff;color:#16202e;font-weight:700;font-size:13.5px;padding:12px 16px;border-radius:10px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:opacity .18s ease,border-color .18s ease}
+  .btn:hover{border-color:#c7ccd2}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn-primary{border:none;background:#16202e;color:#fff}
+  .btn-primary:hover{opacity:.92;border:none}
+
+  .skeleton{background:linear-gradient(100deg,#eef0f2 30%,#f6f7f8 50%,#eef0f2 70%);background-size:200% 100%;animation:lfsk 1.2s ease-in-out infinite;border-radius:8px}
+  @keyframes lfsk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  .skel-line{height:14px}
+  /* No min-height: the hero's aspect-ratio sizes it — a fixed min-height would
+     transfer into a min-WIDTH via the aspect ratio and overflow small phones. */
+  .skel-hero{height:100%;border-radius:14px}
+
+  .breadcrumbs{margin-bottom:18px}
+  .chip-back a{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:#6b7480;font-weight:600;font-size:13.5px}
+  .chip-back a:hover{color:#1f8b57}
+  .header{display:none}
+
+  /* minmax(0,1fr): a bare 1fr floors the track at the column's intrinsic
+     min-content width, which overflows phones (e.g. the bid form's input) */
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;align-items:start}
+
+  .gallery .hero{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;border:1px solid #e6e8ec;background:#f3f4f6;cursor:zoom-in}
+  .gallery .hero img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumbRow{display:flex;align-items:center;gap:8px;margin-top:12px}
+  .thumbs{display:flex;gap:10px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none}
+  .thumbs::-webkit-scrollbar{display:none}
+  .thumb{width:76px;height:64px;flex-shrink:0;border-radius:9px;overflow:hidden;border:1px solid #e6e8ec;cursor:pointer;background:#f3f4f6}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb.active{border:2px solid #16202e}
+  .thumbNav{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1px solid #e6e8ec;background:#fff;cursor:pointer;color:#16202e;display:flex;align-items:center;justify-content:center}
+  .thumbNav:disabled{opacity:.4;cursor:default}
+
+  .summary{border:1px solid #e6e8ec;border-radius:16px;padding:26px}
+  .lot-title{font-weight:800;font-size:21px;line-height:1.25;letter-spacing:-.01em;margin:0;color:#16202e}
+  .lot-sub{font-size:13px;color:#97a0ab;margin-top:6px}
+  .sum-titlerow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .chip{flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.07em;padding:7px 12px;border-radius:999px;background:rgba(31,139,87,.12);color:#177045;text-transform:uppercase}
+  .headerMsg{display:flex;align-items:center;gap:8px;margin:16px 0 0;padding:10px 13px;border-radius:9px;font-size:13px;font-weight:600;line-height:1.35}
+  .headerMsg svg{flex-shrink:0}
+  .headerMsg span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .headerMsg.win{background:rgba(31,139,87,.08);color:#177045}
+  .headerMsg.outbid{background:rgba(192,69,63,.08);color:#c0453f}
+  .sum-msrprow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding-bottom:16px;border-bottom:1px solid #eef0f2}
+  .totalMsrpDisplay{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#97a0ab;font-weight:700}
+  .price{font-weight:800;font-size:24px;color:#16202e;margin-top:3px}
+  .countdown{font-variant-numeric:tabular-nums;font-weight:700;font-size:16px;margin-top:3px;color:#16202e}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #eef0f2;gap:16px}
+  .row .muted{color:#6b7480;font-weight:600;font-size:14px}
+  #highestBid{font-weight:800;font-size:18px;color:#1f8b57}
+  #lotId,#lotCategory{font-weight:700;font-size:14px;color:#16202e}
+  .bidlabel{font-size:12px;font-weight:700;color:#16202e;margin:18px 0 7px;display:block}
+  .bid-form{display:flex;gap:10px}
+  /* min-width:0 lets the input shrink below its intrinsic size on phones */
+  .bid-form input{flex:1;min-width:0;border:1px solid #dfe2e6;background:#fff;border-radius:10px;padding:12px 14px;font-family:inherit;font-size:14.5px;color:#16202e;outline:none}
+  .bid-form input:focus{border-color:#1f8b57;box-shadow:0 0 0 3px rgba(31,139,87,.12)}
+  .bid-form .btn-primary{padding:12px 22px;white-space:nowrap}
+  #bidIncrement{font-size:12.5px;color:#6b7480;margin-top:9px;line-height:1.5}
+  #bidMessage{margin-top:10px;font-size:13px;font-weight:700}
+  #bidMessage:empty{display:none}
+  #watchBtn{width:100%;margin-top:12px}
+  .notice{background:#f6f7f8;border-radius:10px;padding:13px 15px;margin-top:16px;font-size:12.5px;line-height:1.55;color:#6b7480}
+
+  .details-wrap{margin-top:28px}
+  .details-h{font-weight:800;font-size:22px;letter-spacing:-.01em;margin:0 0 14px;color:#16202e}
+  .tabs{display:flex;gap:8px;position:relative;z-index:1}
+  .tab{padding:11px 24px;font-family:inherit;font-weight:800;font-size:14px;border-radius:10px 10px 0 0;cursor:pointer;margin-bottom:-1px;border:1px solid #e6e8ec;background:#f6f7f8;color:#6b7480}
+  .tab.on{background:#fff;color:#16202e;border-bottom-color:#fff}
+  .tab-panel{border:1px solid #e6e8ec;border-radius:0 14px 14px 14px;padding:26px;background:#fff}
+  .desc{font-size:14.5px;line-height:1.65;color:#6b7480;margin:0 0 22px;max-width:820px}
+  .info-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  .info-card{border:1px solid #e6e8ec;border-radius:12px;padding:22px}
+  .info-card h3{font-weight:800;font-size:16px;margin:0 0 14px;color:#16202e}
+  .kv{display:flex;flex-direction:column;gap:10px;font-size:14px;color:#16202e;line-height:1.5}
+  .kv > div span{color:#97a0ab;font-weight:600}
+  .kv > div strong{font-weight:700}
+
+  .panels{display:grid;grid-template-columns:1fr;gap:24px;margin-top:24px}
+  .card{border:1px solid #e6e8ec;border-radius:16px;padding:26px}
+  .card h3{font-weight:800;font-size:18px;letter-spacing:-.01em;margin:0 0 12px;color:#16202e}
+  .pickup-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+  .manifest-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .manifest-page-size select{border:1px solid #dfe2e6;background:#fff;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:13px;color:#16202e;font-weight:600;cursor:pointer;outline:none}
+  table.specs{width:100%;border-collapse:collapse;border:1px solid #e6e8ec;border-radius:12px;overflow:hidden;font-size:13px}
+  table.specs thead th{background:#16202e;color:#fff;font-weight:700;font-size:11.5px;letter-spacing:.02em;text-transform:uppercase;text-align:left;padding:12px 14px}
+  table.specs tbody td{padding:11px 14px;border-bottom:1px solid #f1f2f4;color:#16202e;vertical-align:top}
+  table.specs tbody tr:last-child td{border-bottom:none}
+  .manifest-pagination{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px}
+  .manifest-pagination button{min-width:32px;height:32px;border-radius:8px;border:1px solid #e6e8ec;background:#fff;color:#16202e;font-weight:700;font-size:13px;cursor:pointer;padding:0 8px}
+  .manifest-pagination button.active{background:#16202e;border-color:#16202e;color:#fff}
+  .manifest-pagination button:disabled{opacity:.45;cursor:default}
+  #downloadManifestBtn{margin-top:16px}
+
+  .lightbox{position:fixed;inset:0;background:rgba(22,32,46,.82);display:none;align-items:center;justify-content:center;z-index:1000;padding:24px}
+  .lightbox.open{display:flex}
+  .lightboxInner{position:relative;max-width:92vw;max-height:88vh}
+  .lightboxImg{max-width:92vw;max-height:88vh;border-radius:12px;display:block}
+  .lbBtn{position:absolute;width:42px;height:42px;border-radius:999px;border:none;background:rgba(255,255,255,.92);color:#16202e;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .lbClose{top:-14px;right:-14px}
+  .lbPrev{left:-14px;top:50%;transform:translateY(-50%)}
+  .lbNext{right:-14px;top:50%;transform:translateY(-50%)}
+  .lbCap{position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);color:#fff;font-size:13px;font-weight:600}
+
+  @media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr);gap:22px}.pickup-grid{grid-template-columns:1fr}}
+  @media (max-width:640px){.page{padding:20px 18px 32px}.info-cards{grid-template-columns:1fr}}
+  /* Small phones: stop the MSRP + Time-left header from colliding, and give the
+     summary rows more vertical breathing room. */
+  @media (max-width:480px){
+    .sum-msrprow{flex-direction:column;align-items:stretch;gap:4px;padding-bottom:18px}
+    .sum-msrprow>div:last-child{text-align:left!important}
+    .price{font-size:21px}
+    .countdown{font-size:15px}
+    .row{padding:16px 0}
+    .lot-title{font-size:19px}
+  }
+</style>
+
+</head>
+<body>
+
+  <!-- Shared Topnav -->
+  <link rel="stylesheet" href="/css/topnav.css?v=4">
+  <div id="topnavContainer"></div>
+
+  <!-- 1. Load CONFIG.js (defines CONFIG.API_BASE_URL) -->
+  <script src="/js/config.js?v=4"></script>
+  <script src="/js/demo-data.js?v=1"></script>
+
+  <!-- 2. Load auth.js after config -->
+  <script src="/js/auth.js?v=4" defer></script>
+
+  <div class="page">
+    <div class="breadcrumbs">
+      <div class="chip-back"><a href="/index.html?type=auction"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg>Back to listings</a></div>
+    </div>
+
+    <!-- title / status / won message are populated by JS into the summary card below -->
+    <div class="header"></div>
+
+    <div class="layout">
+      <!-- Left: Gallery -->
+      <div class="gallery" id="gallery">
+        <div class="hero" id="hero"><div class="skel-hero skeleton" style="width:100%"></div></div>
+        <div class="thumbRow">
+          <button class="thumbNav" id="thumbPrev" aria-label="Previous thumbnails"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg></button>
+          <div class="thumbs" id="thumbs"></div>
+          <button class="thumbNav" id="thumbNext" aria-label="Next thumbnails"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg></button>
+        </div>
+      </div>
+
+      <!-- Right: Summary & Bidding -->
+      <div class="summary">
+        <div class="sum-titlerow">
+          <h1 class="lot-title" id="lotTitle"><span class="skel-line skeleton" style="width:60%;display:inline-block"></span></h1>
+          <div class="chip" id="lotStatus">AUCTION</div>
+        </div>
+        <div class="lot-sub" id="lotSub"></div>
+
+        <div class="headerMsg hidden" id="headerWonMsg"><svg id="headerWonIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg><span id="headerWonText">You're the highest bidder</span></div>
+
+        <div class="sum-msrprow" style="margin-top:16px;">
+          <div><div class="totalMsrpDisplay">Total MSRP</div><div class="price" id="totalMsrpDisplay">$—</div></div>
+          <div style="text-align:right;"><div class="totalMsrpDisplay" id="countdownLabel">Time left</div><div class="countdown" id="countdown">—</div></div>
+        </div>
+
+        <div class="row"><div class="muted" id="highestBidLabel">Highest bid</div><div id="highestBid">$0.00</div></div>
+        <div class="row"><div class="muted">Lot ID</div><div id="lotId">—</div></div>
+        <div class="row"><div class="muted">Category</div><div id="lotCategory">—</div></div>
+
+        <div id="bidPanel">
+          <label class="bidlabel" for="bidAmount">Your maximum bid</label>
+          <div class="bid-form">
+            <input type="number" id="bidAmount" placeholder="Enter your max bid" />
+            <button class="btn btn-primary" id="bidNow"><svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg>Place bid</button>
+          </div>
+          <div id="bidIncrement"></div>
+          <div id="bidMessage"></div>
+        </div>
+
+        <div id="comingSoonPanel" class="hidden" style="margin-top:18px;text-align:center;color:#6b7480;font-weight:700;font-size:13.5px;padding:16px;border:1px dashed #dfe2e6;border-radius:11px;background:#f6f7f8;">Coming soon — bidding hasn&rsquo;t opened for this lot yet.</div>
+
+        <input type="hidden" id="minAllowedBidValue" value="0" />
+        <input type="hidden" id="wonUserId" value="0" />
+
+        <button class="btn" id="watchBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="2.6"></circle></svg> Add to Watchlist</button>
+
+        <div class="notice">New registrants may be asked to use alternate payment methods for the first invoice as part of credit card security procedures.</div>
+      </div>
+    </div>
+
+    <!-- Listing details tabs -->
+    <div class="details-wrap">
+      <h2 class="details-h">Listing details</h2>
+      <div class="tabs">
+        <button class="tab on" id="tabOverview" type="button">Overview</button>
+        <button class="tab" id="tabManifest" type="button">Manifest</button>
+      </div>
+      <div class="tab-panel">
+        <div id="panelOverview">
+          <p class="desc" id="description">Loading description…</p>
+          <div class="info-cards">
+            <div class="info-card">
+              <h3>About this listing</h3>
+              <div class="kv">
+                <div><span>Brand:</span> <strong id="specBrand">—</strong></div>
+                <div><span>Model:</span> <strong id="specModel">—</strong></div>
+                <div><span>SKU / Code:</span> <strong id="specSku">—</strong></div>
+              </div>
+            </div>
+            <div class="info-card">
+              <h3>Condition &amp; details</h3>
+              <div class="kv">
+                <div><span>Condition:</span> <strong id="specCondition">—</strong></div>
+                <div><span>Sold:</span> <strong>As-is, final sale</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panelManifest" class="hidden">
+          <div class="manifest-header">
+            <h3 style="margin:0;font-weight:800;font-size:16px;color:#16202e;">All products</h3>
+            <div class="manifest-page-size">
+              <label for="manifestPageSize" class="muted" style="font-size:12px;margin-right:6px;">Rows per page:</label>
+              <select id="manifestPageSize"><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="50">50</option></select>
+            </div>
+          </div>
+          <div id="manifestContainer"><div class="muted" style="font-size:14px;">Loading manifest…</div></div>
+          <button class="btn btn-primary" id="downloadManifestBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v5h5M14 3l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"></path><path d="M9 13h6M9 17h6"></path></svg>Download Manifest (Excel)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pickup / terms -->
+    <div class="panels">
+      <div class="card">
+        <div class="pickup-grid">
+          <div>
+            <h3>Pickup / Location</h3>
+            <div class="muted" style="font-size:14px;line-height:1.7;">Location: <span id="pickupLocation" style="color:#16202e;font-weight:700;">—</span><br/>Pickup Window: <span id="pickupWindow" style="color:#16202e;font-weight:700;">—</span></div>
+          </div>
+          <div>
+            <h3>Auction Terms</h3>
+            <div class="muted" style="font-size:14px;line-height:1.6;">All lots are sold as-is. Please read the buyer&rsquo;s info &amp; terms before bidding.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== NEW: Lightbox DOM ====== -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightboxInner" role="dialog" aria-modal="true" aria-label="Image viewer">
+      <img class="lightboxImg" id="lbImg" alt="Full view" />
+      <button class="lbBtn lbClose" id="lbClose" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <button class="lbBtn lbPrev" id="lbPrev" aria-label="Previous image">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button class="lbBtn lbNext" id="lbNext" aria-label="Next image">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      <div class="lbCap" id="lbCap"></div>
+    </div>
+  </div>
+
+  <!-- SockJS / STOMP -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+  <script>
+    // ========= Config & Auth =========
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+    console.log("API Base URL:", API_BASE_URL);
+
+    const token  = localStorage.getItem("token");
+    const userid = localStorage.getItem("userid");
+
+    // Manifest pagination state
+    let manifestList = [];
+    let manifestCurrentPage = 1;
+    let manifestPageSize = 5;
+
+    // ========= Helpers =========
+    const qs  = (s, r=document) => r.querySelector(s);
+    const qsa = (s, r=document) => Array.from(r.querySelectorAll(s));
+    const fmtMoney = (x) => {
+      if (x == null) return '$—';
+      const n = Number(x);
+      return Number.isNaN(n) ? '$—' : `$${n.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    };
+    const getIdFromQuery = () => new URLSearchParams(location.search).get("id");
+
+
+	// ===== Helper Method to Show WON-MESSAGE 
+	let __headerTimer = null;
+
+	function showHeaderMessage(type, text, autoHideMs = 0){
+	  const box = document.getElementById('headerWonMsg');
+	  const t = document.getElementById('headerWonText');
+	  const icon = document.getElementById('headerWonIcon');
+	  if(!box || !t) return;
+
+	  // reset
+	  box.classList.remove('hidden', 'win', 'outbid');
+	  box.classList.add(type);  // "win" | "outbid"
+	  t.textContent = text;
+	  // Match the stroke icon to the state (check = winning, alert = outbid)
+	  if (icon) {
+	    icon.innerHTML = (type === 'outbid')
+	      ? '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>'
+	      : '<path d="M20 6L9 17l-5-5"></path>';
+	  }
+
+	  if (__headerTimer) clearTimeout(__headerTimer);
+	  __headerTimer = null;
+
+	  if (autoHideMs > 0){
+		__headerTimer = setTimeout(() => {
+		  box.classList.add('hidden');
+		  box.classList.remove('win','outbid');
+		  __headerTimer = null;
+		}, autoHideMs);
+	  }
+	}
+
+	// ===== Helper Method to Hide WON-MESSAGE 
+	function hideHeaderMessage(){
+	  const box = document.getElementById('headerWonMsg');
+	  if(!box) return;
+	  if (__headerTimer) clearTimeout(__headerTimer);
+	  __headerTimer = null;
+	  box.classList.add('hidden');
+	  box.classList.remove('win','outbid');
+	}
+	
+	
+	
+    function timeLeftLabel(endIso){
+      if(!endIso) return '—';
+      const end = new Date(endIso).getTime();
+      const now = Date.now();
+      const diff = end - now;
+      if (diff <= 0) return 'Ended';
+      const d = Math.floor(diff/86400000);
+      const h = Math.floor((diff%86400000)/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      const s = Math.floor((diff%60000)/1000);
+      if (d>0) return `${d}d ${h}h ${m}m`;
+      if (h>0) return `${h}h ${m}m ${s}s`;
+      return `${m}m ${s}s`;
+    }
+
+    // ========= NEW: Gallery State =========
+    let GALLERY_IMAGES = [];
+    let ACTIVE_INDEX = 0;
+
+    function setActiveIndex(idx){
+      if (!GALLERY_IMAGES.length) return;
+      ACTIVE_INDEX = Math.max(0, Math.min(idx, GALLERY_IMAGES.length - 1));
+      renderHero(GALLERY_IMAGES[ACTIVE_INDEX]);
+      highlightThumb(ACTIVE_INDEX);
+      updateThumbNavDisabled();
+    }
+
+    function renderHero(url){
+      const hero = qs('#hero');
+      hero.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = url || NO_IMAGE;
+      img.alt = 'Product';
+      img.loading = 'eager';
+      hero.appendChild(img);
+
+      // Click main image => open lightbox
+      hero.onclick = () => openLightbox(ACTIVE_INDEX);
+    }
+
+    function highlightThumb(index){
+      const thumbs = qs('#thumbs');
+      qsa('.thumb', thumbs).forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+
+      // Ensure active thumb visible
+      const activeEl = thumbs.querySelector(`.thumb:nth-child(${index+1})`);
+      if (activeEl) activeEl.scrollIntoView({behavior:'smooth', block:'nearest', inline:'nearest'});
+    }
+
+    function renderThumbs(images){
+      const thumbs = qs('#thumbs');
+      thumbs.innerHTML = '';
+
+      images.forEach((src, idx) => {
+        const t = document.createElement('div');
+        t.className = 'thumb' + (idx===0 ? ' active' : '');
+        t.innerHTML = `<img src="${src}" alt="thumb ${idx+1}" loading="lazy">`;
+        t.addEventListener('click', () => setActiveIndex(idx));
+        thumbs.appendChild(t);
+      });
+
+      updateThumbNavDisabled();
+    }
+
+    function scrollThumbs(direction){
+      const thumbs = qs('#thumbs');
+      const amount = 260; // px scroll step
+      thumbs.scrollBy({ left: direction * amount, behavior: 'smooth' });
+    }
+
+    function updateThumbNavDisabled(){
+      const prev = qs('#thumbPrev');
+      const next = qs('#thumbNext');
+
+      // If less than 2 images, disable both
+      if (GALLERY_IMAGES.length <= 1){
+        prev.disabled = true;
+        next.disabled = true;
+        return;
+      }
+
+      // Not strictly needed to disable, but keep enabled
+      prev.disabled = false;
+      next.disabled = false;
+    }
+
+    // ========= NEW: Lightbox =========
+    const lb = {
+      root: () => qs('#lightbox'),
+      img: () => qs('#lbImg'),
+      cap: () => qs('#lbCap')
+    };
+
+    function openLightbox(index){
+      if (!GALLERY_IMAGES.length) return;
+      const root = lb.root();
+      root.classList.add('open');
+      root.setAttribute('aria-hidden', 'false');
+      setLightboxImage(index);
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(){
+      const root = lb.root();
+      root.classList.remove('open');
+      root.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function setLightboxImage(index){
+      ACTIVE_INDEX = Math.max(0, Math.min(index, GALLERY_IMAGES.length - 1));
+      lb.img().src = GALLERY_IMAGES[ACTIVE_INDEX];
+      lb.cap().textContent = `${ACTIVE_INDEX + 1} / ${GALLERY_IMAGES.length}`;
+      highlightThumb(ACTIVE_INDEX);
+      renderHero(GALLERY_IMAGES[ACTIVE_INDEX]); // keep main in sync
+    }
+
+    function lbNext(){ setLightboxImage((ACTIVE_INDEX + 1) % GALLERY_IMAGES.length); }
+    function lbPrev(){ setLightboxImage((ACTIVE_INDEX - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length); }
+
+    // Close on backdrop click
+    document.addEventListener('click', (e) => {
+      const root = lb.root();
+      if (!root.classList.contains('open')) return;
+      if (e.target === root) closeLightbox();
+    });
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      const root = lb.root();
+      if (!root.classList.contains('open')) return;
+
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') lbNext();
+      if (e.key === 'ArrowLeft') lbPrev();
+    });
+
+    // Button wiring
+    function wireGalleryControls(){
+      qs('#thumbPrev').addEventListener('click', () => scrollThumbs(-1));
+      qs('#thumbNext').addEventListener('click', () => scrollThumbs(1));
+
+      qs('#lbClose').addEventListener('click', closeLightbox);
+      qs('#lbNext').addEventListener('click', lbNext);
+      qs('#lbPrev').addEventListener('click', lbPrev);
+    }
+
+    // ========= Load product =========
+    let product = null;
+    let countdownTimer = null;
+    let productComingSoon = false;   // true = bidding not open yet (browse only)
+    let goLiveTimer = null;          // fires when a coming-soon lot should re-check for going live
+
+    async function loadProduct() {
+      const id = getIdFromQuery();
+      if (!id) { LF.toast("Missing product id", 'error'); setTimeout(function(){ location.href="/index.html"; }, 1400); return; }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/products/${id}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+        if (!res.ok) throw new Error("Unauthorized");
+        product = await res.json();
+
+        // Header
+        qs('#lotTitle').textContent   = product.title || 'Untitled';
+        qs('#lotSub').textContent     = product.shortDescription || product.subtitle || '';
+        qs('#lotStatus').textContent  = (product.status || 'AUCTION').toString().toUpperCase();
+
+        // ===== Gallery build from product.imageUrl + product.images =====
+        const imgs = [];
+        if (product.imageUrl) imgs.push(product.imageUrl);
+
+        // If product.images is array of strings => push directly
+        // If product.images is array of objects => try .imageUrl/.url/.path
+        if (Array.isArray(product.images)) {
+          product.images.forEach(it => {
+            if (!it) return;
+            if (typeof it === 'string') imgs.push(it);
+            else if (typeof it === 'object') {
+              const u = it.imageUrl || it.url || it.path;
+              if (u) imgs.push(u);
+            }
+          });
+        }
+
+        // De-duplicate
+        const uniqueImgs = Array.from(new Set(imgs.filter(Boolean)));
+        GALLERY_IMAGES = uniqueImgs.length ? uniqueImgs : [NO_IMAGE];
+
+        renderHero(GALLERY_IMAGES[0]);
+        renderThumbs(GALLERY_IMAGES);
+        setActiveIndex(0);
+
+        // Coming soon lots: browsing only — no bidding until they open. The
+        // /products/{id} endpoint doesn't always include the flag, so also honour
+        // a ?comingSoon=1 carried from the listing and a "coming soon" status.
+        // Server is authoritative: once auctionStart has passed the lot is live,
+        // and an explicit product.comingSoon flag wins over the (sticky) URL hint.
+        // The ?comingSoon=1 param and status text are only fallbacks for when the
+        // /products/{id} endpoint omits the flag. This ordering lets a re-fetch
+        // after go-live correctly flip the page to live (see scheduleGoLive).
+        const startPassed = !!(product.auctionStart && new Date(product.auctionStart).getTime() <= Date.now());
+        const comingSoon = !startPassed && (
+          product.comingSoon != null
+            ? Boolean(product.comingSoon)
+            : (new URLSearchParams(location.search).get('comingSoon') === '1'
+               || /coming[\s_-]?soon/i.test(String(product.status || '')))
+        );
+        productComingSoon = comingSoon;
+
+        // Summary
+        qs('#highestBid').textContent  = fmtMoney(product.highestBid);
+        // qs('#maxBid').textContent      = fmtMoney(product.maxBid);
+        qs('#lotId').textContent       = product.id ?? '—';
+        qs('#lotCategory').textContent = (product.category && product.category.name) || product.categoryName || '—';
+        qs('#description').textContent = product.description || 'No description provided.';
+        qs('#specCondition').textContent = product.condition || '—';
+        qs('#specBrand').textContent     = product.brand || '—';
+        qs('#specModel').textContent     = product.model || '—';
+        qs('#specSku').textContent       = product.sku || product.code || '—';
+        qs('#pickupLocation').textContent = product.pickupLocation || '—';
+        qs('#pickupWindow').textContent   = product.pickupWindow || '—';
+
+        qs('#wonUserId').value = product.wonUserId ?? 0;
+		qs('#wonUserId').dataset.prevWinner = (product.wonUserId ?? "").toString();
+        
+		const myId = localStorage.getItem('userid');
+		const iAmWinning = (myId && product.wonUserId != null && String(product.wonUserId) === String(myId));
+
+
+
+		if (comingSoon) {
+		  hideHeaderMessage();
+		} else if (iAmWinning) {
+		  showHeaderMessage("win", "You're the highest bidder", 0);
+		} else {
+		  // if I have bid before AND I'm not winning => persistent outbid
+		  const iBidBefore = await hasMyBid(product.id);
+		  if (iBidBefore) {
+			showHeaderMessage("outbid", "You've been outbid — raise your bid to win", 0); // persistent
+		  } else {
+			hideHeaderMessage();
+		  }
+		}
+		
+		
+		/** ✅ If already won => show green header message
+		const myId = localStorage.getItem('userid');
+		if (myId && product.wonUserId != null && String(product.wonUserId) === String(myId)) {
+		  showHeaderWonMessage("You're the highest bidder");
+		}*/
+
+        // This block is re-runnable: a lot can flip coming-soon → live while the
+        // page stays open, so keep both panels in sync in BOTH directions and
+        // (re)arm or clear the go-live re-check accordingly.
+        if (goLiveTimer) { clearTimeout(goLiveTimer); goLiveTimer = null; }
+
+        if (comingSoon) {
+          // No bidding yet: hide the form, show the notice, flip the status chip,
+          // and show a live "Starts in" countdown toward go-live (auctionStart).
+          qs('#bidPanel').classList.add('hidden');
+          qs('#comingSoonPanel').classList.remove('hidden');
+          if (qs('#lotStatus')) qs('#lotStatus').textContent = 'COMING SOON';
+          if (qs('#countdownLabel')) qs('#countdownLabel').textContent = 'Starts in';
+          if (qs('#highestBidLabel')) qs('#highestBidLabel').textContent = 'Starting bid';
+          startCountdown(product.auctionStart, 'starts');
+          scheduleGoLive(product.auctionStart);
+        } else {
+          // Live now: clear any leftover coming-soon UI. This matters when we
+          // re-load after a go-live transition without a navigation.
+          qs('#comingSoonPanel').classList.add('hidden');
+          qs('#bidPanel').classList.remove('hidden');
+          if (qs('#lotStatus')) qs('#lotStatus').textContent = (product.status || 'AUCTION').toString().toUpperCase();
+          if (qs('#countdownLabel')) qs('#countdownLabel').textContent = 'Time left';
+          if (qs('#highestBidLabel')) qs('#highestBidLabel').textContent = 'Highest bid';
+
+          // Countdown to auction end
+          startCountdown(product.auctionEnd);
+
+          // Bid increment
+          await loadBidIncrement();
+        }
+
+        // Manifest
+        loadManifest(product.id);
+
+      } catch (err) {
+        console.error("Error loading product:", err);
+        LF.toast("Failed to load product. Please log in again.", 'error');
+        setTimeout(function(){ window.location.href = "/web/login_cu.html"; }, 1400);
+      }
+    }
+
+    async function hasMyBid(productId){
+	
+	  const myId = localStorage.getItem("userid");
+	  if (!myId) return false;
+
+	  const res = await fetch(`${API_BASE_URL}/bids/product/${productId}/user/${myId}/exists`, {
+		headers: token ? { "Authorization": `Bearer ${token}` } : {}
+	  });
+	  if (!res.ok) return false;
+	  return await res.json(); // true/false
+	  
+	}
+	
+	async function loadBidIncrement(){
+      const highest = Number((qs('#highestBid')?.textContent || '0').replace(/[^0-9.]/g, '')) || 0;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/bids/increment?amount=${highest}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+
+        if (res.ok) {
+          let inc;
+          const ct = res.headers.get('content-type') || '';
+          inc = ct.includes('application/json') ? await res.json() : parseFloat(await res.text());
+
+          if (!Number.isFinite(inc)) {
+            qs('#bidIncrement').textContent = 'Increment step: $0';
+            return;
+          }
+
+          const minAllowed = highest + inc;
+          qs('#bidIncrement').textContent = `Please enter : ${fmtMoney(minAllowed)} or higher amount`;
+          qs('#minAllowedBidValue').value = String(Number(minAllowed) || 0);
+        } else {
+          qs('#bidIncrement').textContent = 'Increment step: $0';
+        }
+      } catch (err) {
+        console.error("Error loading bid increment:", err);
+      }
+    }
+
+    // ========= Go-live re-check =========
+    // Coming-soon lots open when auctionStart passes. Instead of trusting the
+    // client clock to flip the UI, wait until that moment (+1s) and re-fetch the
+    // product so the server decides "is it live yet?". Unknown start time → poll.
+    function scheduleGoLive(startIso){
+      if (goLiveTimer) { clearTimeout(goLiveTimer); goLiveTimer = null; }
+      const start = startIso ? new Date(startIso).getTime() : NaN;
+      let delay;
+      if (isFinite(start)) {
+        delay = start - Date.now() + 1000;   // fire just after it opens
+        if (delay < 0) delay = 3000;         // start already passed → re-check shortly
+      } else {
+        delay = 30000;                       // unknown start → poll every 30s
+      }
+      delay = Math.min(delay, 6 * 60 * 60 * 1000);  // cap re-check gap at 6h (setInterval overflow guard)
+      goLiveTimer = setTimeout(function(){ if (productComingSoon) loadProduct(); }, delay);
+    }
+
+    // ========= Countdown =========
+    // mode 'ends' (default): counts down to auction end (Time left).
+    // mode 'starts': counts down to go-live for coming-soon lots (Starts in);
+    // when the start passes it shows "Starting…" until scheduleGoLive re-loads.
+    function startCountdown(iso, mode){
+      if (countdownTimer) { clearInterval(countdownTimer); countdownTimer=null; }
+      const el = qs('#countdown');
+      function label(){
+        if (mode === 'starts') {
+          if (!iso) return 'Coming soon';
+          return (new Date(iso).getTime() - Date.now() <= 0) ? 'Starting…' : timeLeftLabel(iso);
+        }
+        return timeLeftLabel(iso);
+      }
+      function tick(){ el.textContent = label(); }
+      tick();
+      countdownTimer = setInterval(tick, 1000);
+    }
+
+    // ========= Bidding Submit() (your original - unchanged logic) =========
+    async function submitBid(){
+      const id = getIdFromQuery();
+      const amount = parseFloat(qs("#bidAmount").value);
+      const msg = qs("#bidMessage");
+
+      msg.textContent = ""; msg.style.color = "";
+
+      // Coming-soon lots don't accept bids yet — block even if the form is reached.
+      if (productComingSoon) {
+        LF.toast("Bidding hasn't opened for this lot yet.", 'info');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+      if (!token || !userid) {
+        msg.textContent = "🔒 Please log in to place a bid.";
+        msg.style.color = "red";
+        if (typeof window.openLoginModal === 'function') {
+          if (qs('#authTitle')) qs('#authTitle').textContent = '🔒 Please log in to place a bid.';
+          window.openLoginModal();
+        }
+        return;
+      }
+
+      const minAllowed = Number(qs('#minAllowedBidValue').value || 0);
+      const wonUserId = qs('#wonUserId').value;
+
+      if (!amount || amount <= 0) {
+        msg.textContent = "Please enter a valid bid amount.";
+        msg.style.color = "red";
+        msg.style.fontSize = "15px";
+        msg.style.fontWeight = "bold";
+        setTimeout(() => { msg.textContent = ""; }, 4000);
+        return;
+      }
+      if (amount < minAllowed) {
+        msg.textContent = `❌ Bid must be at least or higher than minum allowed bid : ${fmtMoney(minAllowed)}.`;
+        msg.style.color = "red";
+        msg.style.fontSize = "15px";
+        msg.style.fontWeight = "bold";
+        setTimeout(() => { msg.textContent = ""; }, 4000);
+        return;
+      }
+      // if (wonUserId == userid) {
+	  if (wonUserId && String(wonUserId) === String(userid)) {
+        msg.textContent = `You're already the highest bidder.`;
+        msg.style.color = "#6b7480";
+        msg.style.fontSize = "14px";
+        msg.style.fontWeight = "600";
+        setTimeout(() => { msg.textContent = ""; }, 4000);
+        return;
+      }
+
+      const stopBusy = LF.busy(qs('#bidNow'), 'Placing bid…');
+      try {
+        const res = await fetch(`${API_BASE_URL}/bids`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            productId: parseInt(id),
+            userId: parseInt(userid),
+            bidAmount: amount
+          })
+        });
+
+        if (res.ok) {
+          const prod = await res.json();
+
+          if (prod.isAutoOutbid && String(prod.isAutoOutbid).trim() !== ""){
+            msg.textContent = prod.isAutoOutbid;
+            msg.style.color = "#c0453f";
+            msg.style.fontSize = "14px";
+            msg.style.fontWeight = "600";
+            msg.style.padding = "5px 0";
+            setTimeout(() => { msg.textContent = ""; }, 10000);
+          } else {
+            msg.textContent = "Bid placed — you're the highest bidder";
+            msg.style.color = "#177045";
+            msg.style.fontSize = "14px";
+            msg.style.fontWeight = "600";
+            msg.style.padding = "5px 0";
+            setTimeout(() => { msg.textContent = ""; }, 5000);
+          }
+        } else {
+          const errText = await res.text();
+          msg.textContent = "❌ Failed to place bid: " + errText;
+          msg.style.color = "red";
+        }
+      } catch (e) {
+        msg.textContent = "❌ Error submitting bid.";
+        msg.style.color = "red";
+      } finally {
+        stopBusy();
+      }
+    }
+
+    // ========= Watchlist (UI only placeholder) =========
+    function wireWatch(){
+      const btn = qs('#watchBtn');
+      btn.addEventListener('click', () => {
+        if (btn.dataset.added === '1') {
+          btn.dataset.added = '0';
+          btn.innerHTML = `<i class="fa-regular fa-bookmark"></i> Add to Watchlist`;
+        } else {
+          btn.dataset.added = '1';
+          btn.innerHTML = `<i class="fa-solid fa-bookmark"></i> Watching`;
+        }
+      });
+    }
+
+    // ========= Manifest (your original, kept) =========
+    async function loadManifest(productId) {
+      const container = qs('#manifestContainer');
+      if (!container || !productId) return;
+
+      container.innerHTML = `<div class="muted" style="font-size:14px;">Loading manifest…</div>`;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/manifests/product/${productId}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+
+        if (!res.ok) {
+          container.innerHTML = `<div class="muted" style="font-size:14px;">Manifest not available.</div>`;
+          manifestList = [];
+          const totalMsrpEl = document.getElementById("totalMsrpDisplay");
+          if (totalMsrpEl) totalMsrpEl.textContent = `Total MSRP: $0.00`;
+          return;
+        }
+
+        const list = await res.json();
+        if (!Array.isArray(list) || list.length === 0) {
+          container.innerHTML = `<div class="muted" style="font-size:14px;">No manifest items listed for this lot.</div>`;
+          manifestList = [];
+          const totalMsrpEl = document.getElementById("totalMsrpDisplay");
+          if (totalMsrpEl) totalMsrpEl.textContent = `Total MSRP: $0.00`;
+          return;
+        }
+
+        manifestList = list;
+        manifestCurrentPage = 1;
+
+        let totalMsrpSum = 0;
+        manifestList.forEach(m => {
+          if (m.totalMsrp != null) totalMsrpSum += Number(m.totalMsrp);
+        });
+
+        const totalMsrpEl = document.getElementById("totalMsrpDisplay");
+        if (totalMsrpEl) totalMsrpEl.textContent = ` $${totalMsrpSum.toFixed(2)}`;
+
+        renderManifestPage();
+      } catch (err) {
+        console.error("Error loading manifest:", err);
+        container.innerHTML = `<div class="muted" style="font-size:14px;">Error loading manifest.</div>`;
+        manifestList = [];
+      }
+    }
+
+    function renderManifestPage() {
+      const container = qs('#manifestContainer');
+      if (!container || !Array.isArray(manifestList) || manifestList.length === 0) return;
+
+      const totalItems = manifestList.length;
+      const totalPages = Math.ceil(totalItems / manifestPageSize) || 1;
+
+      if (manifestCurrentPage > totalPages) manifestCurrentPage = totalPages;
+      if (manifestCurrentPage < 1) manifestCurrentPage = 1;
+
+      const startIdx = (manifestCurrentPage - 1) * manifestPageSize;
+      const endIdx = startIdx + manifestPageSize;
+      const pageItems = manifestList.slice(startIdx, endIdx);
+
+      const rowsHtml = pageItems.map(m => `
+        <tr>
+          <td>${m.quantity ?? ''}</td>
+          <td>${m.brand ?? ''}</td>
+          <td>${m.partNumber ?? ''}</td>
+          <td>${m.itemTitle ?? ''}</td>
+          <td>${m.upc ?? ''}</td>
+          <td>${m.sku ?? ''}</td>
+          <td>${m.estimatedMsrp != null ? fmtMoney(m.estimatedMsrp) : ''}</td>
+          <td>${m.totalMsrp != null ? fmtMoney(m.totalMsrp) : ''}</td>
+        </tr>
+      `).join('');
+
+      container.innerHTML = `
+        <table class="specs">
+          <thead>
+            <tr>
+              <th>Qty</th>
+              <th>Brand</th>
+              <th>Part #</th>
+              <th>Item Title</th>
+              <th>UPC</th>
+              <th>SKU</th>
+              <th>Est. MSRP</th>
+              <th>Total MSRP</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div class="manifest-pagination" id="manifestPagination"></div>
+      `;
+
+      const paginationDiv = container.querySelector('#manifestPagination');
+      if (!paginationDiv) return;
+
+      let buttonsHtml = '';
+
+      if (totalPages > 1) {
+        buttonsHtml += `<button type="button" data-page="${manifestCurrentPage - 1}" ${manifestCurrentPage === 1 ? 'disabled' : ''}>Prev</button>`;
+        for (let p = 1; p <= totalPages; p++) {
+          buttonsHtml += `<button type="button" data-page="${p}" class="${p === manifestCurrentPage ? 'active' : ''}">${p}</button>`;
+        }
+        buttonsHtml += `<button type="button" data-page="${manifestCurrentPage + 1}" ${manifestCurrentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+      }
+
+      const showingFrom = startIdx + 1;
+      const showingTo = Math.min(endIdx, totalItems);
+      buttonsHtml += `<span style="margin-left:8px;color:var(--muted);">Showing ${showingFrom}-${showingTo} of ${totalItems}</span>`;
+      paginationDiv.innerHTML = buttonsHtml;
+
+      paginationDiv.querySelectorAll('button[data-page]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetPage = parseInt(btn.getAttribute('data-page'), 10);
+          if (!Number.isNaN(targetPage) && targetPage >= 1 && targetPage <= totalPages) {
+            manifestCurrentPage = targetPage;
+            renderManifestPage();
+          }
+        });
+      });
+    }
+
+    function wireManifestPageSizeControl() {
+      const select = document.getElementById("manifestPageSize");
+      if (!select) return;
+      select.addEventListener("change", () => {
+        const val = parseInt(select.value, 10);
+        manifestPageSize = Number.isNaN(val) ? 10 : val;
+        manifestCurrentPage = 1;
+        renderManifestPage();
+      });
+    }
+
+    // Download Manifest
+    qs('#downloadManifestBtn').addEventListener('click', () => {
+      const id = getIdFromQuery();
+      window.location.href = `${API_BASE_URL}/manifests/product/${id}/excel`;
+    });
+
+    // ========= WebSocket live updates (your original) =========
+    let stompClient = null;
+    function connectSocket(){
+      const id = getIdFromQuery();
+      const socket = new SockJS(`${API_BASE_URL}/ws/auction`);
+      stompClient = Stomp.over(socket);
+      stompClient.debug = null;
+
+      stompClient.connect({}, () => {
+
+        stompClient.subscribe(`/topic/auction.${id}`, async frame => {
+		  const evt = JSON.parse(frame.body || "{}");
+
+		  // 1) Update price UI if provided
+		  if (evt.highestBid != null) {
+			qs('#highestBid').textContent = fmtMoney(evt.highestBid);
+		  }
+		  if (evt.nextMinumBid != null) {
+			qs('#minAllowedBidValue').value = String(Number(evt.nextMinumBid) || 0);
+			qs('#bidIncrement').textContent = `Min next bid: ${fmtMoney(evt.nextMinumBid)}`;
+		  }
+		  if (evt.auctionEnd) startCountdown(evt.auctionEnd);
+
+		  // 2) Winner switching logic MUST run when wonUserId is present
+		  if (evt.wonUserId !== undefined) {
+			const myId = localStorage.getItem('userid');
+			const prevWinner = qs('#wonUserId').dataset.prevWinner || "";   // read old
+			const newWinner  = (evt.wonUserId ?? "").toString();
+
+			// update hidden field AFTER reading prev
+			qs('#wonUserId').value = evt.wonUserId ?? 0;
+			qs('#wonUserId').dataset.prevWinner = newWinner;
+
+			const iAmWinningNow = (myId && newWinner && String(newWinner) === String(myId));
+			const iWasWinningBefore = (myId && prevWinner && String(prevWinner) === String(myId));
+
+			if (iAmWinningNow) {
+			  // outbid -> win OR keep win
+			  showHeaderMessage("win", "You're the highest bidder", 0);
+			} else {
+			  // if I just lost leadership => temporary outbid
+			  if (iWasWinningBefore) {
+				showHeaderMessage("outbid", "You've been outbid — raise your bid to win", 0);
+			  } else {
+				// If I have bid before, keep persistent outbid (no timeout)
+				// Important: don't spam API on every WS tick, only when message is empty/hidden
+				const boxHidden = qs('#headerWonMsg').classList.contains('hidden');
+				const isCurrentlyWinMsg = qs('#headerWonMsg').classList.contains('win');
+
+				if (myId && (boxHidden || isCurrentlyWinMsg)) {
+				  const iBidBefore = await hasMyBid(Number(id));
+				  if (iBidBefore) {
+					showHeaderMessage("outbid", "You've been outbid — raise your bid to win", 0);
+				  } else {
+					hideHeaderMessage();
+				  }
+				}
+			  }
+			}
+		  }
+		});  // End of stompClient.subscribe()
+      
+	  
+	  }, () => setTimeout(connectSocket, 5000));
+    }
+
+    // ========= Wire UI =========
+    function wireUI(){
+      qs('#bidNow').addEventListener('click', (e) => { e.preventDefault(); submitBid(); });
+      wireWatch();
+    }
+
+    // ========= Init =========
+    (async function init(){
+      wireGalleryControls();          // NEW
+      await loadProduct();
+      wireUI();
+      wireManifestPageSizeControl();
+      connectSocket();
+
+      // Safety net: background tabs throttle timers, so a lot may go live while
+      // this tab is hidden. Re-sync from the server the moment it's visible again
+      // (only while still coming-soon, so live browsing isn't disrupted).
+      document.addEventListener('visibilitychange', function(){
+        if (!document.hidden && productComingSoon) loadProduct();
+      });
+    })();
+  </script>
+
+  <!-- Listing details tab toggle (Overview / Manifest) -->
+  <script>
+    (function(){
+      var to=document.getElementById('tabOverview'), tm=document.getElementById('tabManifest');
+      var po=document.getElementById('panelOverview'), pm=document.getElementById('panelManifest');
+      if(!to||!tm||!po||!pm) return;
+      function show(overview){
+        to.classList.toggle('on', overview); tm.classList.toggle('on', !overview);
+        po.classList.toggle('hidden', !overview); pm.classList.toggle('hidden', overview);
+      }
+      to.addEventListener('click', function(){ show(true); });
+      tm.addEventListener('click', function(){ show(false); });
+    })();
+  </script>
+</body>
+</html>

@@ -3,15 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>How It Works — Live Demo · Liquidation Flips</title>
+  <title>Product Tour · Liquidation Flips</title>
   <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="/css/topnav.css?v=4">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
   <style>
     :root{
       --green:#1f8b57; --green-2:#177045; --ink:#16202e; --muted:#6b7480;
-      --muted-2:#97a0ab; --border:#e6e8ec; --border-2:#dfe2e6; --surface:#fff;
-      --bg:#f6f7f8; --radius:16px;
+      --muted-2:#97a0ab; --border:#e6e8ec; --border-2:#dfe2e6; --bg:#0d141d;
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0}
@@ -31,7 +30,7 @@
       max-width:1180px; margin:0 auto; padding:14px 20px;
       display:flex; align-items:center; gap:14px; flex-wrap:wrap;
     }
-    .brand{display:flex; align-items:center; gap:10px; font-weight:800; font-size:16.5px}
+    .brand{display:flex; align-items:center; gap:10px; font-weight:800; font-size:16.5px; text-decoration:none; color:var(--ink)}
     .brand .mark{width:34px;height:34px;border-radius:9px;background:var(--ink);display:grid;place-items:center;color:#fff;flex:0 0 auto}
     .brand .mark i{color:var(--green);font-size:15px}
     .brand b{color:var(--green)}
@@ -42,56 +41,100 @@
     .intro{max-width:1180px;margin:0 auto;padding:26px 20px 6px}
     .intro h1{font-size:clamp(24px,5vw,34px);font-weight:800;letter-spacing:-.02em;margin:0 0 8px;line-height:1.12}
     .intro h1 span{color:var(--green)}
-    .intro p{margin:0;color:var(--muted);font-size:15px;line-height:1.5;max-width:640px}
+    .intro p{margin:0;color:var(--muted);font-size:15px;line-height:1.5;max-width:660px}
+    .flow-switch{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+    .flow-switch a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;font-size:13.5px;padding:9px 15px;border-radius:999px;border:1px solid var(--border);color:var(--muted);background:#fff;transition:all .15s ease}
+    .flow-switch a:hover{border-color:var(--border-2);color:var(--ink)}
+    .flow-switch a.on{background:var(--ink);border-color:var(--ink);color:#fff}
+    .flow-switch a.on i{color:var(--green)}
 
-    /* ===== Flow tabs ===== */
-    .flowtabs{max-width:1180px;margin:18px auto 0;padding:0 20px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
-    .flowtabs::-webkit-scrollbar{display:none}
-    .flowtab{
-      flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
-      border:1px solid var(--border);background:#fff;color:var(--muted);
-      font-weight:700;font-size:13.5px;padding:10px 15px;border-radius:999px;cursor:pointer;
-      transition:all .18s ease;
-    }
-    .flowtab i{font-size:12px}
-    .flowtab:hover{border-color:var(--border-2);color:var(--ink)}
-    .flowtab.on{background:var(--ink);border-color:var(--ink);color:#fff}
-    .flowtab.on i{color:var(--green)}
-
-    /* ===== Stage ===== */
-    .stagewrap{position:relative;max-width:1180px;margin:16px auto 0;padding:0 20px}
+    /* ===== The "screen recording" — a real browser window playing the live site ===== */
+    .film{max-width:1180px;margin:20px auto 0;padding:0 20px}
     .device-hint{display:flex;align-items:center;justify-content:center;gap:8px;font-size:11.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted-2);margin-bottom:10px}
-    .stage-outer{
-      position:relative;background:var(--bg);border:1px solid var(--border);
-      border-radius:22px;padding:22px;min-height:520px;overflow:hidden;
-    }
-    .stage{position:relative;z-index:1}
 
-    /* Fake cursor */
-    .cursor{
-      position:absolute;left:0;top:0;width:30px;height:30px;z-index:20;pointer-events:none;
-      transform:translate(60px,60px);transition:transform .72s cubic-bezier(.55,.08,.3,1);
-      filter:drop-shadow(0 3px 5px rgba(22,32,46,.35));will-change:transform;
+    /* Browser window frame around the recording */
+    .window{
+      position:relative;
+      border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08);
+      background:#0d141d;box-shadow:0 30px 80px -30px rgba(13,20,29,.55);
     }
+    .notch{display:none}
+
+    /* ===== Phone mode: render the site inside an iPhone ===== */
+    .film.is-phone .window{
+      max-width:400px;margin:0 auto;overflow:visible;
+      border-radius:56px;padding:13px;border:1px solid #2b3543;
+      background:#0b1017;box-shadow:0 26px 60px -20px rgba(13,20,29,.6), inset 0 0 0 2px #000;
+    }
+    .film.is-phone .winbar{display:none}
+    .film.is-phone .viewport{border-radius:44px;overflow:hidden}
+    .film.is-phone .notch{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      position:absolute;top:20px;left:50%;transform:translateX(-50%);
+      width:132px;height:30px;background:#000;border-radius:0 0 16px 16px;z-index:26;
+    }
+    .film.is-phone .notch-cam{width:8px;height:8px;border-radius:50%;background:#1b2733;box-shadow:0 0 0 2px #05070a}
+    .winbar{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#111a24}
+    .winbar .dots{display:flex;gap:7px}
+    .winbar .dots i{width:11px;height:11px;border-radius:50%;display:block}
+    .winbar .dots i:nth-child(1){background:#ff5f56}
+    .winbar .dots i:nth-child(2){background:#ffbd2e}
+    .winbar .dots i:nth-child(3){background:#27c93f}
+    .winbar .url{
+      flex:1;margin-left:8px;height:26px;border-radius:7px;background:#1c2731;
+      display:flex;align-items:center;gap:8px;padding:0 12px;color:#8b97a4;font-size:12px;
+      font-weight:600;overflow:hidden;white-space:nowrap;
+    }
+    .winbar .url i{font-size:10px;color:#4c6}
+    .winbar .rec{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#ff6b64;letter-spacing:.04em}
+    .winbar .rec .blink{width:8px;height:8px;border-radius:50%;background:#ff5f56;animation:blink 1.2s steps(2,end) infinite}
+    @keyframes blink{50%{opacity:.15}}
+
+    /* The viewport that clips the zoom camera */
+    .viewport{position:relative;overflow:hidden;background:#0d141d}
+    .camera{
+      position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;
+      transition:transform 1.15s cubic-bezier(.55,.05,.25,1);
+    }
+    .filmframe{position:relative;background:#fff}
+    /* pointer-events:none — it's a playback surface, not interactive. Scripted
+       clicks/typing (el.click(), dispatched events) still work; only real user
+       input is blocked, and wheel/scroll passes through to the page. */
+    .filmframe iframe{display:block;border:0;background:#fff;pointer-events:none}
+
+    /* Soft loading veil while a page navigates */
+    .veil{
+      position:absolute;inset:0;z-index:15;background:rgba(13,20,29,.55);
+      display:flex;align-items:center;justify-content:center;gap:12px;color:#e8edf2;
+      font-weight:700;font-size:13px;letter-spacing:.02em;opacity:0;pointer-events:none;
+      transition:opacity .3s ease;backdrop-filter:blur(1px);
+    }
+    .veil.on{opacity:1}
+    .veil .spin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.25);border-top-color:#fff;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Fake cursor — lives in viewport space so it stays crisp during zoom */
+    .cursor{
+      position:absolute;left:0;top:0;width:28px;height:28px;z-index:20;pointer-events:none;
+      transform:translate(80px,80px);
+      transition:transform .68s cubic-bezier(.5,.05,.3,1);
+      filter:drop-shadow(0 3px 6px rgba(13,20,29,.45));will-change:transform;
+    }
+    .cursor.slow{transition:transform 1.15s cubic-bezier(.55,.05,.25,1)}
     .cursor svg{display:block;width:100%;height:100%}
     .cursor .ring{
-      position:absolute;left:2px;top:2px;width:26px;height:26px;border-radius:999px;
-      border:2px solid var(--green);opacity:0;transform:scale(.3)
+      position:absolute;left:1px;top:1px;width:26px;height:26px;border-radius:999px;
+      border:2.5px solid var(--green);opacity:0;transform:scale(.3)
     }
-    .cursor.click .ring{animation:ripple .5s ease-out}
-    @keyframes ripple{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(2.1)}}
+    .cursor.click .ring{animation:ripple .55s ease-out}
+    @keyframes ripple{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(2.3)}}
 
-    /* Highlight halo on the active target */
-    .halo{outline:3px solid rgba(31,139,87,.55) !important; outline-offset:3px; border-radius:12px; transition:outline .2s ease}
-
-    /* ===== Coach bar + controls ===== */
-    .coach{
-      max-width:1180px;margin:14px auto 0;padding:0 20px;display:flex;gap:14px;align-items:flex-start;
-    }
+    /* ===== Caption + controls ===== */
+    .coach{max-width:1180px;margin:16px auto 0;padding:0 20px;display:flex;gap:14px;align-items:flex-start}
     .coach-step{flex:0 0 auto;width:44px;height:44px;border-radius:12px;background:var(--green);color:#fff;font-weight:800;font-size:15px;display:grid;place-items:center}
     .coach-body{flex:1;min-width:0}
     .coach-flow{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--green-2)}
-    .coach-text{font-size:15px;font-weight:600;color:var(--ink);line-height:1.45;margin-top:2px}
+    .coach-text{font-size:15.5px;font-weight:600;color:var(--ink);line-height:1.45;margin-top:2px}
 
     .controls{max-width:1180px;margin:16px auto 0;padding:0 20px 8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .ctl{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--border);background:#fff;color:var(--ink);font-weight:700;font-size:13.5px;padding:10px 14px;border-radius:10px;cursor:pointer;transition:all .15s ease}
@@ -107,187 +150,59 @@
     .cta-btn{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;font-weight:800;font-size:14px;padding:12px 20px;border-radius:10px;text-decoration:none}
     .cta-btn.dark{background:var(--ink)}
 
-    /* =====================================================================
-       Faithful screen components (styles copied/adapted from the real pages)
-       ===================================================================== */
-    .ph{position:relative;width:100%;background:linear-gradient(135deg,#eef0f2,#e3e7ea);display:grid;place-items:center;color:#aab1ba}
-    .ph i{font-size:34px}
-    .ph .phlabel{position:absolute;bottom:10px;left:12px;font-size:11px;font-weight:700;color:#9aa2ac;letter-spacing:.02em}
-
-    /* Home grid + card (from index.html productCardGrid) */
-    .lf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px}
-    .lf-card{background:#fff;border:1px solid #E0E8E2;border-radius:20px;overflow:hidden;display:flex;flex-direction:column}
-    .lf-card .thumb{position:relative;overflow:hidden;background:#f3f4f6}
-    .lf-card .lf-img{position:relative;aspect-ratio:4/3}
-    .lf-typebadge{position:absolute;left:14px;top:14px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 11px;border-radius:6px}
-    .lf-typebadge.auction{background:#1f8b57;color:#fff}
-    .lf-typebadge.buynow{background:#16202e;color:#fff}
-    .lf-cardbody{padding:16px 18px 18px;display:flex;flex-direction:column;flex:1}
-    .lf-cat{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#aab1ba;margin-bottom:7px}
-    .lf-title{font-weight:600;font-size:15px;line-height:1.35;margin:0 0 16px;color:#16202e;min-height:40px}
-    .lf-pricerow{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:auto}
-    .lf-price{font-weight:800;font-size:23px;line-height:1;color:#16202e;font-variant-numeric:tabular-nums}
-    .lf-timechip{display:flex;align-items:center;gap:5px;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;color:#c0453f;font-weight:700}
-    .lf-meta{font-size:12px;color:#aab1ba;margin-top:9px;font-weight:500}
-    .lf-primary{width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;margin-top:15px}
-    .lf-quick{margin-top:8px;width:100%;font-weight:700;font-size:13px;padding:10px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid rgba(31,139,87,.35);background:rgba(31,139,87,.08);color:#177045}
-    .lf-addcart{margin-top:8px;width:100%;font-weight:700;font-size:13px;padding:10px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #dfe2e6;background:#fff;color:#16202e}
-    .lf-qbmsg{margin-top:10px;font-size:12.5px;font-weight:700;color:#177045;display:flex;align-items:center;gap:6px}
-
-    /* PDP shared (from product-view / product-buynow) */
-    .pdp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start;max-width:1000px;margin:0 auto}
-    .gallery .hero{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;border:1px solid #e6e8ec;background:#f3f4f6}
-    .thumbRow{display:flex;gap:10px;margin-top:12px}
-    .thumbRow .t{width:72px;height:60px;border-radius:9px;border:1px solid #e6e8ec;background:#f3f4f6;display:grid;place-items:center;color:#c2c8ce}
-    .thumbRow .t.active{border:2px solid #16202e}
-    .summary{border:1px solid #e6e8ec;border-radius:16px;padding:24px;background:#fff}
-    .sum-titlerow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-    .lot-title{font-weight:800;font-size:21px;line-height:1.25;letter-spacing:-.01em;margin:0;color:#16202e}
-    .lot-sub{font-size:13px;color:#97a0ab;margin-top:6px}
-    .chip{flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.07em;padding:7px 12px;border-radius:999px;background:rgba(31,139,87,.12);color:#177045;text-transform:uppercase}
-    .sum-msrprow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid #eef0f2;margin-top:16px}
-    .capr{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#97a0ab;font-weight:700}
-    .price{font-weight:800;font-size:24px;color:#16202e;margin-top:3px}
-    .price.green{color:#1f8b57}
-    .countdown{font-variant-numeric:tabular-nums;font-weight:700;font-size:16px;margin-top:3px;color:#16202e}
-    .row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #eef0f2;gap:16px}
-    .row .muted{color:#6b7480;font-weight:600;font-size:14px}
-    .row .strong{font-weight:800;font-size:15px;color:#16202e}
-    .hibid{font-weight:800;font-size:18px;color:#1f8b57}
-    .bidlabel{font-size:12px;font-weight:700;color:#16202e;margin:18px 0 7px;display:block}
-    .bid-form{display:flex;gap:10px}
-    .bid-form input{flex:1;min-width:0;border:1px solid #dfe2e6;background:#fff;border-radius:10px;padding:12px 14px;font-family:inherit;font-size:14.5px;color:#16202e;outline:none}
-    .btn{border:1px solid #dfe2e6;background:#fff;color:#16202e;font-weight:700;font-size:13.5px;padding:12px 16px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px}
-    .btn-primary{border:none;background:#16202e;color:#fff}
-    .btn-green{border:none;background:#1f8b57;color:#fff}
-    .btn-block{width:100%}
-    .bid-form .btn-primary{padding:12px 22px;white-space:nowrap}
-    .bidmsg{margin-top:12px;font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:7px;line-height:1.4}
-    .bidmsg.win{color:#177045}
-    .bidmsg.outbid{color:#c0453f}
-    .watchbtn{width:100%;margin-top:12px}
-    .notice{background:#f6f7f8;border-radius:10px;padding:13px 15px;margin-top:16px;font-size:12.5px;line-height:1.55;color:#6b7480}
-    .qty-block{padding:14px 0 4px}
-    .qty-row{display:flex;align-items:center;gap:10px;margin-top:8px}
-    .qty-row input{width:96px;border:1px solid #dfe2e6;background:#fff;border-radius:10px;padding:11px 12px;font-family:inherit;font-size:14.5px;color:#16202e;outline:none}
-
-    /* Cart + account hero (from cart.html) */
-    .acct{max-width:920px;margin:0 auto}
-    .hero{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;padding:16px 18px;border-radius:16px;border:1px solid var(--border);background:#f5f8f6;margin-bottom:16px}
-    .heroHead{display:flex;align-items:center;gap:12px}
-    .heroIcon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(31,139,87,.12);border:1px solid rgba(31,139,87,.20);color:var(--green);font-size:18px;flex:0 0 auto}
-    .hero h2{font-size:22px;margin:0;font-weight:800;letter-spacing:-.01em}
-    .hero .sub{color:var(--muted);font-size:13px;margin-top:8px;line-height:1.45}
-    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
-    .kpi{border:1px solid var(--border);border-radius:12px;padding:14px;background:#fff}
-    .kpi .label{font-size:12px;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:7px}
-    .kpi .label i{color:var(--green)}
-    .kpi .val{font-size:20px;font-weight:800;margin-top:6px}
-    .cardpanel{border:1px solid var(--border);border-radius:16px;padding:18px;background:#fff}
-    .cardpanel h3{margin:0 0 14px;font-size:16px;font-weight:800}
-    .citem{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:14px 0;border-top:1px solid #f1f2f4}
-    .citem:first-of-type{border-top:none}
-    .citem .cthumb{width:64px;height:64px;border-radius:10px;background:#eef0f2;display:grid;place-items:center;color:#c2c8ce}
-    .citem .ctitle{font-weight:700;font-size:14.5px;color:var(--ink)}
-    .citem .csub{font-size:12px;color:var(--muted-2);margin-top:3px}
-    .citem .cqty{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:999px;padding:5px 12px;font-weight:800;font-size:13px}
-    .citem .cprice{font-weight:800;font-size:15px;white-space:nowrap}
-    .cart-layout{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;align-items:start}
-    .paysummary .prow{display:flex;justify-content:space-between;padding:9px 0;font-size:14px;color:var(--muted)}
-    .paysummary .prow.total{border-top:1px solid var(--border);margin-top:6px;padding-top:14px;font-size:19px;font-weight:800;color:var(--ink)}
-
-    /* Checkout / payment (from checkout-payment.html) */
-    .co{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:920px;margin:0 auto}
-    .co .card{border:1px solid var(--border);border-radius:16px;padding:22px;background:#fff}
-    .co h3{margin:0 0 4px;font-size:20px;font-weight:800;letter-spacing:-.01em}
-    .co .desc{color:var(--muted);font-size:13.5px;margin:0 0 14px}
-    .co .srow{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px dashed var(--border);font-size:14px;color:var(--muted)}
-    .co .srow .v{color:var(--ink);font-weight:700}
-    .co .srow.total{border-bottom:none;font-size:19px;font-weight:800;color:var(--ink);padding-top:16px}
-    .co .srow.total .v{font-weight:800}
-    .field{margin-bottom:14px}
-    .field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:6px}
-    .field .inp{border:1px solid var(--border-2);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--ink);background:#fff;min-height:44px;display:flex;align-items:center;gap:8px}
-    .field .inp .ph-txt{color:#aab1ba}
-    .field .inp .cardbrand{margin-left:auto;color:#6b7480}
-    .paynow{width:100%;background:#1f8b57;border:none;color:#fff;font-weight:800;font-size:15px;padding:14px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;margin-top:4px}
-    .co-legal{color:var(--muted);font-size:12px;text-align:center;margin-top:12px;line-height:1.5}
-    .co-legal a{color:var(--green-2);font-weight:700}
-
-    /* Success */
-    .success{max-width:560px;margin:10px auto;text-align:center;background:#fff;border:1px solid var(--border);border-radius:20px;padding:40px 26px}
-    .success .badge{width:78px;height:78px;border-radius:999px;background:rgba(31,139,87,.12);color:#1f8b57;display:grid;place-items:center;font-size:34px;margin:0 auto 18px}
-    .success h2{font-size:26px;font-weight:800;margin:0 0 8px;letter-spacing:-.01em}
-    .success p{color:var(--muted);font-size:15px;line-height:1.55;margin:0 auto;max-width:380px}
-    .success .oref{display:inline-flex;gap:8px;margin-top:18px;background:#f6f7f8;border-radius:999px;padding:9px 16px;font-weight:800;font-size:13px}
-
-    /* My Bids won row (from my-bids.html) */
-    .mbcard{border:1px solid var(--border);border-radius:16px;padding:0;background:#fff;overflow:hidden;max-width:760px;margin:0 auto}
-    .mbtabs{display:flex;gap:8px;padding:16px 18px 0;flex-wrap:wrap}
-    .mbtab{border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 16px;font-weight:800;font-size:13px;color:var(--muted);display:inline-flex;align-items:center;gap:8px}
-    .mbtab.on{background:#1f8b57;border-color:#1f8b57;color:#fff}
-    .mbtab .cnt{background:rgba(255,255,255,.25);border-radius:999px;padding:1px 8px;font-size:12px}
-    .mbtab:not(.on) .cnt{background:#eef0f2;color:var(--muted)}
-    .mbrow{padding:16px 18px}
-    .mbtop{display:flex;align-items:center;gap:12px}
-    .mbthumb{width:54px;height:54px;border-radius:10px;background:#eef0f2;display:grid;place-items:center;color:#c2c8ce;flex:0 0 auto}
-    .mbtitle{font-weight:800;font-size:15px;color:var(--ink)}
-    .mbmeta{font-size:12.5px;color:var(--muted-2);margin-top:2px}
-    .mbkv{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;margin:14px 0}
-    .mbkv .k{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
-    .mbkv .v{font-size:15px;font-weight:800;margin-top:1px}
-    .pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;letter-spacing:.04em;padding:5px 11px;border-radius:999px}
-    .pill.won{background:rgba(31,139,87,.12);color:#177045}
-    .pill.pay{background:#fef3c7;color:#92610a}
-    .btn-pay{background:#16a34a;border:none;color:#fff;font-weight:800;font-size:14px;padding:12px 20px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
-
-    /* ===== Responsive: mobile shows the mobile layout of each screen ===== */
     @media (max-width:760px){
-      .pdp{grid-template-columns:minmax(0,1fr);gap:22px}
-      .co{grid-template-columns:minmax(0,1fr)}
-      .cart-layout{grid-template-columns:minmax(0,1fr)}
-      .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .stage-outer{padding:14px;border-radius:18px;min-height:0}
-      .stagewrap{padding:0 14px}
-      .coach,.controls,.flowtabs,.intro,.demo-top-inner,.demo-foot{padding-left:14px;padding-right:14px}
-      .sum-msrprow{flex-direction:column;align-items:stretch;gap:4px}
-      .sum-msrprow > div:last-child{text-align:left}
-      .citem{grid-template-columns:56px 1fr;grid-auto-rows:auto}
-      .citem .cprice{grid-column:2}
-      .lf-grid{grid-template-columns:minmax(0,1fr)}
-      .coach-text{font-size:14px}
+      .film,.coach,.controls,.intro,.demo-top-inner,.demo-foot{padding-left:14px;padding-right:14px}
+      .coach-text{font-size:14.5px}
       .dots{margin-left:0;width:100%;justify-content:center;order:5;margin-top:6px}
+      .winbar .rec span{display:none}
     }
-    @media (max-width:420px){
-      .demo-tag{display:none}
-      .lot-title{font-size:19px}
-    }
-    .hidden{display:none !important}
   </style>
 </head>
 <body>
   <header class="demo-top">
     <div class="demo-top-inner">
-      <div class="brand"><span class="mark"><i class="fa-solid fa-bolt"></i></span>Liquidation <b>Flips</b></div>
+      <a class="brand" href="/index.html" aria-label="Liquidation Flips home">
+        <svg width="32" height="32" viewBox="0 0 240 240" aria-hidden="true">
+          <rect x="0" y="0" width="240" height="240" rx="54" fill="#17202D"></rect>
+          <g transform="translate(38.6 48.6) scale(0.714)">
+            <path fill="#FFFFFF" d="M16 18 L58 10 L58 150 L150 150 L128 190 L16 190 Z"></path>
+            <path fill="#22A06B" d="M68 10 L178 10 L162 46 L104 46 L104 74 L150 74 L150 58 L212 96 L150 134 L150 118 L104 118 L68 118 Z"></path>
+          </g>
+        </svg>
+        Liquidation <b>Flips</b>
+      </a>
       <a class="back-link" href="/how-it-works.html"><i class="fa-solid fa-arrow-left"></i> How it works</a>
-      <span class="demo-tag"><i class="fa-solid fa-circle-play"></i> Interactive demo</span>
+      <span class="demo-tag" id="demoTag"><i class="fa-solid fa-circle-play"></i> Product tour</span>
     </div>
   </header>
 
   <section class="intro">
-    <h1>See exactly how it works — <span>watch it play</span></h1>
-    <p>A hands-free walkthrough of every way to shop on Liquidation Flips. It plays automatically — use the controls to pause, step through, or jump to any flow. Everything here is a simulation; no real bids, orders, or charges.</p>
+    <h1 id="introTitle">A guided tour of the <span>real site</span></h1>
+    <p id="introText">This plays the actual Liquidation Flips pages — the same lots and checkout you'd really use — with a sample product filled in. It runs on its own, moving through each step like a screen recording; use the controls to pause, step, or restart. Nothing here places a real bid, order, or charge.</p>
+    <div class="flow-switch" id="flowSwitch"></div>
   </section>
 
-  <nav class="flowtabs" id="flowtabs"></nav>
-
-  <div class="stagewrap">
-    <div class="device-hint" id="deviceHint"><i class="fa-solid fa-desktop"></i> <span id="deviceLabel">Desktop preview</span></div>
-    <div class="stage-outer">
-      <div class="stage" id="stage"></div>
-      <div class="cursor" id="cursor" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M5 3l14 7-6 1.5L11 19 5 3z" fill="#16202e" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>
-        <span class="ring"></span>
+  <div class="film" id="film">
+    <div class="device-hint"><i class="fa-solid fa-clapperboard" id="deviceIcon"></i> <span id="deviceLabel">Live walkthrough</span></div>
+    <div class="window">
+      <div class="winbar">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="url"><i class="fa-solid fa-lock"></i> <span id="urlText">liquidationflips.ca</span></span>
+        <span class="rec"><span class="blink"></span> <span>REC</span></span>
+      </div>
+      <div class="notch"><span class="notch-cam"></span></div>
+      <div class="viewport" id="viewport">
+        <div class="camera" id="camera">
+          <div class="filmframe" id="filmframe">
+            <iframe id="site" title="Liquidation Flips"
+                    referrerpolicy="no-referrer"></iframe>
+          </div>
+        </div>
+        <div class="cursor" id="cursor" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M5 3l14 7-6 1.5L11 19 5 3z" fill="#16202e" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          <span class="ring"></span>
+        </div>
+        <div class="veil" id="veil"><span class="spin"></span> <span id="veilText">Loading…</span></div>
       </div>
     </div>
   </div>
@@ -295,7 +210,7 @@
   <div class="coach">
     <div class="coach-step" id="coachStep">1</div>
     <div class="coach-body">
-      <div class="coach-flow" id="coachFlow">Quick Bid</div>
+      <div class="coach-flow" id="coachFlow">The tour</div>
       <div class="coach-text" id="coachText">—</div>
     </div>
   </div>
@@ -304,9 +219,9 @@
     <button class="ctl" id="prevBtn"><i class="fa-solid fa-backward-step"></i> Prev</button>
     <button class="ctl primary" id="playBtn"><i class="fa-solid fa-pause"></i> <span>Pause</span></button>
     <button class="ctl" id="nextBtn">Next <i class="fa-solid fa-forward-step"></i></button>
-    <button class="ctl" id="restartBtn"><i class="fa-solid fa-rotate-left"></i> Restart flow</button>
+    <button class="ctl" id="restartBtn"><i class="fa-solid fa-rotate-left"></i> Restart</button>
     <div class="dots" id="dots"></div>
-    <div class="autoplay-note">Tip: the demo adapts to your screen — open it on your phone to see the mobile experience.</div>
+    <div class="autoplay-note">Everything you see is the real site playing inside a frame — with a sample product, so no real bids or orders happen.</div>
   </div>
 
   <footer class="demo-foot">
@@ -319,410 +234,492 @@
   (function(){
     'use strict';
 
-    // ---------- placeholder image tile ----------
-    function ph(icon, label, height){
-      return '<div class="ph" style="height:'+(height||'100%')+'"><i class="fa-solid fa-'+icon+'"></i>'+(label?'<span class="phlabel">'+label+'</span>':'')+'</div>';
+    // Every page is loaded with ?demo=1, which switches on /js/demo-data.js —
+    // it feeds the real pages a fixed DEMO PRODUCT instead of the live backend,
+    // so the tour renders the actual pages, offline, with sample data.
+    var DEMO = 'demo=1';
+
+    // Logical size of the "recording" — a stable desktop viewport. The camera
+    // scales this to fit whatever width the page has, so layout never shifts.
+    var FW = 1280, FH = 800;
+    var ZOOM_ON = false;      // set true to bring back the cinematic zoom-in on each click
+    var ZOOM = 2.15;          // push-in factor when ZOOM_ON
+    var CAM_MS = 1150;        // must match .camera / .cursor.slow transition
+
+    // Fixed demo lot IDs served by /js/demo-data.js
+    var AUCTION_ID = 90001, BUYNOW_ID = 90002;
+
+    // ---- helpers to resolve a target element inside the live page ----
+    // Each target is a list of candidates tried in order. A candidate is:
+    //   'css selector'  |  {text:'Button label'}  |  function(doc)->el
+    function firstCardByBtn(doc, re){
+      var cards = doc.querySelectorAll('article.lf-card[data-pid]');
+      for(var i=0;i<cards.length;i++){
+        var b = cards[i].querySelector('button[data-id]');
+        if(b && re.test(b.textContent)) return cards[i];
+      }
+      return null;
+    }
+    function firstAuctionCard(doc){
+      return firstCardByBtn(doc, /place bid/i) || doc.querySelector('article.lf-card[data-pid]');
+    }
+    function resolve(doc, list){
+      for(var i=0;i<list.length;i++){
+        var c = list[i], el = null;
+        try{
+          if(typeof c === 'function') el = c(doc);
+          else if(typeof c === 'string') el = doc.querySelector(c);
+          else if(c && c.text){
+            var nodes = doc.querySelectorAll('button, a, [role=button]');
+            for(var j=0;j<nodes.length;j++){
+              if(new RegExp(c.text,'i').test((nodes[j].textContent||'').trim())){ el = nodes[j]; break; }
+            }
+          }
+        }catch(e){}
+        if(el) return el;
+      }
+      return null;
     }
 
-    // ---------- mock data ----------
-    var IPAD = {cat:'Electronics', title:'Apple iPad Air 11" 128GB WiFi', icon:'tablet-screen-button', cond:'Open box'};
-    var FRYER = {cat:'Home & Kitchen', title:'Ninja Foodi 8-Qt DualZone Air Fryer', icon:'kitchen-set', cond:'New'};
-    var VAC   = {cat:'Home & Kitchen', title:'Dyson V15 Detect Cordless Vacuum', icon:'wind', cond:'Like new'};
+    // ---------------------------------------------------------------------
+    // Two separate tours — auction and buy-now have different pay workflows.
+    // Each is an ordered list of steps; same url in a row = no reload.
+    // ---------------------------------------------------------------------
 
-    // ---------- screen builders ----------
-    function homeGrid(opts){
-      opts = opts||{};
-      var qbState = opts.quickBid || 'idle'; // idle | placed
-      var iCard =
-        '<article class="lf-card" id="cardIpad">'+
-          '<div class="thumb"><div class="lf-img">'+ph(IPAD.icon,'', '100%')+'</div><span class="lf-typebadge auction">Auction</span></div>'+
-          '<div class="lf-cardbody">'+
-            '<div class="lf-cat">'+IPAD.cat+'</div>'+
-            '<h3 class="lf-title">'+IPAD.title+'</h3>'+
-            '<div class="lf-pricerow"><div class="lf-price" id="ipadPrice">'+(qbState==='placed'?'$355.00':'$340.00')+'</div>'+
-              '<div class="lf-timechip"><i class="fa-regular fa-clock"></i> 2h 39m</div></div>'+
-            '<div class="lf-meta">'+(qbState==='placed'?'13 bids · ':'12 bids · ')+IPAD.cond+'</div>'+
-            '<button class="lf-primary" id="placeBidBtn">Place Bid</button>'+
-            (qbState==='placed'
-              ? '<div class="lf-qbmsg" id="qbMsg"><i class="fa-solid fa-circle-check"></i> Bid placed — you\'re the highest bidder</div>'
-              : '<button class="lf-quick" id="quickBidBtn"><i class="fa-solid fa-bolt"></i> Quick bid $355</button>')+
-          '</div>'+
-        '</article>';
-      var fCard =
-        '<article class="lf-card" id="cardFryer">'+
-          '<div class="thumb"><div class="lf-img">'+ph(FRYER.icon,'', '100%')+'</div><span class="lf-typebadge buynow">Buy now</span></div>'+
-          '<div class="lf-cardbody">'+
-            '<div class="lf-cat">'+FRYER.cat+'</div>'+
-            '<h3 class="lf-title">'+FRYER.title+'</h3>'+
-            '<div class="lf-pricerow"><div class="lf-price">$129.99</div></div>'+
-            '<div class="lf-meta">In stock · '+FRYER.cond+'</div>'+
-            '<button class="lf-primary" id="buyNowCardBtn">Buy Now</button>'+
-            '<button class="lf-addcart" id="addCartCardBtn"><i class="fa-solid fa-cart-shopping"></i> Add to cart</button>'+
-          '</div>'+
-        '</article>';
-      var vCard =
-        '<article class="lf-card">'+
-          '<div class="thumb"><div class="lf-img">'+ph(VAC.icon,'', '100%')+'</div><span class="lf-typebadge auction">Auction</span></div>'+
-          '<div class="lf-cardbody">'+
-            '<div class="lf-cat">'+VAC.cat+'</div>'+
-            '<h3 class="lf-title">'+VAC.title+'</h3>'+
-            '<div class="lf-pricerow"><div class="lf-price">$412.00</div>'+
-              '<div class="lf-timechip"><i class="fa-regular fa-clock"></i> 5h 02m</div></div>'+
-            '<div class="lf-meta">21 bids · '+VAC.cond+'</div>'+
-            '<button class="lf-primary">Place Bid</button>'+
-            '<button class="lf-quick"><i class="fa-solid fa-bolt"></i> Quick bid $420</button>'+
-          '</div>'+
-        '</article>';
-      return '<div class="lf-grid">'+iCard+fCard+vCard+'</div>';
-    }
+    // ===== AUCTION: browse → bid → win → pay the invoice =====
+    var STEPS_AUCTION = [
+      { url:'/demo/index.html?'+DEMO, flow:'Auction',
+        ready:['article.lf-card[data-pid]'],
+        target:[firstAuctionCard, 'article.lf-card', '.lf-header'],
+        click:false, dwell:2600,
+        cap:'Auction lots on the homepage — each shows the current bid and a live countdown.' },
 
-    function pdpAuction(opts){
-      opts = opts||{};
-      var highest = opts.highest || '$340.00';
-      var bidVal = opts.bidVal || '';
-      var msg = opts.msg;
-      var mc = opts.msgClass || 'win';
-      var chip = opts.chip || 'Active';
-      var ended = opts.ended;
-      var micon = mc==='outbid' ? 'triangle-exclamation' : (ended ? 'trophy' : 'circle-check');
-      var timeLeft = ended ? 'Ended' : '2h 39m 41s';
-      var bidBlock = ended
-        ? '<div class="notice" style="margin-top:18px"><b style="color:#16202e">Auction ended.</b> The highest bidder wins the lot and is invoiced for the winning price.</div>'
-        : '<label class="bidlabel">Your maximum bid</label>'+
-          '<div class="bid-form"><input id="pdpBidInput" type="text" placeholder="Enter your max bid" value="'+bidVal+'" readonly>'+
-            '<button class="btn btn-primary" id="pdpPlaceBid"><i class="fa-solid fa-bolt"></i> Place bid</button></div>';
-      return '<div class="pdp">'+
-        '<div class="gallery">'+
-          '<div class="hero">'+ph(IPAD.icon,'Photo 1','100%')+'</div>'+
-          '<div class="thumbRow"><div class="t active"><i class="fa-solid fa-'+IPAD.icon+'"></i></div><div class="t"><i class="fa-solid fa-image"></i></div><div class="t"><i class="fa-solid fa-image"></i></div></div>'+
-        '</div>'+
-        '<div class="summary">'+
-          '<div class="sum-titlerow"><h1 class="lot-title">'+IPAD.title+'</h1><span class="chip"'+(ended?' style="background:#eef0f2;color:#6b7480"':'')+'>'+chip+'</span></div>'+
-          '<div class="lot-sub">Lot #10248 · '+IPAD.cat+'</div>'+
-          '<div class="sum-msrprow"><div><div class="capr">Total MSRP</div><div class="price">$599.00</div></div>'+
-            '<div style="text-align:right"><div class="capr">Time left</div><div class="countdown">'+timeLeft+'</div></div></div>'+
-          '<div class="row"><div class="muted">Highest bid</div><div class="hibid" id="pdpHigh">'+highest+'</div></div>'+
-          '<div class="row"><div class="muted">Bids</div><div class="strong" id="pdpBids">'+(opts.bids||'12')+'</div></div>'+
-          '<div class="row"><div class="muted">Condition</div><div class="strong">'+IPAD.cond+'</div></div>'+
-          bidBlock+
-          (msg ? '<div class="bidmsg '+mc+'" id="pdpMsg"><i class="fa-solid fa-'+micon+'"></i> '+msg+'</div>'
-               : '<div id="pdpIncr" style="font-size:12.5px;color:#6b7480;margin-top:9px">Increment step: $5 · we\'ll auto-bid up to your max.</div>')+
-          (ended?'':'<button class="btn watchbtn" id="pdpWatch"><i class="fa-regular fa-eye"></i> Add to Watchlist</button>')+
-        '</div>'+
-      '</div>';
-    }
+      { url:'/demo/index.html?'+DEMO, flow:'Auction',
+        target:[ function(d){ var a=firstAuctionCard(d); return a && a.querySelector('button[data-id]'); },
+                 'article.lf-card button[data-id]' ],
+        click:true, dwell:1600,
+        cap:'Open a lot to place a bid on it.' },
 
-    function pdpBuyNow(opts){
-      opts = opts||{};
-      var qty = opts.qty || 1;
-      var total = (129.99*qty).toFixed(2);
-      return '<div class="pdp">'+
-        '<div class="gallery">'+
-          '<div class="hero">'+ph(FRYER.icon,'Photo 1','100%')+'</div>'+
-          '<div class="thumbRow"><div class="t active"><i class="fa-solid fa-'+FRYER.icon+'"></i></div><div class="t"><i class="fa-solid fa-image"></i></div></div>'+
-        '</div>'+
-        '<div class="summary">'+
-          '<div class="sum-titlerow"><h1 class="lot-title">'+FRYER.title+'</h1><span class="chip">Available</span></div>'+
-          '<div class="lot-sub">Lot #10312 · '+FRYER.cat+'</div>'+
-          '<div class="row" style="margin-top:16px;border-top:none"><div><div class="capr">Buy Now Price</div><div class="price green">$129.99</div></div></div>'+
-          '<div class="row"><div class="muted">Condition</div><div class="strong">'+FRYER.cond+'</div></div>'+
-          '<div class="row"><div class="muted">Available Qty</div><div class="strong">40</div></div>'+
-          '<div class="qty-block"><div class="capr" style="color:#16202e;font-size:12px">Select quantity</div>'+
-            '<div class="qty-row"><input id="qtyInput" type="text" value="'+qty+'" readonly><span class="muted" style="font-size:12.5px;color:#6b7480">Order total: <b id="orderTotal" style="color:#16202e">$'+total+'</b></span></div></div>'+
-          '<button class="btn btn-primary btn-block" id="buyNowBtn" style="margin-top:12px"><i class="fa-solid fa-bolt"></i> Buy Now</button>'+
-          '<button class="btn btn-block" id="addCartBtn" style="margin-top:10px"><i class="fa-solid fa-cart-shopping"></i> Add to cart</button>'+
-        '</div>'+
-      '</div>';
-    }
+      { url:'/demo/product-view.html?id='+AUCTION_ID+'&'+DEMO, flow:'Auction',
+        ready:['#bidPanel','#lotTitle','#highestBid'],
+        target:['#lotTitle','#hero'],
+        click:false, dwell:2400,
+        cap:'The lot page — full photos, condition, the highest bid and a live countdown.' },
 
-    function cartScreen(){
-      var items = [
-        {d:FRYER, qty:2, unit:129.99},
-        {d:IPAD,  qty:1, unit:340.00}
-      ];
-      var sub = 0, rows='';
-      items.forEach(function(it){
-        var line = it.unit*it.qty; sub += line;
-        rows += '<div class="citem"><div class="cthumb"><i class="fa-solid fa-'+it.d.icon+'"></i></div>'+
-          '<div><div class="ctitle">'+it.d.title+'</div><div class="csub">'+it.d.cat+' · '+it.d.cond+'</div>'+
-          '<div style="margin-top:8px"><span class="cqty"><i class="fa-solid fa-minus" style="color:#97a0ab"></i> '+it.qty+' <i class="fa-solid fa-plus" style="color:#1f8b57"></i></span></div></div>'+
-          '<div class="cprice">$'+line.toFixed(2)+'</div></div>';
-      });
-      return '<div class="acct">'+
-        '<div class="hero"><div style="flex:1"><div class="heroHead"><div class="heroIcon"><i class="fa-solid fa-cart-shopping"></i></div><h2>My Cart</h2></div>'+
-          '<div class="sub">Review items in your cart before checkout.</div></div></div>'+
-        '<div class="kpis">'+
-          '<div class="kpi"><div class="label"><i class="fa-solid fa-box"></i> Items</div><div class="val">2</div></div>'+
-          '<div class="kpi"><div class="label"><i class="fa-solid fa-layer-group"></i> Quantity</div><div class="val">3</div></div>'+
-          '<div class="kpi"><div class="label"><i class="fa-solid fa-receipt"></i> Subtotal</div><div class="val">$'+sub.toFixed(2)+'</div></div>'+
-          '<div class="kpi"><div class="label"><i class="fa-solid fa-sack-dollar"></i> Total</div><div class="val">$'+sub.toFixed(2)+'</div></div>'+
-        '</div>'+
-        '<div class="cart-layout">'+
-          '<div class="cardpanel"><h3>Cart items</h3>'+rows+'</div>'+
-          '<div class="cardpanel paysummary"><h3>Payment</h3>'+
-            '<div class="prow"><span>Subtotal</span><span>$'+sub.toFixed(2)+'</span></div>'+
-            '<div class="prow"><span>Estimated taxes</span><span>$0.00</span></div>'+
-            '<div class="prow"><span>Fees</span><span>$0.00</span></div>'+
-            '<div class="prow total"><span>Total</span><span>$'+sub.toFixed(2)+'</span></div>'+
-            '<button class="btn btn-primary btn-block" id="checkoutBtn" style="margin-top:14px"><i class="fa-solid fa-credit-card"></i> Proceed to Checkout</button>'+
-            '<button class="btn btn-block" id="cartContinue" style="margin-top:10px"><i class="fa-solid fa-store"></i> Continue Shopping</button>'+
-          '</div>'+
-        '</div>'+
-      '</div>';
-    }
+      { url:'/demo/product-view.html?id='+AUCTION_ID+'&'+DEMO, flow:'Auction',
+        target:['#bidPanel','#bidNow','#highestBid'],
+        click:false, dwell:3200,
+        cap:'Enter your maximum bid and place it — you become the top bidder instantly.',
+        interact: async function(doc, api){
+          var input = doc.querySelector('#bidAmount');
+          var btn   = doc.querySelector('#bidNow');
+          if(input){ await api.cursorTo(input); await api.type(input, '375'); await api.wait(500); }
+          if(btn){ await api.cursorTo(btn); await api.press(btn); }
+          await api.wait(2400);   // watch the "Bid placed — you're the highest bidder" result
+        } },
 
-    function paymentScreen(opts){
-      opts = opts||{};
-      var total = opts.total || '599.98';
-      var filled = opts.filled;
-      return '<div class="co">'+
-        '<div class="card"><h3>Order Summary</h3><p class="desc">Review your order before paying.</p>'+
-          '<div class="srow"><span>Subtotal</span><span class="v">$'+total+'</span></div>'+
-          '<div class="srow"><span>Tax</span><span class="v">$0.00</span></div>'+
-          '<div class="srow"><span>Shipping</span><span class="v">Calculated at fulfilment</span></div>'+
-          '<div class="srow total"><span>Total</span><span class="v">$'+total+'</span></div>'+
-        '</div>'+
-        '<div class="card"><h3>Secure Payment</h3><p class="desc">Enter your card details to complete payment securely.</p>'+
-          '<div class="field"><label>Name on card</label><div class="inp" id="cardName">'+(filled?'<span>Jordan Smith</span>':'<span class="ph-txt">Full name</span>')+'</div></div>'+
-          '<div class="field"><label>Card details</label><div class="inp" id="cardNum">'+(filled?'<span>4242 4242 4242 4242</span><span>&nbsp; 12/28 &nbsp; 123</span>':'<span class="ph-txt">1234 1234 1234 1234</span>')+'<span class="cardbrand"><i class="fa-brands fa-cc-visa"></i></span></div></div>'+
-          '<button class="paynow" id="payNowBtn"><i class="fa-solid fa-lock"></i> Pay $'+total+'</button>'+
-          '<div class="co-legal">By completing your purchase, you agree to our <a href="#">Terms</a> and <a href="#">Purchase Agreement</a>.</div>'+
-        '</div>'+
-      '</div>';
-    }
+      { url:'/demo/my-bids.html?'+DEMO, flow:'Auction',
+        ready:['[data-tab="won"]'],
+        target:['[data-tab="won"]'],
+        click:false, dwell:3000,
+        cap:'When the auction ends and you’re highest, the lot appears under My Bids → Won, invoice ready.',
+        interact: async function(doc, api){
+          var wonTab = doc.querySelector('[data-tab="won"]');
+          if(wonTab){ await api.cursorTo(wonTab); await api.press(wonTab); await api.wait(700); }
+          var pay = doc.querySelector('.btn-pay');
+          if(pay){ await api.cursorTo(pay); }
+          await api.wait(1200);
+        } },
 
-    function successScreen(opts){
-      opts=opts||{};
-      return '<div class="success">'+
-        '<div class="badge"><i class="fa-solid fa-check"></i></div>'+
-        '<h2>Payment successful</h2>'+
-        '<p>'+(opts.msg||'Thanks! Your order is confirmed. You\'ll get an email receipt and shipping updates as your lot moves.')+'</p>'+
-        '<div class="oref"><i class="fa-solid fa-receipt" style="color:#1f8b57"></i> Order #LF-'+(opts.ref||'80421')+'</div>'+
-      '</div>';
-    }
-
-    function myBidsScreen(){
-      return '<div class="acct">'+
-        '<div class="hero"><div style="flex:1"><div class="heroHead"><div class="heroIcon"><i class="fa-solid fa-gavel"></i></div><h2>My Bids</h2></div>'+
-          '<div class="sub">Ongoing bids, Won, and Lost — click a row to expand bid history.</div></div></div>'+
-        '<div class="mbcard">'+
-          '<div class="mbtabs"><span class="mbtab"><i class="fa-solid fa-bolt"></i> Ongoing <span class="cnt">2</span></span>'+
-            '<span class="mbtab on"><i class="fa-solid fa-trophy"></i> Won <span class="cnt">1</span></span>'+
-            '<span class="mbtab"><i class="fa-solid fa-xmark"></i> Lost <span class="cnt">0</span></span></div>'+
-          '<div class="mbrow">'+
-            '<div class="mbtop"><div class="mbthumb"><i class="fa-solid fa-'+IPAD.icon+'"></i></div>'+
-              '<div style="flex:1"><div class="mbtitle">'+IPAD.title+'</div><div class="mbmeta">'+IPAD.cat+' · Lot #10248</div></div>'+
-              '<span class="pill won"><i class="fa-solid fa-trophy"></i> WON</span></div>'+
-            '<div class="mbkv"><div><div class="k">Your winning bid</div><div class="v">$365.00</div></div>'+
-              '<div><div class="k">Payment</div><div class="v"><span class="pill pay"><i class="fa-solid fa-clock"></i> Due now</span></div></div></div>'+
-            '<button class="btn-pay" id="payWonBtn"><i class="fa-solid fa-credit-card"></i> Pay invoice</button>'+
-          '</div>'+
-        '</div>'+
-      '</div>';
-    }
-
-    // ---------- flows ----------
-    // frame = { render, caption, target, click, typeInto?, dwell? }
-    var flows = [
-      // ---- Quick bid (the one-tap shortcut) ----
-      { id:'quickbid', label:'Quick Bid', icon:'bolt', frames:[
-        { render:function(){return homeGrid();}, caption:'Browse live auctions. Each card shows the current bid and how much time is left.', target:'#cardIpad', click:false, dwell:2400 },
-        { render:function(){return homeGrid();}, caption:'To bid the next minimum instantly — no typing — tap “Quick bid”.', target:'#quickBidBtn', click:true, dwell:1600 },
-        { render:function(){return homeGrid({quickBid:'placed'});}, caption:'Done! Your bid is placed and you’re the highest bidder. The price and bid count update live.', target:'#qbMsg', click:false, dwell:3200 }
-      ]},
-
-      // ---- Full auction journey: place a bid → outbid → auto-bid wins → win → pay ----
-      { id:'auction', label:'Bidding → Win → Pay', icon:'gavel', frames:[
-        { render:function(){return homeGrid();}, caption:'Bidding, step by step. Start by opening an auction lot.', target:'#placeBidBtn', click:true, dwell:1600 },
-        { render:function(){return pdpAuction({bidVal:''});}, caption:'The lot page shows the highest bid, time left and condition. Enter the most you’ll pay — your maximum bid.', target:'#pdpBidInput', click:true, typeInto:{sel:'#pdpBidInput', text:'$375.00'}, dwell:1500 },
-        { render:function(){return pdpAuction({bidVal:'$375.00'});}, caption:'Tap “Place bid”. We only ever use as much of your max as needed to lead.', target:'#pdpPlaceBid', click:true, dwell:1500 },
-        { render:function(){return pdpAuction({highest:'$355.00', bidVal:'$375.00', bids:'13', msg:'You’re the top bidder at $355 — well under your $375 max.', msgClass:'win'});}, caption:'You’re now the top bidder at $355, using only part of your $375 maximum.', target:'#pdpMsg', click:false, dwell:3000 },
-        { render:function(){return pdpAuction({highest:'$360.00', bidVal:'$375.00', bids:'14', msg:'You’ve been outbid — another buyer bid $360.', msgClass:'outbid'});}, caption:'Someone bids higher and you’re outbid (you’re notified instantly). If you had no max set, you could lose the lot here.', target:'#pdpMsg', click:false, dwell:3400 },
-        { render:function(){return pdpAuction({highest:'$365.00', bidVal:'$375.00', bids:'15', msg:'Auto-bid placed — you’re back in the lead at $365.', msgClass:'win'});}, caption:'Because you set a $375 maximum, we auto-bid to $365 and take the lead back — no action needed.', target:'#pdpMsg', click:false, dwell:3400 },
-        { render:function(){return pdpAuction({ended:true, chip:'Ended', highest:'$365.00', bids:'15', msg:'You won this lot at $365! 🎉', msgClass:'win'});}, caption:'The timer runs out while you’re highest — you win the lot at $365.', target:'#pdpMsg', click:false, dwell:3200 },
-        { render:function(){return myBidsScreen();}, caption:'Your win appears under My Bids → Won, with the invoice ready to pay.', target:'.mbrow', click:false, dwell:2600 },
-        { render:function(){return myBidsScreen();}, caption:'Tap “Pay invoice” to settle your winning lot.', target:'#payWonBtn', click:true, dwell:1600 },
-        { render:function(){return paymentScreen({total:'365.00'});}, caption:'Same secure Stripe checkout — enter your card details.', target:'#cardNum', click:true, dwell:2000 },
-        { render:function(){return paymentScreen({total:'365.00', filled:true});}, caption:'Confirm the payment.', target:'#payNowBtn', click:true, dwell:1600 },
-        { render:function(){return successScreen({ref:'80422', msg:'Your won lot is paid and being prepared for shipment. Track it any time under My Orders.'});}, caption:'All done — you bid, won, and paid. Your lot is on its way.', target:'.oref', click:false, dwell:3600 }
-      ]},
-
-      // ---- Full buy-now journey: buy now → cart → checkout → pay ----
-      { id:'buynow', label:'Buy Now → Checkout → Pay', icon:'cart-shopping', frames:[
-        { render:function(){return homeGrid();}, caption:'Prefer not to wait for an auction? “Buy now” lots have a fixed price. Open one.', target:'#buyNowCardBtn', click:true, dwell:1700 },
-        { render:function(){return pdpBuyNow({qty:1});}, caption:'Fixed price, buy instantly — no bidding required.', target:'.summary', click:false, dwell:2000 },
-        { render:function(){return pdpBuyNow({qty:2});}, caption:'Choose your quantity — the order total updates as you go.', target:'#qtyInput', click:true, dwell:2000 },
-        { render:function(){return pdpBuyNow({qty:2});}, caption:'Add it to your cart (or buy it right away).', target:'#addCartBtn', click:true, dwell:1800 },
-        { render:function(){return cartScreen();}, caption:'Your cart shows every item, quantity and the running total.', target:'.cardpanel', click:false, dwell:2400 },
-        { render:function(){return cartScreen();}, caption:'When you’re ready, tap “Proceed to Checkout”.', target:'#checkoutBtn', click:true, dwell:1600 },
-        { render:function(){return paymentScreen({total:'599.98'});}, caption:'Review the order summary, then enter your card. Payments are processed securely by Stripe.', target:'#cardNum', click:true, dwell:2000 },
-        { render:function(){return paymentScreen({total:'599.98', filled:true});}, caption:'Card in — tap “Pay” to confirm.', target:'#payNowBtn', click:true, dwell:1600 },
-        { render:function(){return successScreen({ref:'80421'});}, caption:'Paid! You get an instant receipt and shipping updates. That’s the whole buy-now checkout.', target:'.oref', click:false, dwell:3600 }
-      ]}
+      { url:'/demo/payment-success.html?orderId=LF-90420&'+DEMO, flow:'Auction',
+        ready:['#orderId','#total'],
+        target:['#orderId',{text:'successful'},'h1','h2'],
+        click:false, dwell:3400,
+        cap:'Pay the invoice and you’re done — instant receipt and shipping updates on your won lot.' }
     ];
 
-    // ---------- engine ----------
-    var stage = document.getElementById('stage');
-    var cursor = document.getElementById('cursor');
-    var coachStep = document.getElementById('coachStep');
-    var coachFlow = document.getElementById('coachFlow');
-    var coachText = document.getElementById('coachText');
-    var dotsEl = document.getElementById('dots');
-    var playBtn = document.getElementById('playBtn');
-    var flowtabsEl = document.getElementById('flowtabs');
+    // ===== BUY NOW: browse → pick qty → add to cart → checkout → pay =====
+    var STEPS_BUYNOW = [
+      { url:'/demo/index.html?'+DEMO, flow:'Buy Now',
+        ready:['article.lf-card[data-pid]'],
+        target:[ function(d){ return firstCardByBtn(d, /buy now/i); }, 'article.lf-card', '.lf-header'],
+        click:false, dwell:2600,
+        cap:'Buy-now lots on the homepage — a fixed price, ready to purchase, no bidding.' },
 
-    var flowIndex = 0, frameIndex = 0, playing = true, seq = 0, firstRender = true;
+      { url:'/demo/index.html?'+DEMO, flow:'Buy Now',
+        target:[ function(d){ var c=firstCardByBtn(d, /buy now/i); return c && c.querySelector('button[data-id]'); },
+                 'article.lf-card button[data-id]' ],
+        click:true, dwell:1600,
+        cap:'Open a buy-now lot to purchase it.' },
 
-    function curFlow(){ return flows[flowIndex]; }
-    function curFrame(){ return curFlow().frames[frameIndex]; }
+      { url:'/demo/product-buynow.html?id='+BUYNOW_ID+'&'+DEMO, flow:'Buy Now',
+        ready:['#buyNowBtn','#lotTitle','#buyPrice'],
+        target:['#buyPrice','#buyQty','#lotTitle'],
+        click:false, dwell:2800,
+        cap:'Fixed price — pick a quantity and the order total updates live.',
+        interact: async function(doc, api){
+          var qty = doc.querySelector('#buyQty');
+          if(qty){ await api.cursorTo(qty); await api.type(qty, '2'); await api.wait(400); }
+          await api.wait(1000);
+        } },
+
+      { url:'/demo/product-buynow.html?id='+BUYNOW_ID+'&'+DEMO, flow:'Buy Now',
+        target:['#buyNowBtn',{text:'Buy Now'}],
+        click:true, dwell:2000,
+        cap:'“Buy Now” adds it to your cart and takes you to checkout.' },
+
+      { url:'/demo/cart.html?'+DEMO, flow:'Buy Now',
+        ready:['table','.totals-grand'],
+        target:[{text:'Proceed to Checkout'},'.totals-grand','table'],
+        click:true, dwell:2800,
+        cap:'Your cart shows the item, quantity and running total, ready for secure checkout.' },
+
+      { url:'/demo/payment-success.html?orderId=LF-90421&'+DEMO, flow:'Buy Now',
+        ready:['#orderId','#total'],
+        target:['#orderId',{text:'successful'},'h1','h2'],
+        click:false, dwell:3400,
+        cap:'Paid! Instant receipt and shipping updates — that’s the whole buy-now checkout.' }
+    ];
+
+    // pick the flow from ?flow=auction | ?flow=buynow (default auction)
+    var FLOW = (function(){
+      var w = '';
+      try{ w = (new URLSearchParams(location.search)).get('flow') || ''; }catch(e){}
+      w = w.toLowerCase();
+      var alias = { bid:'auction', bidding:'auction', win:'auction', buy:'buynow', 'buy-now':'buynow', buynow:'buynow' };
+      return alias[w] || (w === 'buynow' ? 'buynow' : 'auction');
+    })();
+    var steps = (FLOW === 'buynow') ? STEPS_BUYNOW : STEPS_AUCTION;
+
+    // ---------------------------------------------------------------------
+    // Engine
+    // ---------------------------------------------------------------------
+    var viewport = document.getElementById('viewport');
+    var camera   = document.getElementById('camera');
+    var filmframe= document.getElementById('filmframe');
+    var iframe   = document.getElementById('site');
+    var cursor   = document.getElementById('cursor');
+    var veil     = document.getElementById('veil');
+    var coachStep= document.getElementById('coachStep');
+    var coachFlow= document.getElementById('coachFlow');
+    var coachText= document.getElementById('coachText');
+    var dotsEl   = document.getElementById('dots');
+    var playBtn  = document.getElementById('playBtn');
+    var urlText  = document.getElementById('urlText');
+    var film     = document.getElementById('film');
+    var deviceLabel = document.getElementById('deviceLabel');
+    var deviceIcon  = document.getElementById('deviceIcon');
+
+    var index = 0, playing = true, seq = 0, baseScale = 1, loadedUrl = null;
+
+    function stepUrl(s){ return typeof s.url === 'function' ? s.url() : s.url; }
     function wait(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
-    function raf(){ return new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); }); }
     function cancelled(my){ return my !== seq; }
 
-    function buildTabs(){
-      flowtabsEl.innerHTML = flows.map(function(f,i){
-        return '<button class="flowtab'+(i===flowIndex?' on':'')+'" data-i="'+i+'"><i class="fa-solid fa-'+f.icon+'"></i> '+f.label+'</button>';
-      }).join('');
-      Array.prototype.forEach.call(flowtabsEl.children, function(btn){
-        btn.addEventListener('click', function(){ selectFlow(parseInt(btn.getAttribute('data-i'),10)); });
+    // Desktop = browser window @1280; phone = iPhone frame @390 showing the real
+    // mobile layout. Reflows automatically because the iframe width changes.
+    function pickDevice(){
+      var mobile = window.matchMedia('(max-width:760px)').matches;
+      FW = mobile ? 390 : 1280;
+      FH = mobile ? 844 : 800;
+      film.classList.toggle('is-phone', mobile);
+      if(deviceLabel) deviceLabel.textContent = mobile ? 'Mobile preview — inside iPhone' : 'Live walkthrough';
+      if(deviceIcon)  deviceIcon.className = mobile ? 'fa-solid fa-mobile-screen-button' : 'fa-solid fa-clapperboard';
+      return mobile;
+    }
+
+    // Fit the logical frame to the current viewport width.
+    function layout(){
+      pickDevice();
+      var w = viewport.clientWidth || FW;
+      baseScale = w / FW;
+      filmframe.style.width  = FW + 'px';
+      filmframe.style.height = FH + 'px';
+      iframe.style.width  = FW + 'px';
+      iframe.style.height = FH + 'px';
+      viewport.style.height = Math.round(FH * baseScale) + 'px';
+      // keep whatever zoom the current step wants
+      applyCamera(current || null, false);
+    }
+
+    // Apply the camera transform. focus = {cx,cy,z} in logical coords, or null=rest.
+    var current = null;
+    function applyCamera(focus, animate){
+      camera.style.transition = animate ? '' : 'none';
+      if(!focus){
+        camera.style.transform = 'translate(0px,0px) scale(' + baseScale + ')';
+      }else{
+        var vw = FW * baseScale, vh = FH * baseScale;
+        var S = baseScale * (focus.z || ZOOM);
+        var tx = vw/2 - focus.cx * S;
+        var ty = vh/2 - focus.cy * S;
+        camera.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + S + ')';
+      }
+      if(!animate){ void camera.offsetWidth; camera.style.transition = ''; }
+    }
+
+    function moveCursor(x, y, slow){
+      cursor.classList.toggle('slow', !!slow);
+      cursor.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    }
+    function clickPulse(){
+      cursor.classList.remove('click'); void cursor.offsetWidth; cursor.classList.add('click');
+    }
+
+    // Where a logical (in-iframe) point lands on screen given the current camera.
+    function screenPos(lx, ly){
+      if(current){
+        var vw = FW*baseScale, vh = FH*baseScale, S = baseScale*(current.z||ZOOM);
+        return { x: lx*S + (vw/2 - current.cx*S), y: ly*S + (vh/2 - current.cy*S) };
+      }
+      return { x: lx*baseScale, y: ly*baseScale };
+    }
+    function elCenterLogical(el){
+      var r = el.getBoundingClientRect();
+      return { x: r.left + r.width/2, y: r.top + r.height/2 };
+    }
+    // Scroll INSIDE the iframe only (never the parent page) to bring el into the
+    // 800px film window. Using el.scrollIntoView() would also scroll this page.
+    function scrollIntoIframe(el, always){
+      try{
+        var d = el.ownerDocument, win = d.defaultView;
+        var r = el.getBoundingClientRect();
+        if(always || r.top < 40 || r.bottom > FH - 40){
+          var cur = win.pageYOffset || d.documentElement.scrollTop || 0;
+          var target = cur + r.top - (FH/2 - r.height/2);
+          win.scrollTo(0, Math.max(0, target));
+        }
+      }catch(e){}
+    }
+
+    // Toolkit handed to a step's interact() so it can drive the REAL page:
+    // move the cursor onto an element, type into a field, and click it for real.
+    function makeApi(my){
+      return {
+        wait: async function(ms){ await wait(ms); if(cancelled(my)) throw 'cancel'; },
+        cursorTo: async function(el, slow){
+          if(!el) return;
+          scrollIntoIframe(el, false);
+          await wait(60);
+          var c = elCenterLogical(el), p = screenPos(c.x, c.y);
+          moveCursor(p.x, p.y, !!slow);
+          await wait(slow ? CAM_MS : 620);
+          if(cancelled(my)) throw 'cancel';
+        },
+        type: async function(el, text){
+          if(!el) return;
+          var W = (el.ownerDocument && el.ownerDocument.defaultView) || window;
+          try{ el.focus(); }catch(e){}
+          el.value = '';
+          try{ el.dispatchEvent(new W.Event('input', {bubbles:true})); }catch(e){}
+          for(var i=0;i<text.length;i++){
+            el.value += text.charAt(i);
+            try{ el.dispatchEvent(new W.Event('input', {bubbles:true})); }catch(e){}
+            await wait(95);
+            if(cancelled(my)) throw 'cancel';
+          }
+          try{ el.dispatchEvent(new W.Event('change', {bubbles:true})); }catch(e){}
+        },
+        press: async function(el){
+          if(!el) return;
+          clickPulse();
+          await wait(180);
+          try{ el.click(); }catch(e){}
+        }
+      };
+    }
+    async function runInteract(s, doc, my){
+      var api = makeApi(my);
+      try{ await s.interact(doc, api); }catch(e){}
+    }
+
+    function showVeil(on){ veil.classList.toggle('on', on); }
+
+    // Load a page and wait for it to be interactive + its "ready" markers present.
+    function loadPage(url, readySel){
+      return new Promise(function(resolve){
+        var done = false;
+        function finish(){ if(done) return; done = true; resolve(); }
+        iframe.onload = function(){
+          var doc;
+          try{ doc = iframe.contentDocument; }catch(e){ return finish(); }
+          if(!doc) return finish();
+          var tries = 0, max = 90;             // ~9s max for async content
+          (function poll(){
+            var ok = !readySel || readySel.length===0;
+            if(!ok){
+              for(var i=0;i<readySel.length;i++){
+                try{ if(doc.querySelector(readySel[i])){ ok = true; break; } }catch(e){}
+              }
+            }
+            if(ok || tries++ > max) return finish();
+            setTimeout(poll, 100);
+          })();
+        };
+        iframe.src = url;
       });
     }
-    function syncTabs(){
-      Array.prototype.forEach.call(flowtabsEl.children, function(btn,i){
-        btn.classList.toggle('on', i===flowIndex);
-      });
+
+    // Bring the target into view inside the iframe and return its logical rect.
+    function targetRect(doc, list){
+      var el = resolve(doc, list);
+      if(!el){ return { cx:FW/2, cy:FH*0.32, z:1.4, el:null }; }
+      scrollIntoIframe(el, true);
+      var r = el.getBoundingClientRect();
+      var cx = r.left + r.width/2;
+      var cy = r.top  + r.height/2;
+      // clamp so we never frame off the edges
+      cx = Math.max(60, Math.min(FW-60, cx));
+      cy = Math.max(60, Math.min(FH-60, cy));
+      return { cx:cx, cy:cy, el:el };
     }
+
+    async function play(){
+      var my = ++seq;
+      var s = steps[index];
+
+      // caption + chrome
+      coachStep.textContent = (index+1);
+      coachFlow.textContent = s.flow;
+      coachText.textContent = s.cap;
+      syncDots();
+
+      var url = stepUrl(s);
+      urlText.textContent = 'liquidationflips.ca' + url.replace(/\?.*$/,'').replace(/^\/demo/,'');
+
+      // navigate only when the page actually changes
+      if(url !== loadedUrl){
+        // reset camera to rest for the incoming page, cursor parks center-top
+        current = null; applyCamera(null, false);
+        moveCursor(viewport.clientWidth/2, 70, false);
+        showVeil(true);
+        await loadPage(url, s.ready || []);
+        if(cancelled(my)) return;
+        loadedUrl = url;
+        showVeil(false);
+        await wait(250);
+        if(cancelled(my)) return;
+      }
+
+      var doc;
+      try{ doc = iframe.contentDocument; }catch(e){ doc = null; }
+      if(!doc){ if(playing) scheduleNext(my); return; }
+
+      if(s.onReady){ try{ s.onReady(doc); }catch(e){} }
+
+      // find the thing to look at
+      var t = targetRect(doc, s.target || ['body']);
+      t.z = s.zoom || ZOOM;
+
+      // 1) move the cursor to the target at rest scale
+      var sx = t.cx * baseScale, sy = t.cy * baseScale;
+      moveCursor(sx, sy, false);
+      await wait(720);
+      if(cancelled(my)) return;
+
+      // 2) act on the target — optionally push the camera in first
+      if(ZOOM_ON){
+        if(s.click) clickPulse();
+        current = { cx:t.cx, cy:t.cy, z:t.z };
+        applyCamera(current, true);
+        moveCursor(FW*baseScale/2, FH*baseScale/2, true);   // cursor rides in with the camera
+        await wait(CAM_MS);
+        if(cancelled(my)) return;
+      } else if(s.click){
+        clickPulse();
+        await wait(240);
+        if(cancelled(my)) return;
+      }
+
+      // 2b) perform the real interaction (typing a bid, choosing a qty, …)
+      if(s.interact){ await runInteract(s, doc, my); if(cancelled(my)) return; }
+
+      // 3) hold on the detail
+      await wait(s.dwell || 2200);
+      if(cancelled(my)) return;
+
+      // 4) pull the camera back out before moving on (only if we pushed in)
+      if(ZOOM_ON){
+        current = null;
+        applyCamera(null, true);
+        await wait(CAM_MS * 0.7);
+        if(cancelled(my)) return;
+      }
+
+      if(playing) scheduleNext(my);
+    }
+
+    function scheduleNext(my){
+      if(cancelled(my)) return;
+      index = (index + 1) % steps.length;
+      play();
+    }
+
+    function goTo(i){ index = (i + steps.length) % steps.length; play(); }
+
+    function setPlaying(v){
+      playing = v;
+      playBtn.innerHTML = playing
+        ? '<i class="fa-solid fa-pause"></i> <span>Pause</span>'
+        : '<i class="fa-solid fa-play"></i> <span>Play</span>';
+      if(playing) play();
+      else ++seq;   // cancel any pending advance
+    }
+
+    // dots
     function buildDots(){
-      var n = curFlow().frames.length;
       var h='';
-      for(var i=0;i<n;i++){ h += '<span class="dot'+(i===frameIndex?' on':'')+'" data-i="'+i+'"></span>'; }
+      for(var i=0;i<steps.length;i++){ h += '<span class="dot" data-i="'+i+'"></span>'; }
       dotsEl.innerHTML = h;
       Array.prototype.forEach.call(dotsEl.children, function(d){
-        d.addEventListener('click', function(){ frameIndex = parseInt(d.getAttribute('data-i'),10); playFrame(); });
+        d.addEventListener('click', function(){ goTo(parseInt(d.getAttribute('data-i'),10)); });
       });
     }
     function syncDots(){
-      Array.prototype.forEach.call(dotsEl.children, function(d,i){ d.classList.toggle('on', i===frameIndex); });
-    }
-
-    function positionCursor(sel, instant){
-      var wrap = document.querySelector('.stage-outer');
-      var el = sel ? stage.querySelector(sel) : null;
-      if(!el || !wrap){ return null; }
-      var er = el.getBoundingClientRect();
-      var wr = wrap.getBoundingClientRect();
-      var x = er.left - wr.left + Math.min(er.width*0.5, 40);
-      var y = er.top - wr.top + Math.min(er.height*0.5, 24);
-      if(instant){ cursor.style.transition='none'; }
-      cursor.style.transform = 'translate('+x+'px,'+y+'px)';
-      if(instant){ void cursor.offsetWidth; cursor.style.transition=''; }
-      return el;
-    }
-
-    function clickPulse(el){
-      cursor.classList.remove('click'); void cursor.offsetWidth; cursor.classList.add('click');
-      if(el){ el.classList.add('halo'); }
-    }
-
-    async function typeInto(spec, my){
-      var el = stage.querySelector(spec.sel);
-      if(!el) return;
-      el.value='';
-      for(var i=0;i<spec.text.length;i++){
-        if(cancelled(my)) return;
-        el.value += spec.text.charAt(i);
-        await wait(55);
-      }
-    }
-
-    async function playFrame(){
-      var my = ++seq;
-      var frame = curFrame();
-      stage.innerHTML = frame.render();
-      // coach
-      coachStep.textContent = (frameIndex+1);
-      coachFlow.textContent = curFlow().label;
-      coachText.textContent = frame.caption;
-      syncDots(); syncTabs();
-
-      await raf();
-      if(cancelled(my)) return;
-      var el = positionCursor(frame.target, firstRender);
-      firstRender = false;
-
-      // wait for cursor travel
-      await wait(760);
-      if(cancelled(my)) return;
-
-      if(frame.typeInto){ await typeInto(frame.typeInto, my); if(cancelled(my)) return; }
-
-      if(frame.click){ clickPulse(el); await wait(480); if(cancelled(my)) return; }
-      else if(el){ el.classList.add('halo'); }
-
-      if(playing){
-        await wait(frame.dwell || 2200);
-        if(cancelled(my) || !playing) return;
-        goNext(true);
-      }
-    }
-
-    function goNext(auto){
-      if(frameIndex < curFlow().frames.length-1){ frameIndex++; }
-      else { flowIndex = (flowIndex+1) % flows.length; frameIndex = 0; buildDots(); }
-      playFrame();
-    }
-    function goPrev(){
-      if(frameIndex > 0){ frameIndex--; }
-      else { flowIndex = (flowIndex-1+flows.length) % flows.length; frameIndex = curFlow().frames.length-1; buildDots(); }
-      playFrame();
-    }
-    function selectFlow(i){
-      if(i===flowIndex) return;
-      flowIndex = i; frameIndex = 0; buildDots(); playFrame();
-    }
-    function setPlaying(v){
-      playing = v;
-      playBtn.innerHTML = playing ? '<i class="fa-solid fa-pause"></i> <span>Pause</span>' : '<i class="fa-solid fa-play"></i> <span>Play</span>';
-      if(playing){ playFrame(); }
+      Array.prototype.forEach.call(dotsEl.children, function(d,i){ d.classList.toggle('on', i===index); });
     }
 
     // controls
-    document.getElementById('nextBtn').addEventListener('click', function(){ goNext(false); });
-    document.getElementById('prevBtn').addEventListener('click', goPrev);
-    document.getElementById('restartBtn').addEventListener('click', function(){ frameIndex=0; playFrame(); });
+    document.getElementById('nextBtn').addEventListener('click', function(){ ++seq; index=(index+1)%steps.length; play(); });
+    document.getElementById('prevBtn').addEventListener('click', function(){ ++seq; index=(index-1+steps.length)%steps.length; play(); });
+    document.getElementById('restartBtn').addEventListener('click', function(){ ++seq; index=0; loadedUrl=null; play(); });
     playBtn.addEventListener('click', function(){ setPlaying(!playing); });
 
-    // reposition cursor on resize (layout shifts)
-    var rz;
+    // resize / pause when tab hidden
+    var rz, wasMobile = window.matchMedia('(max-width:760px)').matches;
     window.addEventListener('resize', function(){
       clearTimeout(rz);
-      rz = setTimeout(function(){ positionCursor(curFrame().target, true); }, 150);
+      rz = setTimeout(function(){
+        var m = window.matchMedia('(max-width:760px)').matches;
+        layout();
+        // when the device mode flips (browser <-> iPhone) re-run the step so the
+        // cursor and framing settle against the new mobile/desktop layout
+        if(m !== wasMobile){ wasMobile = m; ++seq; play(); }
+      }, 160);
+    });
+    document.addEventListener('visibilitychange', function(){
+      if(document.hidden && playing) setPlaying(false);
     });
 
-    // device hint
-    function updateHint(){
-      var mobile = window.matchMedia('(max-width:760px)').matches;
-      document.getElementById('deviceHint').innerHTML = mobile
-        ? '<i class="fa-solid fa-mobile-screen-button"></i> <span>Mobile preview</span>'
-        : '<i class="fa-solid fa-desktop"></i> <span>Desktop preview</span>';
-    }
-    window.addEventListener('resize', updateHint);
-
-    // deep link: /demo.html?flow=auction  (or #auction)
+    // ---- flow-specific header, tag and the switch between the two videos ----
     (function(){
-      var want = '';
-      try { want = (new URLSearchParams(location.search)).get('flow') || ''; } catch(e){}
-      if(!want && location.hash){ want = location.hash.replace('#',''); }
-      // friendly aliases
-      var alias = { bid:'auction', bidding:'auction', win:'auction', pay:'auction', checkout:'buynow', buy:'buynow' };
-      want = alias[want] || want;
-      var idx = -1;
-      for(var i=0;i<flows.length;i++){ if(flows[i].id===want){ idx=i; break; } }
-      if(idx>=0){ flowIndex = idx; }
+      var isBuy = (FLOW === 'buynow');
+      document.title = (isBuy ? 'Buy Now' : 'Auction') + ' walkthrough · Liquidation Flips';
+      document.getElementById('demoTag').innerHTML =
+        '<i class="fa-solid fa-circle-play"></i> ' + (isBuy ? 'Buy Now walkthrough' : 'Auction walkthrough');
+      document.getElementById('introTitle').innerHTML = isBuy
+        ? 'How <span>Buy Now</span> works'
+        : 'How <span>Auctions</span> work';
+      document.getElementById('introText').textContent = isBuy
+        ? 'Watch a buy-now purchase end to end on the real pages — pick a lot, choose a quantity, add it to your cart and check out. It plays on its own with a sample product; nothing here places a real order or charge.'
+        : 'Watch an auction end to end on the real pages — find a lot, place your maximum bid, win, and pay the invoice. It plays on its own with a sample product; nothing here places a real bid or charge.';
+      document.getElementById('flowSwitch').innerHTML =
+        '<a href="/demo.html?flow=auction" class="' + (isBuy ? '' : 'on') + '"><i class="fa-solid fa-gavel"></i> Auction flow</a>' +
+        '<a href="/demo.html?flow=buynow" class="'  + (isBuy ? 'on' : '') + '"><i class="fa-solid fa-bolt"></i> Buy Now flow</a>';
     })();
 
     // boot
-    buildTabs(); buildDots(); updateHint(); playFrame();
+    buildDots(); layout(); play();
   })();
   </script>
 </body>

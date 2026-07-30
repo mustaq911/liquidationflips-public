@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Liquidation Flips - Buy Now</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+ <!-- ✅ Replace ONLY your <style>...</style> in product-buynow.html with this GREEN version -->
+<style>
+  *{box-sizing:border-box}
+  :root{--accent:#1f8b57;--ink:#16202e;--muted:#6b7480;--muted2:#97a0ab;--line:#e6e8ec}
+  html,body{margin:0;padding:0}
+  body{background:#fff;color:#16202e}
+  .hidden{display:none!important}
+  .muted{color:#6b7480}
+
+  .page{max-width:1400px;margin:0 auto;padding:24px 28px 40px}
+
+  .btn{border:1px solid #dfe2e6;background:#fff;color:#16202e;font-weight:700;font-size:13.5px;padding:12px 16px;border-radius:10px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:opacity .18s ease,border-color .18s ease}
+  .btn:hover{border-color:#c7ccd2}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn-primary{border:none;background:#16202e;color:#fff}
+  .btn-primary:hover{opacity:.92;border:none}
+  .btn-block{width:100%}
+
+  .skeleton{background:linear-gradient(100deg,#eef0f2 30%,#f6f7f8 50%,#eef0f2 70%);background-size:200% 100%;animation:lfsk 1.2s ease-in-out infinite;border-radius:8px}
+  @keyframes lfsk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  .skel-line{height:14px}
+  .skel-hero{height:100%;min-height:320px;border-radius:14px}
+
+  .breadcrumbs{margin-bottom:18px}
+  .chip-back a{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:#6b7480;font-weight:600;font-size:13.5px}
+  .chip-back a:hover{color:#1f8b57}
+  .header{display:none}
+
+  /* minmax(0,1fr): a bare 1fr floors the track at the column's intrinsic
+     min-content width, which overflows phones */
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;align-items:start}
+
+  .gallery .hero{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;border:1px solid #e6e8ec;background:#f3f4f6;cursor:zoom-in}
+  .gallery .hero img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumbs-wrap{display:flex;align-items:center;gap:8px;margin-top:12px}
+  .thumbs-viewport{overflow:hidden;flex:1}
+  .thumbs-track{display:flex;gap:8px;transition:transform .3s ease}
+  .thumb{width:74px;height:62px;flex-shrink:0;border-radius:9px;overflow:hidden;border:1px solid #e6e8ec;cursor:pointer;background:#f3f4f6}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb.active{border:2px solid #16202e}
+  .thumb-nav{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1px solid #e6e8ec;background:#fff;cursor:pointer;color:#16202e;display:flex;align-items:center;justify-content:center}
+  .thumb-nav:disabled{opacity:.4;cursor:default}
+
+  .summary{border:1px solid #e6e8ec;border-radius:16px;padding:26px}
+  .lot-title{font-weight:800;font-size:21px;line-height:1.25;letter-spacing:-.01em;margin:0;color:#16202e}
+  .lot-sub{font-size:13px;color:#97a0ab;margin-top:6px;margin-bottom:4px}
+  .sum-titlerow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .chip{flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.07em;padding:7px 12px;border-radius:999px;background:#16202e;color:#fff;text-transform:uppercase}
+  .badge-status{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;padding:6px 11px;border-radius:999px;background:rgba(31,139,87,.12);color:#177045;text-transform:uppercase}
+  .badge-status-closed{background:#fdecec;color:#c0453f}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #eef0f2;gap:16px}
+  .row .muted{color:#6b7480;font-weight:600;font-size:14px}
+  .price{font-weight:800;font-size:24px;color:#1f8b57;margin-top:3px}
+  #lotId,#lotCategory,#availableQty{font-weight:700;font-size:14px;color:#16202e}
+  #orderTotal{font-weight:800;font-size:16px;color:#16202e}
+  .qty-block{padding:14px 0 4px}
+  .qty-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+  .qty-row input{width:96px;border:1px solid #dfe2e6;background:#fff;border-radius:10px;padding:11px 12px;font-family:inherit;font-size:14.5px;color:#16202e;outline:none}
+  .qty-row input:focus{border-color:#1f8b57;box-shadow:0 0 0 3px rgba(31,139,87,.12)}
+  #buyNowBtn{margin-top:16px;font-size:14.5px;padding:14px}
+  #buyMessage{margin-top:10px;font-size:13px;font-weight:700}
+  #buyMessage:empty{display:none}
+  .notice{background:#f6f7f8;border-radius:10px;padding:13px 15px;margin-top:16px;font-size:12.5px;line-height:1.55;color:#6b7480}
+
+  .details-wrap{margin-top:28px}
+  .details-h{font-weight:800;font-size:22px;letter-spacing:-.01em;margin:0 0 14px;color:#16202e}
+  .tabs{display:flex;gap:8px;position:relative;z-index:1}
+  .tab{padding:11px 24px;font-family:inherit;font-weight:800;font-size:14px;border-radius:10px 10px 0 0;cursor:pointer;margin-bottom:-1px;border:1px solid #e6e8ec;background:#f6f7f8;color:#6b7480}
+  .tab.on{background:#fff;color:#16202e;border-bottom-color:#fff}
+  .tab-panel{border:1px solid #e6e8ec;border-radius:0 14px 14px 14px;padding:26px;background:#fff}
+  .desc{font-size:14.5px;line-height:1.65;color:#6b7480;margin:0 0 22px;max-width:820px}
+  .info-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  .info-card{border:1px solid #e6e8ec;border-radius:12px;padding:22px}
+  .info-card h3{font-weight:800;font-size:16px;margin:0 0 14px;color:#16202e}
+  .kv{display:flex;flex-direction:column;gap:10px;font-size:14px;color:#16202e;line-height:1.5}
+  .kv > div span{color:#97a0ab;font-weight:600}
+  .kv > div strong{font-weight:700}
+
+  .panels{display:grid;grid-template-columns:1fr;gap:24px;margin-top:24px}
+  .card{border:1px solid #e6e8ec;border-radius:16px;padding:26px}
+  .card h3{font-weight:800;font-size:18px;letter-spacing:-.01em;margin:0 0 12px;color:#16202e}
+  .pickup-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+  .manifest-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .manifest-page-size select{border:1px solid #dfe2e6;background:#fff;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:13px;color:#16202e;font-weight:600;cursor:pointer;outline:none}
+  table.specs{width:100%;border-collapse:collapse;border:1px solid #e6e8ec;border-radius:12px;overflow:hidden;font-size:13px}
+  table.specs thead th{background:#16202e;color:#fff;font-weight:700;font-size:11.5px;letter-spacing:.02em;text-transform:uppercase;text-align:left;padding:12px 14px}
+  table.specs tbody td{padding:11px 14px;border-bottom:1px solid #f1f2f4;color:#16202e;vertical-align:top}
+  table.specs tbody tr:last-child td{border-bottom:none}
+  .manifest-pagination{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:14px}
+  .manifest-pagination button{min-width:32px;height:32px;border-radius:8px;border:1px solid #e6e8ec;background:#fff;color:#16202e;font-weight:700;font-size:13px;cursor:pointer;padding:0 8px}
+  .manifest-pagination button.active{background:#16202e;border-color:#16202e;color:#fff}
+  .manifest-pagination button:disabled{opacity:.45;cursor:default}
+  #downloadManifestBtn{margin-top:16px}
+
+  .lightbox{position:fixed;inset:0;background:rgba(22,32,46,.82);display:none;align-items:center;justify-content:center;z-index:1000;padding:24px}
+  .lightbox.open{display:flex}
+  .lightboxInner{position:relative;max-width:92vw;max-height:88vh}
+  .lightbox img{max-width:92vw;max-height:88vh;border-radius:12px;display:block}
+  .lbBtn{position:absolute;width:42px;height:42px;border-radius:999px;border:none;background:rgba(255,255,255,.92);color:#16202e;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .lbClose{top:-14px;right:-14px}
+  .lbPrev{left:-14px;top:50%;transform:translateY(-50%)}
+  .lbNext{right:-14px;top:50%;transform:translateY(-50%)}
+  .lbCap{position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);color:#fff;font-size:13px;font-weight:600}
+
+  @media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr);gap:22px}.pickup-grid{grid-template-columns:1fr}}
+  @media (max-width:640px){.page{padding:20px 18px 32px}.info-cards{grid-template-columns:1fr}}
+  @media (max-width:480px){.row{padding:16px 0}.lot-title{font-size:19px}}
+</style>
+
+</head>
+<body>
+
+  <!-- Shared Topnav (keep if you use it) -->
+  <link rel="stylesheet" href="/css/topnav.css?v=4">
+  <div id="topnavContainer"></div>
+
+  <!-- Config + Auth -->
+  <script src="/js/config.js?v=4"></script>
+  <script src="/js/demo-data.js?v=1"></script>
+  <script src="/js/auth.js?v=4" defer></script>
+
+  <div class="page">
+    <div class="breadcrumbs">
+      <div class="chip-back"><a href="/index.html?type=buynow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg>Back to Buy Now</a></div>
+    </div>
+
+    <!-- title / status are populated by JS into the summary card below -->
+    <div class="header"><span id="lotStatusText">BUY-NOW</span></div>
+
+    <div class="layout">
+      <!-- Left: Gallery -->
+      <div class="gallery">
+        <div class="hero" id="hero"><div class="skel-hero skeleton" style="width:100%"></div></div>
+        <div class="thumbs-wrap" id="thumbsWrap" style="display:none;">
+          <button class="thumb-nav" id="thumbPrev" type="button" aria-label="Previous images"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg></button>
+          <div class="thumbs-viewport"><div class="thumbs-track" id="thumbsTrack"></div></div>
+          <button class="thumb-nav" id="thumbNext" type="button" aria-label="Next images"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg></button>
+        </div>
+      </div>
+
+      <!-- Right: Buy-Now summary -->
+      <div class="summary">
+        <div class="sum-titlerow">
+          <h1 class="lot-title" id="lotTitle"><span class="skel-line skeleton" style="width:60%;display:inline-block"></span></h1>
+          <span class="badge-status" id="statusBadge">AVAILABLE</span>
+        </div>
+        <div class="lot-sub" id="lotSub"></div>
+
+        <div class="row" style="border-bottom:1px solid #eef0f2;">
+          <div><div class="muted" style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#97a0ab;font-weight:700;">Buy Now Price</div><div class="price" id="buyPrice">$—</div></div>
+        </div>
+
+        <div class="row"><div class="muted">Lot ID</div><div id="lotId">—</div></div>
+        <div class="row"><div class="muted">Category</div><div id="lotCategory">—</div></div>
+        <div class="row"><div class="muted">Available Qty</div><div id="availableQty">—</div></div>
+
+        <div class="qty-block">
+          <div class="muted" style="font-size:12px;font-weight:700;color:#16202e;">Select quantity</div>
+          <div class="qty-row">
+            <input type="number" id="buyQty" min="1" value="1" />
+            <span class="muted" id="qtyHelper"></span>
+          </div>
+        </div>
+
+        <div class="row"><div class="muted">Order Total</div><div id="orderTotal">$—</div></div>
+
+        <button class="btn btn-primary btn-block" id="buyNowBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="18" cy="20" r="1.4"></circle><path d="M6 6L5 3H2"></path></svg>Buy Now
+        </button>
+        <div id="buyMessage"></div>
+
+        <div class="notice">For Buy-Now orders, payment must be completed within the specified time. New customers may be asked to complete additional verification as part of our security procedures.</div>
+      </div>
+    </div>
+
+    <!-- Listing details tabs -->
+    <div class="details-wrap">
+      <h2 class="details-h">Listing details</h2>
+      <div class="tabs">
+        <button class="tab on" id="tabOverview" type="button">Overview</button>
+        <button class="tab" id="tabManifest" type="button">Manifest</button>
+      </div>
+      <div class="tab-panel">
+        <div id="panelOverview">
+          <p class="desc" id="description">Loading description…</p>
+          <div class="info-cards">
+            <div class="info-card">
+              <h3>About this listing</h3>
+              <div class="kv">
+                <div><span>Brand:</span> <strong id="specBrand">—</strong></div>
+                <div><span>Model:</span> <strong id="specModel">—</strong></div>
+                <div><span>SKU / Code:</span> <strong id="specSku">—</strong></div>
+              </div>
+            </div>
+            <div class="info-card">
+              <h3>Condition &amp; details</h3>
+              <div class="kv">
+                <div><span>Condition:</span> <strong id="specCondition">—</strong></div>
+                <div><span>Sold:</span> <strong>As-is, final sale</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panelManifest" class="hidden">
+          <div class="manifest-header">
+            <h3 style="margin:0;font-weight:800;font-size:16px;color:#16202e;">All products</h3>
+            <div class="manifest-page-size">
+              <label for="manifestPageSize" class="muted" style="font-size:12px;margin-right:6px;">Rows per page:</label>
+              <select id="manifestPageSize"><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="50">50</option></select>
+            </div>
+          </div>
+          <div id="manifestContainer"><div class="muted" style="font-size:14px;">Loading manifest…</div></div>
+          <button class="btn btn-primary" id="downloadManifestBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v5h5M14 3l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"></path><path d="M9 13h6M9 17h6"></path></svg>Download Manifest (Excel)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pickup / terms -->
+    <div class="panels">
+      <div class="card">
+        <div class="pickup-grid">
+          <div>
+            <h3>Pickup / Location</h3>
+            <div class="muted" style="font-size:14px;line-height:1.7;">Location: <span id="pickupLocation" style="color:#16202e;font-weight:700;">—</span><br/>Pickup Window: <span id="pickupWindow" style="color:#16202e;font-weight:700;">—</span></div>
+          </div>
+          <div>
+            <h3>Terms</h3>
+            <div class="muted" style="font-size:14px;line-height:1.6;">All Buy-Now items are sold as-is. Please review the item details, manifest, and terms before completing your purchase.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Lightbox (FIXED STRUCTURE) ====== -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightboxInner" role="dialog" aria-modal="true" aria-label="Image viewer">
+      <img id="lightboxImg" alt="preview" />
+      <button class="lbBtn lbClose" id="lbClose" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <button class="lbBtn lbPrev" id="lbPrev" aria-label="Previous image">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button class="lbBtn lbNext" id="lbNext" aria-label="Next image">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      <div class="lbCap" id="lbCap"></div>
+    </div>
+  </div>
+
+  <script>
+    // ========= Helpers =========
+    const qs  = (s, r=document) => r.querySelector(s);
+    const qsa = (s, r=document) => Array.from(r.querySelectorAll(s));
+    const fmtMoney = (x) => {
+      if (x == null) return '$—';
+      const n = Number(x);
+      return Number.isNaN(n) ? '$—' : `$${n.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    };
+    const getIdFromQuery = () => new URLSearchParams(location.search).get("id");
+
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+    const token  = localStorage.getItem("token");
+    const userid = localStorage.getItem("userid");
+
+    let product = null;
+    let unitPrice = 0;
+    let maxQty    = 1;
+
+    // Manifest state
+    let manifestList = [];
+    let manifestCurrentPage = 1;
+    let manifestPageSize = 5;
+
+    // ========= NEW: Gallery + Lightbox State =========
+    let GALLERY_IMAGES = [];
+    let ACTIVE_INDEX = 0;
+
+    function setActiveIndex(idx){
+      if (!GALLERY_IMAGES.length) return;
+      ACTIVE_INDEX = Math.max(0, Math.min(idx, GALLERY_IMAGES.length - 1));
+      renderHero(GALLERY_IMAGES[ACTIVE_INDEX]);
+      highlightThumb(ACTIVE_INDEX);
+      // keep caption up-to-date if lightbox open
+      if (lb.root().classList.contains('open')) setLightboxImage(ACTIVE_INDEX);
+    }
+
+    // ========= Gallery =========
+    function renderHero(url){
+      const hero = qs('#hero');
+      hero.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = url || NO_IMAGE;
+      img.alt = 'Product';
+      hero.appendChild(img);
+
+      // Click hero => open lightbox (with current active index)
+      hero.onclick = () => openLightbox(ACTIVE_INDEX);
+    }
+
+    function highlightThumb(index){
+      const track = qs('#thumbsTrack');
+      if (!track) return;
+      Array.from(track.querySelectorAll('.thumb')).forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+    }
+
+    // Thumbnail slider (with ACTIVE_INDEX integration)
+    function renderThumbsSlider(images){
+      const wrap  = qs('#thumbsWrap');
+      const track = qs('#thumbsTrack');
+      const prev  = qs('#thumbPrev');
+      const next  = qs('#thumbNext');
+
+      if (!wrap || !track || !prev || !next) return;
+
+      if (!images || images.length <= 1) {
+        wrap.style.display = "none";
+        track.innerHTML = "";
+        return;
+      }
+
+      wrap.style.display = "flex";
+      track.innerHTML = "";
+
+      // Slider state
+      let sliderIndex = 0;
+      const GAP = 8;
+      const THUMB_W = 74;
+      const STEP = THUMB_W + GAP;
+
+      function visibleCount(){
+        const viewport = wrap.querySelector('.thumbs-viewport');
+        const w = viewport?.clientWidth || 0;
+        return Math.max(1, Math.floor((w + GAP) / STEP));
+      }
+
+      function maxIndex(){
+        return Math.max(0, images.length - visibleCount());
+      }
+
+      function update(){
+        const mi = maxIndex();
+        if (sliderIndex > mi) sliderIndex = mi;
+        if (sliderIndex < 0) sliderIndex = 0;
+        track.style.transform = `translateX(${-sliderIndex * STEP}px)`;
+        prev.disabled = (sliderIndex === 0);
+        next.disabled = (sliderIndex >= mi);
+      }
+
+      function scrollThumbIntoView(activeIdx){
+        const mi = maxIndex();
+        if (activeIdx < sliderIndex) sliderIndex = activeIdx;
+
+        const vc = visibleCount();
+        if (activeIdx > sliderIndex + vc - 1) sliderIndex = activeIdx - (vc - 1);
+
+        if (sliderIndex < 0) sliderIndex = 0;
+        if (sliderIndex > mi) sliderIndex = mi;
+        update();
+      }
+
+      images.forEach((src, idx) => {
+        const t = document.createElement('div');
+        t.className = 'thumb' + (idx === 0 ? ' active' : '');
+        t.innerHTML = `<img src="${src}" alt="thumb ${idx+1}">`;
+
+        t.addEventListener('click', () => {
+          ACTIVE_INDEX = idx;
+          highlightThumb(ACTIVE_INDEX);
+          renderHero(src);
+          scrollThumbIntoView(idx);
+        });
+
+        track.appendChild(t);
+      });
+
+      prev.onclick = () => { sliderIndex -= 1; update(); };
+      next.onclick = () => { sliderIndex += 1; update(); };
+
+      wrap.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          e.preventDefault();
+          sliderIndex += (e.deltaY > 0 ? 1 : -1);
+          update();
+        }
+      }, { passive: false });
+
+      window.addEventListener('resize', update);
+      update();
+    }
+
+    // ========= Lightbox logic (MATCHES your auction page) =========
+    const lb = {
+      root: () => qs('#lightbox'),
+      img:  () => qs('#lightboxImg'),
+      cap:  () => qs('#lbCap')
+    };
+
+    function openLightbox(index){
+      if (!GALLERY_IMAGES.length) return;
+      const root = lb.root();
+      root.classList.add('open');
+      root.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+      setLightboxImage(index);
+    }
+
+    function closeLightbox(){
+      const root = lb.root();
+      root.classList.remove('open');
+      root.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    function setLightboxImage(index){
+      ACTIVE_INDEX = Math.max(0, Math.min(index, GALLERY_IMAGES.length - 1));
+      lb.img().src = GALLERY_IMAGES[ACTIVE_INDEX];
+      lb.cap().textContent = `${ACTIVE_INDEX + 1} / ${GALLERY_IMAGES.length}`;
+    }
+
+    function lbNext(){ setLightboxImage((ACTIVE_INDEX + 1) % GALLERY_IMAGES.length); }
+    function lbPrev(){ setLightboxImage((ACTIVE_INDEX - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length); }
+
+    // Close on backdrop click
+    document.addEventListener('click', (e) => {
+      const root = lb.root();
+      if (!root.classList.contains('open')) return;
+      if (e.target === root) closeLightbox();
+    });
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      const root = lb.root();
+      if (!root.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') lbNext();
+      if (e.key === 'ArrowLeft') lbPrev();
+    });
+
+    // Button wiring
+    function wireGalleryControls(){
+      const closeBtn = qs('#lbClose');
+      const nextBtn  = qs('#lbNext');
+      const prevBtn  = qs('#lbPrev');
+
+      if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+      if (nextBtn)  nextBtn.addEventListener('click', lbNext);
+      if (prevBtn)  prevBtn.addEventListener('click', lbPrev);
+    }
+
+    // ========= Product load =========
+    async function loadProduct(){
+      const id = getIdFromQuery();
+      if(!id){
+        LF.toast("Missing product id", 'error');
+        setTimeout(function(){ window.location.href = "/index.html"; }, 1400);
+        return;
+      }
+
+      try{
+        const res = await fetch(`${API_BASE_URL}/products/${id}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+
+        if(!res.ok){
+          LF.toast("Failed to load product", 'error');
+          return;
+        }
+
+        product = await res.json();
+
+        // Header
+        qs('#lotTitle').textContent  = product.title || 'Untitled';
+        qs('#lotSub').textContent    = product.shortDescription || product.subtitle || '';
+        const statusText = (product.status || 'BUYNOW').toString().toUpperCase();
+        qs('#lotStatusText').textContent = statusText;
+
+        // Status badge
+        const statusBadge = qs('#statusBadge');
+        if(statusText !== 'BUYNOW'){
+          statusBadge.textContent = 'NOT BUY-NOW';
+          statusBadge.classList.add('badge-status-closed');
+          qs('#buyNowBtn').disabled = true;
+        }
+
+        // Gallery images
+        const imgs = [];
+        if(product.imageUrl) imgs.push(product.imageUrl);
+
+        if(Array.isArray(product.images)){
+          product.images.forEach(it => {
+            if (!it) return;
+            if (typeof it === 'string') imgs.push(it);
+            else if (typeof it === 'object') {
+              const u = it.imageUrl || it.url || it.path;
+              if (u) imgs.push(u);
+            }
+          });
+        }
+
+        const uniqueImgs = Array.from(new Set(imgs.filter(Boolean)));
+        GALLERY_IMAGES = uniqueImgs.length ? uniqueImgs : [NO_IMAGE];
+
+        ACTIVE_INDEX = 0;
+        renderHero(GALLERY_IMAGES[0]);
+        renderThumbsSlider(GALLERY_IMAGES);
+
+        // Price + qty
+        unitPrice = Number(product.buyNowPrice ?? product.basePrice ?? 0) || 0;
+        maxQty    = Number(product.quantity ?? product.stockQty ?? 1) || 1;
+
+        qs('#buyPrice').textContent  = fmtMoney(unitPrice);
+        qs('#lotId').textContent     = product.id ?? '—';
+        qs('#lotCategory').textContent = (product.category && product.category.name) || product.categoryName || '—';
+        qs('#availableQty').textContent = maxQty;
+        qs('#qtyHelper').textContent = maxQty ? `(max ${maxQty})` : '';
+
+        // Description + specs
+        qs('#description').textContent   = product.description || 'No description provided.';
+        qs('#specCondition').textContent = product.condition || '—';
+        qs('#specBrand').textContent     = product.brand || '—';
+        qs('#specModel').textContent     = product.model || '—';
+        qs('#specSku').textContent       = product.sku || product.code || '—';
+
+        qs('#pickupLocation').textContent = product.pickupLocation || '—';
+        qs('#pickupWindow').textContent   = product.pickupWindow || '—';
+
+        updateOrderTotal();
+        loadManifest(product.id);
+
+      } catch(e){
+        console.error("Error loading product:", e);
+        LF.toast("Error loading product", 'error');
+      }
+    }
+
+    function updateOrderTotal(){
+      const qtyInput = qs('#buyQty');
+      const totalEl  = qs('#orderTotal');
+      let qty = parseInt(qtyInput.value,10);
+      if(Number.isNaN(qty) || qty <= 0) qty = 1;
+      if(maxQty && qty > maxQty) qty = maxQty;
+      qtyInput.value = qty;
+      totalEl.textContent = fmtMoney(unitPrice * qty);
+    }
+
+    async function handleBuyNow(){
+      const msg = qs('#buyMessage');
+      msg.textContent = '';
+      msg.style.color = '';
+
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+
+	  /*====   VALIDATION ===== */
+	  
+      if(!token || !userid){
+        msg.textContent = "🔒 Please log in to complete your purchase.";
+        msg.style.color = "red";
+        setTimeout(() => { msg.textContent = ""; }, 4000);
+
+        if(typeof window.openLoginModal === 'function'){
+          const authTitle = document.getElementById('authTitle');
+          if(authTitle) authTitle.textContent = '🔒 Please log in to complete your purchase.';
+          window.openLoginModal();
+        }
+        return;
+      }
+
+      let qty = parseInt(qs('#buyQty').value,10);
+	  
+      if(Number.isNaN(qty) || qty <= 0){
+        msg.textContent = "Please enter a valid quantity.";
+        msg.style.color = "red";
+        return;
+      }
+      if(maxQty && qty > maxQty){
+        msg.textContent = `Maximum available quantity is ${maxQty}.`;
+        msg.style.color = "red";
+        return;
+      }
+      if(unitPrice <= 0){
+        msg.textContent = "This item is not available for Buy-Now at the moment.";
+        msg.style.color = "red";
+        return;
+      }
+	  /*====   END - VALIDATION ===== */
+	  
+	  
+      msg.textContent = "Processing your order…";
+      msg.style.color = "#4b5563";
+      const stopBusy = LF.busy(qs('#buyNowBtn'), 'Processing…');
+
+      try{
+        const res = await fetch(`${API_BASE_URL}/orders/buy-now`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            productId: product.id,
+            userId: parseInt(userid, 10),
+            quantity: qty
+          })
+        });
+
+        if(!res.ok){
+          const txt = await res.text();
+          msg.textContent = "❌ Failed to create order: " + txt;
+          msg.style.color = "red";
+          stopBusy();
+          return;
+        }
+
+        // Keep the button busy through the redirect to checkout.
+        msg.textContent = "✅ Order created successfully. Redirecting to checkout…";
+        msg.style.color = "green";
+
+        setTimeout(() => {
+          window.location.href = `/cart.html`;
+        }, 1500);
+
+      }catch(e){
+        console.error("Error in Buy Now:", e);
+        msg.textContent = "❌ Error processing your order.";
+        msg.style.color = "red";
+        stopBusy();
+      }
+    }
+
+    // ========= Manifest loading =========
+    async function loadManifest(productId){
+      const container = qs('#manifestContainer');
+      if(!container || !productId) return;
+
+      container.innerHTML = `<div class="muted" style="font-size:14px;">Loading manifest…</div>`;
+
+      try{
+        const res = await fetch(`${API_BASE_URL}/manifests/product/${productId}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
+
+        if(!res.ok){
+          container.innerHTML = `<div class="muted" style="font-size:14px;">Manifest not available.</div>`;
+          manifestList = [];
+          return;
+        }
+
+        const list = await res.json();
+        if(!Array.isArray(list) || list.length === 0){
+          container.innerHTML = `<div class="muted" style="font-size:14px;">No manifest items listed for this lot.</div>`;
+          manifestList = [];
+          return;
+        }
+
+        manifestList = list;
+        manifestCurrentPage = 1;
+        renderManifestPage();
+
+      }catch(err){
+        console.error("Error loading manifest:", err);
+        container.innerHTML = `<div class="muted" style="font-size:14px;">Error loading manifest.</div>`;
+        manifestList = [];
+      }
+    }
+
+    function renderManifestPage(){
+      const container = qs('#manifestContainer');
+      if(!container || !Array.isArray(manifestList) || manifestList.length === 0) return;
+
+      const totalItems = manifestList.length;
+      const totalPages = Math.ceil(totalItems / manifestPageSize) || 1;
+      if(manifestCurrentPage > totalPages) manifestCurrentPage = totalPages;
+      if(manifestCurrentPage < 1) manifestCurrentPage = 1;
+
+      const startIdx = (manifestCurrentPage - 1) * manifestPageSize;
+      const endIdx   = startIdx + manifestPageSize;
+      const pageItems = manifestList.slice(startIdx, endIdx);
+
+      const rowsHtml = pageItems.map(m => `
+        <tr>
+          <td>${m.quantity ?? ''}</td>
+          <td>${m.brand ?? ''}</td>
+          <td>${m.partNumber ?? ''}</td>
+          <td>${m.itemTitle ?? ''}</td>
+          <td>${m.upc ?? ''}</td>
+          <td>${m.sku ?? ''}</td>
+          <td>${m.estimatedMsrp != null ? fmtMoney(m.estimatedMsrp) : ''}</td>
+          <td>${m.totalMsrp != null ? fmtMoney(m.totalMsrp) : ''}</td>
+        </tr>
+      `).join('');
+
+      container.innerHTML = `
+        <table class="specs">
+          <thead>
+            <tr>
+              <th>Qty</th>
+              <th>Brand</th>
+              <th>Part #</th>
+              <th>Item Title</th>
+              <th>UPC</th>
+              <th>SKU</th>
+              <th>Est. MSRP</th>
+              <th>Total MSRP</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div class="manifest-pagination" id="manifestPagination"></div>
+      `;
+
+      const paginationDiv = container.querySelector('#manifestPagination');
+      if(!paginationDiv) return;
+
+      let buttonsHtml = '';
+      if(totalPages > 1){
+        buttonsHtml += `<button type="button" data-page="${manifestCurrentPage - 1}" ${manifestCurrentPage === 1 ? 'disabled' : ''}>Prev</button>`;
+        for(let p=1; p<=totalPages; p++){
+          buttonsHtml += `<button type="button" data-page="${p}" class="${p === manifestCurrentPage ? 'active' : ''}">${p}</button>`;
+        }
+        buttonsHtml += `<button type="button" data-page="${manifestCurrentPage + 1}" ${manifestCurrentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+      }
+      const showingFrom = startIdx + 1;
+      const showingTo   = Math.min(endIdx, totalItems);
+      buttonsHtml += `<span style="margin-left:8px;color:var(--muted);">Showing ${showingFrom}-${showingTo} of ${totalItems}</span>`;
+      paginationDiv.innerHTML = buttonsHtml;
+
+      paginationDiv.querySelectorAll('button[data-page]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetPage = parseInt(btn.getAttribute('data-page'),10);
+          if(!Number.isNaN(targetPage) && targetPage >= 1 && targetPage <= totalPages){
+            manifestCurrentPage = targetPage;
+            renderManifestPage();
+          }
+        });
+      });
+    }
+
+    function wireManifestPageSizeControl(){
+      const select = document.getElementById("manifestPageSize");
+      if(!select) return;
+      select.addEventListener("change", () => {
+        const val = parseInt(select.value,10);
+        manifestPageSize = Number.isNaN(val) ? 10 : val;
+        manifestCurrentPage = 1;
+        renderManifestPage();
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#downloadManifestBtn');
+      if(!btn) return;
+      const id = getIdFromQuery();
+      window.location.href = `${API_BASE_URL}/manifests/product/${id}/excel`;
+    });
+
+    // ========= Init =========
+    (function init(){
+      qs('#buyQty').addEventListener('input', updateOrderTotal);
+
+      qs('#buyNowBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        handleBuyNow();
+      });
+
+      wireGalleryControls();          // ✅ NEW (lightbox buttons)
+      wireManifestPageSizeControl();
+      loadProduct();
+    })();
+  </script>
+
+  <!-- Listing details tab toggle (Overview / Manifest) -->
+  <script>
+    (function(){
+      var to=document.getElementById('tabOverview'), tm=document.getElementById('tabManifest');
+      var po=document.getElementById('panelOverview'), pm=document.getElementById('panelManifest');
+      if(!to||!tm||!po||!pm) return;
+      function show(overview){
+        to.classList.toggle('on', overview); tm.classList.toggle('on', !overview);
+        po.classList.toggle('hidden', !overview); pm.classList.toggle('hidden', overview);
+      }
+      to.addEventListener('click', function(){ show(true); });
+      tm.addEventListener('click', function(){ show(false); });
+    })();
+  </script>
+</body>
+</html>

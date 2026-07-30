@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Liquidation Flips</title>
+  <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!-- Brand font: Hanken Grotesk (final design uses one sans family) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <!-- OwlCarousel2 -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+
+  <style>
+    *{box-sizing:border-box}
+    .hidden{display:none!important}
+    .lf-wrap{color:#16202e;background:#fff}
+    ::selection{background:#16202e;color:#fff}
+    .muted{color:#6b7480}
+    input::placeholder{color:#9aa1ab}
+
+    /* Horizontal gutters come from the .page wrapper (topnav.css) so content
+       lines up with the header/footer on every page — sections only pad vertically. */
+    .lf-section{max-width:1400px;margin:0 auto}
+    .lf-hero-sec{padding:28px 0 6px}
+    .lf-intro-sec{padding:36px 0 8px}
+    .lf-list-sec{padding:24px 0 0}
+    .lf-grid-sec{padding:0 0 16px}
+
+    .lf-btn{transition:opacity .18s ease,border-color .18s ease,background .18s ease,color .18s ease}
+    .lf-btn:hover{opacity:.9}
+    .lf-btn:active{transform:translateY(1px)}
+
+    /* Hero */
+    .lf-hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(31,139,87,.1);border:1px solid rgba(31,139,87,.25);color:#177045;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:8px 14px;border-radius:999px;margin-bottom:16px}
+    /* ≤900px the header's mobile nav strip shows pill links right above the hero —
+       drop the badge's pill styling there (plain eyebrow text) so two similar
+       green pills don't stack confusingly */
+    @media (max-width:900px){
+      .lf-hero-badge{background:none;border:none;padding:0;border-radius:0;font-size:11px;letter-spacing:.14em;margin-bottom:10px}
+    }
+    .lf-hero-title{font-weight:800;font-size:clamp(26px,3.1vw,40px);line-height:1.1;letter-spacing:-.02em;margin:0 0 14px;color:#16202e;max-width:560px}
+    .lf-hero-title span{color:#1f8b57}
+    .lf-hero{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:stretch}
+    .lf-hero-sub{font-size:15px;line-height:1.6;color:#6b7480;margin:0 0 20px;max-width:480px}
+
+    /* CTAs */
+    .lf-cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+    .lf-cta{display:inline-flex;align-items:center;gap:9px;font-family:inherit;font-weight:700;font-size:14.5px;padding:13px 22px;border-radius:10px;cursor:pointer;text-decoration:none;transition:opacity .18s ease,background .18s ease}
+    .lf-cta:active{transform:translateY(1px)}
+    .lf-cta.green{background:#1f8b57;color:#fff;border:1px solid #1f8b57}
+    .lf-cta.green:hover{background:#177045;border-color:#177045}
+    .lf-cta.dark{background:#16202e;color:#fff;border:1px solid #16202e}
+    .lf-cta.dark:hover{opacity:.9}
+
+    /* Trust checkmarks */
+    .lf-trust{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;max-width:480px;margin-bottom:22px}
+    .lf-trust div{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:600;color:#16202e}
+    .lf-trust svg{flex-shrink:0;color:#1f8b57}
+
+    /* Social-proof stats */
+    .lf-stats{display:flex;gap:26px;flex-wrap:wrap;border-top:1px solid #eef0f2;padding-top:18px}
+    .lf-stat .lf-statnum{font-weight:800;font-size:20px;letter-spacing:-.01em;color:#16202e}
+    .lf-stat .lf-statnum b{color:#1f8b57;font-weight:800}
+    .lf-stat .lf-statlab{font-size:12px;color:#6b7480;font-weight:600;margin-top:2px}
+    .lf-stat.live .lf-statnum{color:#1f8b57}
+    .lf-stat.live .lf-statnum::before{content:"";display:inline-block;width:8px;height:8px;border-radius:999px;background:#1f8b57;margin-right:7px;animation:lfpulse 1.6s ease-in-out infinite}
+    @keyframes lfpulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+    /* Right: rotating image with slide caption overlaid (connects copy + visual) */
+    .lf-heroright{display:flex;flex-direction:column;gap:12px;min-width:0}
+    .lf-heroimg{position:relative;flex:1;min-height:340px;border-radius:16px;overflow:hidden;background:#f3f4f6}
+    /* right-anchored crop: the 3:1 banner art has baked-in text on the left and the
+       pallet/warehouse visuals on the right — in this taller box we show the visuals
+       and let the overlaid caption carry the message */
+    .lf-herolayer{position:absolute;inset:0;background-position:right center;background-size:cover;background-repeat:no-repeat;transition:opacity .5s ease;opacity:0}
+    .lf-herolayer.on{opacity:1}
+    .lf-heroshade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,32,46,0) 35%,rgba(22,32,46,.72) 100%)}
+    .lf-heropill{position:absolute;left:16px;top:16px;display:inline-flex;align-items:center;gap:8px;background:#fff;color:#16202e;font-size:12px;font-weight:700;letter-spacing:.03em;padding:9px 14px;border-radius:999px;box-shadow:0 6px 18px -8px rgba(22,32,46,.45)}
+    .lf-heropill i{width:7px;height:7px;border-radius:999px;background:#1f8b57;display:inline-block;animation:lfpulse 1.6s ease-in-out infinite}
+    .lf-slidecap{position:absolute;left:18px;right:18px;bottom:16px;color:#fff}
+    /* Fixed 1-line title + 2-line subtitle so the hero height never changes as
+       slides (with different-length copy) rotate — esp. in tablet/narrow views. */
+    .lf-hilite-t{font-weight:800;font-size:17px;line-height:1.3;color:#fff;
+      display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
+    .lf-hilite-s{font-size:13px;color:rgba(255,255,255,.85);line-height:1.5;margin-top:3px;min-height:39px;
+      display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+
+    /* Carousel controls: bigger dots + arrows + counter */
+    .lf-heroctrl{display:flex;align-items:center;gap:14px}
+    .lf-dots{display:flex;gap:8px}
+    .lf-dots button{height:9px;width:9px;border-radius:999px;border:none;cursor:pointer;padding:0;background:#c4cad2;transition:width .35s ease,background .35s ease}
+    .lf-dots button.on{width:26px;background:#1f8b57}
+    .lf-herocount{font-size:12.5px;font-weight:700;color:#6b7480;font-variant-numeric:tabular-nums;margin-left:auto}
+    .lf-heronav{display:flex;gap:8px}
+    .lf-heronav button{width:34px;height:34px;border-radius:999px;border:1px solid #dfe2e6;background:#fff;color:#16202e;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .18s ease,color .18s ease}
+    .lf-heronav button:hover{border-color:#1f8b57;color:#1f8b57}
+
+    /* Intro */
+    .lf-intro-h{font-weight:800;font-size:24px;letter-spacing:-.01em;margin:0 0 4px;color:#16202e}
+
+    /* Filter bar */
+    .lf-filter{background:#fff;border:1px solid #e6e8ec;border-radius:12px;padding:14px;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+    .lf-field{display:flex;flex-direction:column;gap:5px}
+    .lf-field.grow{flex:1;min-width:200px}
+    .lf-fieldcap{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#97a0ab;font-weight:700;padding-left:2px}
+    .lf-seg{display:flex;background:#f2f3f5;border-radius:9px;padding:3px;gap:2px}
+    .lf-segbtn{border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:7px;white-space:nowrap;background:transparent;color:#6b7480}
+    .lf-segbtn.is-on{background:#16202e;color:#fff}
+    .lf-searchwrap{position:relative}
+    .lf-searchwrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%)}
+    .lf-searchwrap input{width:100%;border:1px solid #dfe2e6;background:#fff;border-radius:9px;padding:10px 14px 10px 38px;font-family:inherit;font-size:14px;color:#16202e;outline:none}
+    .lf-select{border:1px solid #dfe2e6;background:#fff;border-radius:9px;padding:10px 14px;font-family:inherit;font-size:14px;color:#16202e;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7480' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+    .lf-viewtoggle{display:flex;background:#f2f3f5;border-radius:9px;padding:3px;gap:2px}
+    .lf-vbtn{border:none;cursor:pointer;width:36px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:transparent;color:#97a0ab}
+    .lf-vbtn.is-on,.lf-vbtn.active{background:#fff;color:#16202e;box-shadow:0 1px 3px rgba(22,32,46,.14)}
+
+    .lf-countrow{display:flex;align-items:center;justify-content:space-between;padding:18px 2px 20px;flex-wrap:wrap;gap:10px}
+    .lf-count{font-size:13.5px;color:#6b7480;font-weight:500}
+    .lf-dot{color:#c4cad0}
+    .lf-countright{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .lf-perpage{display:flex;align-items:center;gap:8px;font-size:13px;color:#6b7480;font-weight:500}
+    .lf-perpage select{border:1px solid #dfe2e6;background:#fff;border-radius:8px;padding:7px 10px;font-family:inherit;font-size:13px;color:#16202e;font-weight:600;cursor:pointer;outline:none}
+    .lf-sortedby{font-size:13px;color:#6b7480;font-weight:500}
+    .lf-sortedby span{color:#16202e;font-weight:700}
+
+    /* Grid / list */
+    #grid.lf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px;margin:0}
+    @media (min-width:1100px){ #grid.lf-grid{grid-template-columns:repeat(4,minmax(0,1fr))} }
+    #list.lf-listv{display:flex;flex-direction:column;gap:14px;margin:0}
+    #grid.lf-grid.hidden,#list.lf-listv.hidden{display:none}
+
+    /* Cards */
+    .lf-card{transition:box-shadow .25s ease,border-color .25s ease,transform .25s ease}
+    .lf-card:hover{box-shadow:0 12px 32px -20px rgba(22,32,46,.4);border-color:#d6dade;transform:translateY(-2px)}
+    .lf-img{transition:transform .5s ease}
+    .lf-card:hover .lf-img{transform:scale(1.04)}
+    .lf-card-watch{background:rgba(255,255,255,.92);color:#16202e;border:1px solid #e6e8ec;backdrop-filter:blur(4px)}
+    .lf-card-watch.active{background:#1f8b57;color:#fff;border-color:#1f8b57}
+    .lf-watch-out{border:1px solid #dfe2e6;background:#fff;color:#16202e}
+    .lf-watch-out.active{border-color:#1f8b57;color:#1f8b57;background:rgba(31,139,87,.06)}
+    .lf-quick{border:1px solid #dfe2e6;background:#fff;color:#16202e}
+    /* Keep the quick-bid label on one line so status/label swaps never resize the card */
+    .lf-quick [data-bind="quickBidText"]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+    /* Bid-status chip — pill + coloured dot, bottom-left (matches the design 1:1) */
+    .lf-card.wonFrame{border-color:#1f8b57;box-shadow:0 0 0 1px #1f8b57,0 12px 32px -20px rgba(31,139,87,.5)}
+    /* Outbid / losing: subtle red ring + red type badge so it reads at a glance */
+    .lf-card.losingFrame{border-color:#c0453f;box-shadow:0 0 0 1px #c0453f,0 12px 32px -20px rgba(192,69,63,.45)}
+    .lf-card.losingFrame .lf-typebadge{background:#fbeceb!important;color:#c0453f!important}
+    .wonBadge{position:absolute;left:14px;bottom:14px;top:auto;right:auto;z-index:3;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:999px;box-shadow:0 4px 14px -6px rgba(22,32,46,.5)}
+    .wonBadge .wonDot{width:6px;height:6px;border-radius:999px;background:currentColor;flex:0 0 auto}
+    .wonBadge.isWinning,.wonBadge.isWon{background:#eef6f1;color:#1f8b57}
+    .wonBadge.isLosing{background:#fbeceb;color:#c0453f}
+    .listThumb .wonBadge{left:13px;bottom:13px;font-size:10.5px;gap:5px;padding:5px 10px}
+
+    /* Quick bid message */
+    .qbMsg{margin-top:2px;font-size:12px;font-weight:700;text-align:center;color:#6b7480}
+    .qbMsg.ok{color:#1f8b57}
+    .qbMsg.err{color:#c0453f}
+
+    /* Skeleton */
+    .skeleton{background:linear-gradient(100deg,#eef0f2 30%,#f6f7f8 50%,#eef0f2 70%);background-size:200% 100%;animation:lfsk 1.2s ease-in-out infinite}
+    @keyframes lfsk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    /* Skeleton card mirrors the real grid card so products swap in without any jump */
+    .card.skel{background:#fff;border:1px solid #E0E8E2;border-radius:20px;overflow:hidden;display:flex;flex-direction:column}
+    .card.skel .thumb{aspect-ratio:4/3;width:100%}
+    .card.skel .sk-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:11px;flex:1}
+    .card.skel .line{height:13px;border-radius:7px}
+    .card.skel .line.w35{width:35%}
+    .card.skel .line.w80{width:80%}
+    .card.skel .line.w60{width:60%}
+    .card.skel .line.w40{width:40%}
+    .card.skel .line.price{height:24px;width:45%;margin-top:6px}
+    .card.skel .sk-btn{height:44px;border-radius:9px;margin-top:8px}
+
+    /* Pager */
+    .lf-pager{display:flex;align-items:center;justify-content:center;gap:12px;padding:38px 0 8px}
+    .lf-pagebtn{width:38px;height:38px;border-radius:9px;border:1px solid #e6e8ec;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#16202e}
+    .lf-pagebtn-on{border:none;background:#16202e;color:#fff}
+    .lf-pagebtn:disabled{opacity:.45;cursor:default}
+    .lf-pageinfo{font-size:13.5px;color:#6b7480;font-weight:600}
+    .lf-pageinfo span{color:#16202e;font-weight:700}
+
+    /* Responsive */
+    @media (max-width:820px){
+      .lf-hero{grid-template-columns:minmax(0,1fr)!important;gap:22px!important}
+      .lf-heroimg{flex:none;min-height:0;aspect-ratio:16/10}
+      .lf-hero-title{max-width:none}
+    }
+    /* Phone: tighter rhythm — CTAs side by side on one line, trust list compact,
+       stats in a balanced 2×2 grid (keeps the live counter from dangling alone) */
+    @media (max-width:480px){
+      .lf-hero-title{font-size:24px;margin-bottom:10px}
+      .lf-hero-sub{font-size:14px;margin-bottom:16px}
+      .lf-cta-row{gap:9px;margin-bottom:18px}
+      .lf-cta-row .lf-cta{flex:1;justify-content:center;white-space:nowrap;padding:13px 8px;font-size:13.5px}
+      .lf-trust{grid-template-columns:minmax(0,1fr);gap:9px;margin-bottom:18px}
+      .lf-trust div{font-size:13px}
+      .lf-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px;padding-top:16px}
+      .lf-stat .lf-statnum{font-size:19px}
+    }
+    @media (max-width:880px){.lf-listrow{flex-direction:column!important}.lf-listrow>div:first-child{width:100%!important;height:200px}.lf-listrow .lf-side{width:100%!important;border-left:none!important;border-top:1px solid #e6e8ec}.lf-metagrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+    /* Inventory filter — tidy for tablet/phone so it doesn't feel cluttered */
+    @media (max-width:900px){
+      .lf-filter{align-items:stretch;gap:10px}
+      .lf-field{flex:1 1 calc(50% - 5px)}              /* ~2 controls per row on tablet */
+      .lf-field.grow{flex-basis:100%;order:-1}          /* search: full width, first */
+      .lf-seg{width:100%}.lf-seg .lf-segbtn{flex:1}
+      .lf-select{width:100%}
+      .lf-viewtoggle{width:100%;justify-content:center}
+    }
+    /* "More filters" toggle — hidden except on phone */
+    .lf-morefilters{display:none;align-items:center;justify-content:center;gap:8px;width:100%;border:1px dashed #dfe2e6;background:#fff;border-radius:9px;padding:11px;font-family:inherit;font-weight:700;font-size:13px;color:#6b7480;cursor:pointer}
+    .lf-morefilters .mf-count{background:#1f8b57;color:#fff;border-radius:999px;font-size:11px;font-weight:800;padding:2px 7px;line-height:1.4}
+    .lf-morefilters .mf-chev{transition:transform .25s ease}
+    .lf-filter.open .mf-chev{transform:rotate(180deg)}
+    @media (max-width:560px){
+      .lf-field{flex-basis:100%}                         /* stack every control on phone */
+      .lf-field-view{display:none}                       /* grid by default; hide grid/list toggle */
+      .lf-countrow{gap:8px}
+      .lf-sortedby{display:none}                         /* duplicates the Sort select */
+      .lf-morefilters{display:flex}
+      .lf-field-extra{display:none}                      /* Category/Warehouse/Sort behind the toggle */
+      .lf-filter.open .lf-field-extra{display:flex}
+    }
+    @media (max-width:640px){.lf-hero-sec{padding:24px 0 6px}.lf-list-sec{padding:20px 0 0}.lf-grid-sec{padding:0 0 16px}.lf-intro-sec{padding:28px 0 4px}}
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP Nav section -->
+  <link rel="stylesheet" href="/css/topnav.css?v=4">
+  <div id="topnavContainer"></div>
+
+  <!-- CONFIG + AUTH -->
+  <script src="/js/config.js?v=4"></script>
+  <script src="/js/demo-data.js?v=1"></script>
+  <script src="/js/auth.js?v=4" defer></script>
+
+  <!-- Owl init -->
+  <script>
+	/*  Not ncessary : 19th May 2026
+    jQuery(function ($) {
+      $("#owl-demo").owlCarousel({
+        loop: true,
+        margin: 18,
+        nav: true,
+        dots: false,
+        autoplay: true,
+        autoplayTimeout: 3500,
+        autoplayHoverPause: true,
+        responsive:{ 0:{ items:1 }, 600:{ items:2 }, 1000:{ items:3 } }
+      });
+    });*/
+	
+	async function loadBanners() {
+	  const carousel = document.getElementById("owl-demo");
+
+	  try {
+		const res = await fetch(`${API_BASE_URL}/banners/active?ts=${Date.now()}`, {
+		  cache: "no-store"
+		});
+
+		if (!res.ok) {
+		  throw new Error("Failed to load banners");
+		}
+
+		const banners = await res.json();
+
+		if (!Array.isArray(banners) || banners.length === 0) {
+		  carousel.innerHTML = `
+			<a class="slide" href="#">
+			  <img src="/img/slides/slide-1.jpeg" alt="Default Slide">
+			</a>
+		  `;
+		} else {
+		  carousel.innerHTML = banners.map((b, index) => {
+			const href = b.linkUrl && b.linkUrl.trim() !== "" ? b.linkUrl : "#";
+			const title = b.title || `Banner ${index + 1}`;
+
+			return `
+			  <a class="slide" href="${href}">
+				<img src="${b.imageUrl}" alt="${title}">
+			  </a>
+			`;
+		  }).join("");
+		}
+
+		initBannerCarousel();
+
+	  } catch (err) {
+		console.error("Banner load failed", err);
+
+		carousel.innerHTML = `
+		  <a class="slide" href="#">
+			<img src="/img/slides/slide-1.jpeg" alt="Default Slide">
+		  </a>
+		`;
+
+		initBannerCarousel();
+	  }
+	}
+
+	function initBannerCarousel() {
+	  const $carousel = jQuery("#owl-demo");
+
+	  if ($carousel.hasClass("owl-loaded")) {
+		$carousel.trigger("destroy.owl.carousel");
+		$carousel.removeClass("owl-loaded");
+		$carousel.find(".owl-stage-outer").children().unwrap();
+	  }
+
+	  $carousel.owlCarousel({
+		loop: true,
+		margin: 18,
+		nav: true,
+		dots: false,
+		autoplay: true,
+		autoplayTimeout: 3500,
+		autoplayHoverPause: true,
+		responsive: {
+		  0: { items: 1 },
+		  600: { items: 2 },
+		  1000: { items: 3 }
+		}
+	  });
+	}
+	
+  </script>
+
+  <div class="page lf-wrap">
+
+    <!-- ===================== HERO ===================== -->
+    <section class="lf-section lf-hero-sec">
+      <div class="lf-hero">
+        <div>
+          <!-- 🍁 not 🇨🇦: Windows doesn't render flag emojis (falls back to "CA" letters) -->
+          <div class="lf-hero-badge">🍁 Canada&rsquo;s Liquidation Marketplace</div>
+          <h1 class="lf-hero-title">Save <span>up to 70%</span> on retail returns, overstock &amp; wholesale pallets</h1>
+          <p class="lf-hero-sub">Bid live on auctions or buy instantly from thousands of brand-name lots — shipped fast, coast to coast.</p>
+
+          <div class="lf-cta-row">
+            <button type="button" class="lf-cta green view-nav" data-target="auction" id="ctaAuctions">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 13l7 7"/><path d="M9 4l7 7"/><path d="M6 7l5 5-3 3-5-5z" fill="currentColor" stroke="none"/><path d="M3 21h9"/></svg>
+              Browse Auctions
+            </button>
+            <button type="button" class="lf-cta dark view-nav" data-target="buynow" id="ctaBuyNow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L4.5 12.5H11L9 22l8.5-10.5H12z" fill="currentColor" stroke="none"/></svg>
+              Shop Buy Now
+            </button>
+          </div>
+
+          <div class="lf-trust">
+            <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="10" fill="rgba(31,139,87,.12)" stroke="none"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>Fast Canada-wide shipping</div>
+            <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="10" fill="rgba(31,139,87,.12)" stroke="none"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>New lots added daily</div>
+            <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="10" fill="rgba(31,139,87,.12)" stroke="none"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>Tested &amp; verified lots</div>
+            <div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="10" fill="rgba(31,139,87,.12)" stroke="none"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>Pallets &amp; single items</div>
+          </div>
+
+          <div class="lf-stats">
+            <div class="lf-stat"><div class="lf-statnum">18,000<b>+</b></div><div class="lf-statlab">Lots sold</div></div>
+            <div class="lf-stat"><div class="lf-statnum">4.8<b>★</b></div><div class="lf-statlab">Buyer rating</div></div>
+            <div class="lf-stat"><div class="lf-statnum">70<b>%</b></div><div class="lf-statlab">Avg. savings</div></div>
+            <div class="lf-stat live hidden" id="statLive"><div class="lf-statnum" id="statLiveNum">—</div><div class="lf-statlab">Live auctions now</div></div>
+          </div>
+        </div>
+
+        <div class="lf-heroright">
+          <!-- TODO(backend): hero slides are static marketing images (rotated client-side) -->
+          <div class="lf-heroimg" id="heroImg">
+            <div class="lf-heroshade"></div>
+            <div class="lf-heropill"><i></i>New lots daily</div>
+            <div class="lf-slidecap">
+              <div class="lf-hilite-t" id="heroHiliteT">Up to 70% off retail</div>
+              <div class="lf-hilite-s" id="heroHiliteS">Tested electronics, appliances and home goods from trusted Canadian sellers.</div>
+            </div>
+          </div>
+          <div class="lf-heroctrl">
+            <div class="lf-dots" id="heroDots"></div>
+            <span class="lf-herocount" id="heroCounter">1 / 3</span>
+            <div class="lf-heronav">
+              <button type="button" id="heroPrev" aria-label="Previous slide"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></button>
+              <button type="button" id="heroNext" aria-label="Next slide"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== INTRO ===================== -->
+    <section id="browse" class="lf-section lf-intro-sec">
+      <h2 class="lf-intro-h">Browse auctions &amp; buy-now deals</h2>
+    </section>
+
+    <!-- ===================== FILTER BAR ===================== -->
+    <section id="listings" class="lf-section lf-list-sec">
+      <div class="lf-filter">
+        <label class="lf-field">
+          <span class="lf-fieldcap">Type</span>
+          <div class="lf-seg" id="typeTabs">
+            <button type="button" class="lf-segbtn is-on" data-tab="all">All</button>
+            <button type="button" class="lf-segbtn" data-tab="auction">Auctions</button>
+            <button type="button" class="lf-segbtn" data-tab="buynow">Buy Now</button>
+          </div>
+        </label>
+
+        <label class="lf-field grow">
+          <span class="lf-fieldcap">Search</span>
+          <div class="lf-searchwrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa1ab" stroke-width="2.2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+            <input id="searchBox" type="text" placeholder="Search lots, brands, categories…" />
+          </div>
+        </label>
+
+        <!-- Phone-only: Category/Warehouse/Sort collapse behind this toggle so the
+             filter bar doesn't fill the whole screen before any products show -->
+        <button type="button" class="lf-morefilters" id="moreFiltersBtn" aria-expanded="false">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 5h18M7 12h10M10 19h4"/></svg>
+          <span id="mfLabel">More filters</span>
+          <span class="mf-count hidden" id="mfCount">0</span>
+          <svg class="mf-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+
+        <label class="lf-field lf-field-extra">
+          <span class="lf-fieldcap">Category</span>
+          <select id="categorySelect" name="categoryId" class="lf-select"></select>
+        </label>
+
+        <label class="lf-field lf-field-extra">
+          <span class="lf-fieldcap">Warehouse</span>
+          <select id="warehouseSelect" class="lf-select"><option value="all">All Warehouses</option></select>
+        </label>
+
+        <label class="lf-field lf-field-extra">
+          <span class="lf-fieldcap">Sort by</span>
+          <select id="sortSelect" class="lf-select">
+            <option value="endingSoon" selected>Ending soonest</option>
+            <option value="newlyListed">Newest first</option>
+            <option value="priceLowHigh">Price: low to high</option>
+            <option value="priceHighLow">Price: high to low</option>
+            <option value="mostBids">Most bids</option>
+          </select>
+        </label>
+
+        <label class="lf-field lf-field-view">
+          <span class="lf-fieldcap">View</span>
+          <div class="lf-viewtoggle">
+            <button type="button" id="gridViewBtn" class="lf-vbtn is-on" aria-pressed="true" title="Grid view">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+            </button>
+            <button type="button" id="listViewBtn" class="lf-vbtn" aria-pressed="false" title="List view">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"></path></svg>
+            </button>
+          </div>
+        </label>
+      </div>
+
+      <div class="lf-countrow">
+        <div class="lf-count"><span id="metaInfo">0 lots</span> <span class="lf-dot">·</span> <span id="pageInfoInline">Page 1 of 1</span></div>
+        <div class="lf-countright">
+          <div class="lf-perpage">Show
+            <select id="pageSizeSelect"><option value="12" selected>12</option><option value="24">24</option><option value="48">48</option></select>
+            per page
+          </div>
+          <div class="lf-sortedby">Sorted by <span id="sortLabel">Ending soonest</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== GRID / LIST ===================== -->
+    <section class="lf-section lf-grid-sec">
+      <div id="grid" class="lf-grid"></div>
+      <div id="list" class="lf-listv hidden"></div>
+
+      <div class="lf-pager hidden" id="pagination">
+        <button class="lf-pagebtn" id="prevPage" aria-label="Previous">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg>
+        </button>
+        <span class="lf-pageinfo">Page <span id="pageInfo">1</span></span>
+        <button class="lf-pagebtn lf-pagebtn-on" id="nextPage" aria-label="Next">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- Hidden legacy elements kept so existing JS keeps working -->
+    <div class="hidden" aria-hidden="true">
+      <span id="wsStatus"></span>
+      <div id="owl-demo" class="owl-carousel owl-theme"></div>
+      <select id="typeSelect"><option value="all" selected>Auction + Buy Now</option><option value="auction">Auction</option><option value="buynow">Buy Now</option></select>
+      <button id="applyBtn" type="button">Apply</button>
+      <button id="refreshBtn" type="button">All</button>
+      <button class="view-nav" data-target="auction" type="button">Auction</button>
+      <button class="view-nav" data-target="buynow" type="button">Buy Now</button>
+    </div>
+  </div>
+
+  <!-- SockJS / STOMP (for live updates on index) -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+  <script>
+    const API_BASE_URL = CONFIG.API_BASE_URL;
+
+    /* ==== Utilities & State ==== */
+    const $ = (s, r=document) => r.querySelector(s);
+    const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+    const grid = $('#grid');
+    const list = $('#list');
+    const metaInfo = $('#metaInfo');
+    const categorySelect = $('#categorySelect');
+    const sortSelect = $('#sortSelect');
+    const searchBox = $('#searchBox');
+    const pagination = $('#pagination');
+    const pageInfo = $('#pageInfo');
+    const prevPage = $('#prevPage');
+    const nextPage = $('#nextPage');
+    const applyBtn = $('#applyBtn');
+    const typeSelect = $('#typeSelect');
+    const pageInfoInline = $('#pageInfoInline');
+
+    const gridViewBtn = $('#gridViewBtn');
+    const listViewBtn = $('#listViewBtn');
+    const pageSizeSelect = $('#pageSizeSelect');
+
+    const wsStatus = $('#wsStatus');
+
+    let PAGE_SIZE = 12;
+    let VIEW_MODE = 'grid';
+
+    let ALL_PRODUCTS = [];
+    let FILTERED = [];
+    let CURRENT_PAGE = 1;
+    let PRODUCTS_LOADED = false;   // stays false until the first product fetch resolves
+
+    // ✅ Warehouse cache (same as BuyNow)
+    let WAREHOUSE_MAP = new Map();
+
+    // ==== Helpers ====
+    function safeText(v, fallback='—'){
+      if (v === null || v === undefined) return fallback;
+      const s = String(v).trim();
+      return s ? s : fallback;
+    }
+
+    function formatPrice(x){
+      if(x==null) return '—';
+      const n = Number(x);
+      if(Number.isNaN(n)) return String(x);
+      return `$${n.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    }
+
+    function timeLeft(endIso){
+      if(!endIso) return null;
+      const end = new Date(endIso).getTime();
+      const now = Date.now();
+      const diff = end - now;
+      if(diff <= 0) return 'Ended';
+      const d = Math.floor(diff/86400000);
+      const h = Math.floor((diff%86400000)/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      return (d>0?`${d}d `:'') + (h>0?`${h}h `:'') + `${m}m`;
+    }
+
+    function timeLeftLabelSeconds(endIso){
+      if(!endIso) return '—';
+      const end = new Date(endIso).getTime();
+      const now = Date.now();
+      const diff = end - now;
+      if (diff <= 0) return 'Ended';
+      const d = Math.floor(diff/86400000);
+      const h = Math.floor((diff%86400000)/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      const s = Math.floor((diff%60000)/1000);
+      if (d>0) return `${d}d ${h}h ${m}m`;
+      if (h>0) return `${h}h ${m}m ${s}s`;
+      return `${m}m ${s}s`;
+    }
+
+    // "Starts in …" label for coming-soon lots counting down to auctionStart
+    // (mirrors the auction time-left chip, but toward go-live instead of the end).
+    function startsInLabelSeconds(startIso){
+      if(!startIso) return 'Coming soon';
+      const diff = new Date(startIso).getTime() - Date.now();
+      if (diff <= 0) return 'Starting soon';
+      return 'Starts in ' + timeLeftLabelSeconds(startIso);
+    }
+
+    // Helper method for WON-ITEM-FRAME
+    function hasWon(p){
+      const myId = localStorage.getItem('userid');
+      if (!myId) return false;
+      return (p.wonUserId != null) && (String(p.wonUserId) === String(myId));
+    }
+
+    // ✅ Helper method for WON-Quickbid-button hover
+    // ✅ hover wiring that can be removed later
+	function getQbLabelSpan(btn) {
+	  return btn ? btn.querySelector('[data-bind="quickBidText"]') : null;
+	}
+
+	function setQuickBidLabelFromAmount(btn) {
+	  const label = getQbLabelSpan(btn);
+	  if (!btn || !label) return;
+	  const amt = Number(btn.dataset.amount || 0);
+	  label.textContent = amt ? `Quick Bid ${formatPrice(amt)}` : 'Quick Bid';
+	}
+
+	function wireWonHover(btn, msg = "🏆 You're winning") {
+	  if (!btn) return;
+	  if (btn._wonHoverWired) return;
+
+	  const label = getQbLabelSpan(btn);
+	  if (!label) return;
+
+	  const onEnter = () => {
+		btn._wonHoverActive = true;
+		label.textContent = msg;
+	  };
+
+	  const onLeave = () => {
+		btn._wonHoverActive = false;
+		// ✅ ALWAYS restore from latest dataset.amount (websocket value)
+		setQuickBidLabelFromAmount(btn);
+	  };
+
+	  btn._wonHoverWired = true;
+	  btn._wonHoverEnter = onEnter;
+	  btn._wonHoverLeave = onLeave;
+
+	  btn.addEventListener("mouseenter", onEnter);
+	  btn.addEventListener("mouseleave", onLeave);
+	}
+	
+	// ✅ hover Un-wiring for loose Items
+	function unwireWonHover(btn) {
+	  if (!btn || !btn._wonHoverWired) return;
+
+	  btn.removeEventListener("mouseenter", btn._wonHoverEnter);
+	  btn.removeEventListener("mouseleave", btn._wonHoverLeave);
+
+	  btn._wonHoverWired = false;
+	  btn._wonHoverEnter = null;
+	  btn._wonHoverLeave = null;
+	  btn._wonHoverActive = false;
+
+	  // ✅ when unwired, ensure label is correct
+	  setQuickBidLabelFromAmount(btn);
+	}
+
+    // ✅ Login check (only logged-in users see Quick Bid)
+    function isLoggedIn(){
+      const t = localStorage.getItem('token');
+      const u = localStorage.getItem('userid');
+      return !!(t && u);
+    }
+
+    // ✅ Cache increments by highest amount
+    const INCREMENT_CACHE = new Map();
+
+    async function getNextMinBid(highestAmount){
+      const highest = Number(highestAmount) || 0;
+
+      if (INCREMENT_CACHE.has(highest)) return INCREMENT_CACHE.get(highest);
+
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/bids/increment?amount=${highest}`, {
+        headers: token ? { "Authorization": `Bearer ${token}` } : {}
+      });
+
+      if(!res.ok) throw new Error('increment_failed');
+
+      const ct = res.headers.get('content-type') || '';
+      const inc = ct.includes('application/json') ? await res.json() : parseFloat(await res.text());
+
+      if(!Number.isFinite(inc)) throw new Error('bad_increment');
+
+      const out = { inc, minAllowed: highest + inc };
+      INCREMENT_CACHE.set(highest, out);
+      return out;
+    }
+
+    // ============================
+    // ✅ Shared Quick Bid Validation
+    // ============================
+    function showQbMessage(el, text, type = "info", autoHideMs = 0) {
+      // Quick-bid feedback now floats as a toast instead of expanding an inline
+      // box under the button — so the card never changes height. "info" messages
+      // (e.g. "Placing bid…") are skipped since the button already shows a spinner.
+      if (type === "info") return;
+      const t = (type === "err") ? "error" : "success";
+      if (window.LF && typeof LF.toast === "function") LF.toast(text, t);
+    }
+
+    function isAuctionEnded(auctionEndIso) {
+      if (!auctionEndIso) return false;
+      const end = new Date(auctionEndIso).getTime();
+      if (Number.isNaN(end)) return false;
+      return Date.now() >= end;
+    }
+
+    async function validateQuickBidOrThrow(p, minAllowed, qbMsgEl) {
+      const token  = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+      if (!token || !userid) {
+        showQbMessage(qbMsgEl, "🔒 Please log in to place a bid.", "err", 4000);
+        if (typeof window.openLoginModal === 'function') window.openLoginModal();
+        throw new Error("not_logged_in");
+      }
+
+      if (isAuctionEnded(p.auctionEnd)) {
+        showQbMessage(qbMsgEl, "⏰ This auction has ended.", "err", 4000);
+        throw new Error("auction_ended");
+      }
+
+      if (p.wonUserId != null && String(p.wonUserId) === String(userid)) {
+        showQbMessage(qbMsgEl, "⚠️ You are already the highest bidder.", "err", 4000);
+        throw new Error("already_highest_bidder");
+      }
+
+      const amt = Number(minAllowed);
+      if (!Number.isFinite(amt) || amt <= 0) {
+        showQbMessage(qbMsgEl, "❌ Invalid bid amount.", "err", 4000);
+        throw new Error("bad_amount");
+      }
+    }
+
+    // ✅ Place Quick BID
+    async function placeQuickBid(productId, bidAmount){
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+      if(!token || !userid) throw new Error('not_logged_in');
+
+      const res = await fetch(`${API_BASE_URL}/bids`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: parseInt(productId),
+          userId: parseInt(userid),
+          bidAmount: Number(bidAmount)
+        })
+      });
+
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error(t || 'bid_failed');
+      }
+      return await res.json();
+    }
+
+    // ✅ Watchlist API
+    async function addToWatchlist(productId){
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+      if(!token || !userid) throw new Error('not_logged_in');
+
+      const res = await fetch(`${API_BASE_URL}/watchlist`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId: parseInt(userid),
+          productId: parseInt(productId)
+        })
+      });
+
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error(t || 'watchlist_add_failed');
+      }
+      return await res.json();
+    }
+
+    async function removeFromWatchlist(productId){
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+      if(!token || !userid) throw new Error('not_logged_in');
+
+      const res = await fetch(`${API_BASE_URL}/watchlist?userId=${parseInt(userid)}&productId=${parseInt(productId)}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error(t || 'watchlist_remove_failed');
+      }
+      return true;
+    }
+
+    // ✅ Local cache so UI can toggle immediately (no extra GET needed)
+    const WATCHED_SET = new Set();
+
+    // ✅ Product ids the signed-in user has bid on — powers the Winning/Losing
+    //    status badge. Seeded from /bids/my-bids on load, kept fresh on quick-bid.
+    const MY_BID_SET = new Set();
+
+    async function addProductToCart(productId, quantity = 1){
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+      if(!token || !userid) throw new Error('not_logged_in');
+
+      const res = await fetch(`${API_BASE_URL}/orders/buy-now`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: parseInt(productId, 10),
+          userId: parseInt(userid, 10),
+          quantity: parseInt(quantity, 10) || 1
+        })
+      });
+
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error(t || 'cart_add_failed');
+      }
+
+      const ct = res.headers.get('content-type') || '';
+      return ct.includes('application/json') ? res.json() : true;
+    }
+
+    function setCartButtonState(btn, html, disabled){
+      if(!btn) return;
+      btn.innerHTML = html;
+      btn.disabled = !!disabled;
+    }
+
+    async function loadMyWatchlist(){
+      if(!isLoggedIn()) return;
+
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+      try{
+        const res = await fetch(`${API_BASE_URL}/watchlist/user/${parseInt(userid)}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if(!res.ok) return;
+
+        const data = await res.json();
+        (Array.isArray(data) ? data : []).forEach(w => {
+          if(w && w.productId != null) WATCHED_SET.add(Number(w.productId));
+        });
+      }catch(e){
+        console.warn('watchlist load failed', e);
+      }
+    }
+
+    // Seed MY_BID_SET with every product the user has bid on, so cards can show
+    // the correct Winning / Losing / Won status on first paint.
+    async function loadMyBids(){
+      if(!isLoggedIn()) return;
+
+      const token = localStorage.getItem('token');
+      const userid = localStorage.getItem('userid');
+
+      try{
+        const res = await fetch(`${API_BASE_URL}/bids/my-bids/${parseInt(userid)}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if(!res.ok) return;
+
+        const data = await res.json();
+        (Array.isArray(data) ? data : []).forEach(entry => {
+          const pid = entry?.product?.id ?? entry?.productId;
+          if(pid != null) MY_BID_SET.add(Number(pid));
+        });
+      }catch(e){
+        console.warn('my-bids load failed', e);
+      }
+    }
+
+    // ✅ images come from ProductDTO.images (fallback to imageUrl)
+    function getAllImages(p){
+      const arr = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
+      const main = p.imageUrl ? [p.imageUrl] : [];
+      const merged = (arr.length ? arr : main);
+      return Array.from(new Set(merged));
+    }
+
+    function getPrimaryImage(p){
+      const imgs = getAllImages(p);
+      return imgs[0] || NO_IMAGE;
+    }
+
+    function warehouseForProduct(p){
+      const wid = (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId);
+      if (wid === null || wid === undefined) return null;
+      return WAREHOUSE_MAP.get(Number(wid)) || null;
+    }
+
+    function formatWarehouseAddress(w){
+      if(!w) return '—';
+      const parts = [
+        safeText(w.addressLine1,''),
+        safeText(w.addressLine2,''),
+        [safeText(w.city,''), safeText(w.province,'')].filter(Boolean).join(', '),
+        [safeText(w.postalCode,''), safeText(w.country,'')].filter(Boolean).join(' ')
+      ].filter(Boolean);
+      return parts.length ? parts.join(' • ') : '—';
+    }
+
+    function navigateToProduct(id){
+      window.location.href = `/product-view.html?id=${id}`;
+    }
+
+    // Smooth-flow routing: auctions → bidding page, buy-now → buy-now page.
+    function navigateForProduct(p){
+      if (p && p._kind === 'buynow'){
+        window.location.href = `/product-buynow.html?id=${p.id}`;
+      } else {
+        // Carry the coming-soon flag through the URL — the /products/{id} detail
+        // endpoint doesn't always return it, and coming-soon lots must not accept bids.
+        const cs = isComingSoon(p) ? '&comingSoon=1' : '';
+        window.location.href = `/product-view.html?id=${p.id}${cs}`;
+      }
+    }
+    function isBuyNow(p){ return p && p._kind === 'buynow'; }
+
+    // ==== Data Fetch ====
+    async function loadAllCategories(){
+      try{
+        const res = await fetch(`${API_BASE_URL}/category/get/all`);
+        if(!res.ok) throw new Error('Failed categories');
+        const listData = await res.json();
+
+        const options = `<option value="">All Categories</option>` +
+          listData.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+        categorySelect.innerHTML = options;
+
+        const lpCat = document.getElementById('lp_categorySelect');
+        if (lpCat) lpCat.innerHTML = options;
+
+      }catch(e){
+        console.error(e);
+        categorySelect.innerHTML = `<option value="">All Categories</option>`;
+      }
+    }
+
+    // ✅ Load warehouses once (same as BuyNow)
+    async function loadWarehouses(){
+      try{
+        const res = await fetch(`${API_BASE_URL}/warehouses`);
+        if(!res.ok) throw new Error('Failed warehouses');
+        const list = await res.json();
+        WAREHOUSE_MAP = new Map((Array.isArray(list)?list:[]).map(w => [Number(w.id), w]));
+      }catch(e){
+        console.warn('Warehouses not available:', e);
+        WAREHOUSE_MAP = new Map();
+      }
+    }
+
+    // Tag every product with its kind so cards + routing can branch.
+    function tagKind(arr, kind){
+      return (Array.isArray(arr) ? arr : []).map(p => { p._kind = kind; return p; });
+    }
+
+    // Interleave auctions + buy-now so both appear "in smooth flow"
+    // (~2 auctions : 1 buy-now, like the mock). Used as the default order.
+    function mergeSmooth(a, b){
+      const out = []; let i = 0, j = 0;
+      while (i < a.length || j < b.length){
+        if (i < a.length) out.push(a[i++]);
+        if (i < a.length) out.push(a[i++]);
+        if (j < b.length) out.push(b[j++]);
+      }
+      return out;
+    }
+
+    // ✅ Smooth flow: load ongoing AUCTIONS and BUY-NOW items together.
+    async function fetchAllProducts(){
+      try{
+        showSkeletons();
+
+        // Both endpoints already exist (auctions = homepage, buynow = Buy Now page).
+        const [aRes, bRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/products/get/allAuctionOngoin`),
+          fetch(`${API_BASE_URL}/products/buynow`).catch(() => null)
+        ]);
+
+        if(!aRes.ok) throw new Error('Unauthorized');
+        const aData = await aRes.json();
+        const auctions = tagKind(Array.isArray(aData) ? aData : (aData.content || []), 'auction');
+
+        let buynow = [];
+        if (bRes && bRes.ok){
+          const bData = await bRes.json();
+          buynow = tagKind(Array.isArray(bData) ? bData : (bData.content || []), 'buynow');
+        }
+
+        ALL_PRODUCTS = mergeSmooth(auctions, buynow);
+        PRODUCTS_LOADED = true;   // real data is in — render() may now show the empty state
+
+        // Hero "live auctions" stat — real count, only shown when there are some.
+        const liveWrap = document.getElementById('statLive');
+        if (liveWrap && auctions.length > 0){
+          document.getElementById('statLiveNum').textContent = auctions.length;
+          liveWrap.classList.remove('hidden');
+        }
+
+        applyFilters();
+      }catch(err){
+        // API unreachable / errored — send to the error page instead of
+        // reloading index.html (which caused an infinite reload loop).
+        console.error('Failed to load products', err);
+        window.location.href = "/404.html?reason=api";
+      }
+    }
+
+    // Category filtering is done client-side now (data for both kinds is already
+    // loaded), which keeps the auction + buy-now flow intact. Kept as a thin
+    // wrapper so existing callers still work.
+    async function fetchByCategory(categoryId){
+      categorySelect.value = categoryId || '';
+      applyFilters();
+    }
+
+    // ==== Skeleton ====
+    // Show at least a few placeholder cards while products load so the page never
+    // looks empty. Count adapts to the viewport (phone/tablet/desktop) so we fill
+    // roughly the visible rows without overloading small screens.
+    function skeletonCount(){
+      const w = window.innerWidth || 1200;
+      if (w < 640) return 4;    // phone: ~1 col → 4 cards
+      if (w < 1100) return 6;   // tablet: ~2–3 cols → 6 cards
+      return 12;                // desktop: 4 cols → 3 rows
+    }
+    function showSkeletons(count){
+      count = count || skeletonCount();
+      grid.innerHTML = '';
+      list.innerHTML = '';
+      grid.classList.remove('hidden');
+      list.classList.add('hidden');
+
+      for(let i=0;i<count;i++){
+        const c = document.createElement('div');
+        c.className = 'card skel';
+        c.innerHTML = `
+          <div class="thumb skeleton"></div>
+          <div class="sk-body">
+            <div class="line skeleton w35"></div>
+            <div class="line skeleton w80"></div>
+            <div class="line skeleton w60"></div>
+            <div class="line skeleton price"></div>
+            <div class="line skeleton w40"></div>
+            <div class="sk-btn skeleton"></div>
+          </div>
+        `;
+        grid.appendChild(c);
+      }
+    }
+	
+	// Updating the DOM - for - ALL_PRODUCTS
+	function getLatestProduct(pid){
+	  return ALL_PRODUCTS.find(x => String(x.id) === String(pid)) || null;
+	}
+
+    // ========= LIVE DOM BINDINGS =========
+    // We will update these on WebSocket events + a 1-second ticker.
+    function updateDomForProduct(pid, patch){
+      // Update in-memory model
+      const idxAll = ALL_PRODUCTS.findIndex(x => String(x.id) === String(pid));
+      if (idxAll >= 0) ALL_PRODUCTS[idxAll] = { ...ALL_PRODUCTS[idxAll], ...patch };
+
+      const idxF = FILTERED.findIndex(x => String(x.id) === String(pid));
+      if (idxF >= 0) FILTERED[idxF] = { ...FILTERED[idxF], ...patch };
+
+      // Update visible DOM nodes (grid + list)
+      const nodes = document.querySelectorAll(`[data-pid="${pid}"]`);
+      nodes.forEach(node => {
+        // Auction end dataset
+        if (patch.auctionEnd) node.dataset.auctionEnd = patch.auctionEnd;
+
+        // highest bid
+        if (patch.highestBid != null){
+          const v = formatPrice(patch.highestBid);
+          node.querySelectorAll(`[data-bind="highestBid"]`).forEach(el => el.textContent = v);
+          node.querySelectorAll(`[data-bind="currentBid"]`).forEach(el => el.textContent = v);
+        }
+
+        // won user id
+        if (patch.wonUserId !== undefined){
+          node.dataset.wonUserId = (patch.wonUserId == null ? '' : String(patch.wonUserId));
+		  applyWonUi(node, pid, patch.wonUserId);
+        }
+
+        // quick bid min allowed
+        if (patch.nextMinumBid != null){
+		
+		  /** Delete Later  
+          node.querySelectorAll(`[data-bind="quickBidText"]`).forEach(el => {
+            el.textContent = `Quick Bid ${formatPrice(patch.nextMinumBid)}`;
+          });
+          node.querySelectorAll(`[data-bind="quickBidBtn"]`).forEach(btn => {
+            btn.dataset.amount = String(Number(patch.nextMinumBid) || 0);
+            // keep enabled unless won already
+            if (!btn.dataset.wonLocked) btn.disabled = false;
+          });
+		  */
+		  node.querySelectorAll(`[data-bind="quickBidBtn"]`).forEach(btn => {
+			  btn.dataset.amount = String(Number(patch.nextMinumBid) || 0);
+
+			  // keep enabled unless won already
+			  if (!btn.dataset.wonLocked) btn.disabled = false;
+
+			  // ✅ If user is hovering the WON button, DON'T overwrite the hover message
+			  if (btn.dataset.wonLocked && btn._wonHoverActive) return;
+
+			  // ✅ Otherwise, always set label from latest amount
+			  setQuickBidLabelFromAmount(btn);
+		  });
+		  
+		  
+        }
+      });
+
+      // Also refresh time labels quickly after auctionEnd patch
+      if (patch.auctionEnd) tickAllCountdowns();
+    }
+
+	/** ==  ApplyWonUI ==> Winning-Frame Embeded == */ 
+	function applyWonUi(containerNode, pid, wonUserId){
+	
+	  const myId = localStorage.getItem('userid');
+	  const iWon = (myId && wonUserId != null && String(wonUserId) === String(myId));
+
+	  // Bid status for THIS user on this card:
+	  //  - winning: you're the current highest bidder while the auction is still live
+	  //  - won:     the auction ended and you're the highest bidder
+	  //  - losing:  you've bid on this item but someone else is now ahead (still live)
+	  const endIso = containerNode.dataset.auctionEnd || containerNode.getAttribute('data-auction-end') || '';
+	  const ended  = isAuctionEnded(endIso);
+	  const iBid   = !!myId && MY_BID_SET.has(Number(pid));
+	  let status = null;
+	  if (iWon)                status = ended ? 'won' : 'winning';
+	  else if (iBid && !ended) status = 'losing';
+
+	  // frame: green while you're ahead, subtle red while you're outbid (live).
+	  containerNode.classList.toggle('wonFrame', !!iWon);
+	  containerNode.classList.toggle('losingFrame', status === 'losing');
+
+	  // badge (rendered bottom-left; never overlaps the top-right watchlist button)
+	  let badge = containerNode.querySelector('.wonBadge');
+	  if (status){
+		if (!badge){
+		  badge = document.createElement('div');
+		  const thumb = containerNode.querySelector('.thumb') || containerNode.querySelector('.listThumb') || containerNode;
+		  thumb.appendChild(badge);
+		}
+		const meta = {
+		  won:     { cls:'wonBadge isWon',     label:'Won' },
+		  winning: { cls:'wonBadge isWinning', label:'Winning' },
+		  losing:  { cls:'wonBadge isLosing',  label:'Outbid' }
+		}[status];
+		badge.className = meta.cls;
+		badge.innerHTML = '<span class="wonDot"></span>' + meta.label;
+	  } else {
+		if (badge) badge.remove();
+	  }
+
+	  // quick bid
+	  const qbBtn = containerNode.querySelector(`[data-bind="quickBidBtn"]`);
+	  const qbMsg = containerNode.querySelector(`[data-bind="qbMsg"]`);
+
+	  if (!qbBtn) return;
+
+	  if (iWon){
+		// ✅ lock + wire hover
+		qbBtn.disabled = true;
+		qbBtn.dataset.wonLocked = "1";
+		qbBtn.classList.remove('hidden');
+		qbBtn.title = "You already won / currently winning";
+
+		// store the normal label BEFORE we start swapping it on hover
+		// qbBtn.dataset.normalHtml = qbBtn.dataset.normalHtml || qbBtn.innerHTML;
+
+		wireWonHover(qbBtn, "🏆 You're winning");
+		if (!qbBtn._wonHoverActive) setQuickBidLabelFromAmount(qbBtn);
+
+	  } else {
+		// ✅ unlock + IMPORTANT: remove hover handlers + restore label
+		delete qbBtn.dataset.wonLocked;
+		unwireWonHover(qbBtn);
+
+		/*restore normal label (Quick Bid $amount)
+		const label = qbBtn.querySelector('[data-bind="quickBidText"]');
+		if (label && qbBtn.dataset.normalLabel) {
+		  label.textContent = qbBtn.dataset.normalLabel;
+		} else if (label && qbBtn.dataset.amount) {
+		  label.textContent = `Quick Bid ${formatPrice(qbBtn.dataset.amount)}`;
+		}*/
+
+		
+		qbBtn.disabled = !isLoggedIn();
+		qbBtn.title = "";
+		
+		// ✅ restore label from latest amount
+		setQuickBidLabelFromAmount(qbBtn);
+	  }
+	}
+
+    // ========= 1s ticker to update all time-left fields =========
+    let countdownTicker = null;
+    function tickAllCountdowns(){
+      document.querySelectorAll('[data-auction-end]').forEach(el => {
+        const endIso = el.getAttribute('data-auction-end');
+        const label = timeLeftLabelSeconds(endIso);
+
+        // list time left in details panel
+        const tl = el.querySelector('[data-bind="timeLeft"]');
+        if (tl) tl.textContent = label;
+
+        // list timeBox
+        const tl2 = el.querySelector('[data-bind="timeBoxLeft"]');
+        if (tl2) tl2.textContent = label;
+
+        // list overlay badge
+        const lb = el.querySelector('[data-bind="leftBadge"]');
+        if (lb) lb.textContent = label;
+      });
+
+      // Coming-soon lots count down to their go-live time (auctionStart).
+      document.querySelectorAll('[data-go-live]').forEach(el => {
+        const g = el.querySelector('[data-bind="goLiveLeft"]');
+        if (g) g.textContent = startsInLabelSeconds(el.getAttribute('data-go-live'));
+      });
+    }
+
+    function startCountdownTicker(){
+      if (countdownTicker) return;
+      countdownTicker = setInterval(tickAllCountdowns, 1000);
+      tickAllCountdowns();
+    }
+
+    // ========= WebSocket live updates for index (per visible product) =========
+    let stompClient = null;
+    const SUBS = new Map(); // pid -> subscription
+
+    function connectSocketIndex(){
+      try{
+        const socket = new SockJS(`${API_BASE_URL}/ws/auction`);
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        wsStatus.textContent = "Live: connecting…";
+
+        stompClient.connect({}, () => {
+          wsStatus.textContent = "Live: connected";
+          syncSubscriptionsForVisible();
+        }, () => {
+          wsStatus.textContent = "Live: reconnecting…";
+          setTimeout(connectSocketIndex, 5000);
+        });
+      }catch(e){
+        console.warn('socket failed', e);
+        wsStatus.textContent = "Live: unavailable";
+      }
+    }
+
+    function ensureSubscribed(pid){
+      if (!stompClient || !stompClient.connected) return;
+      if (SUBS.has(pid)) return;
+
+      const sub = stompClient.subscribe(`/topic/auction.${pid}`, frame => {
+        const evt = JSON.parse(frame.body || "{}");
+
+        // Build patch from event keys you already use in product-view.html
+        const patch = {};
+        if (evt.highestBid != null) patch.highestBid = evt.highestBid;
+        if (evt.wonUserId !== undefined) patch.wonUserId = (evt.wonUserId ?? null);
+        if (evt.auctionEnd) patch.auctionEnd = evt.auctionEnd;
+
+        // You use evt.nextMinumBid in product-view
+        if (evt.nextMinumBid != null) patch.nextMinumBid = Number(evt.nextMinumBid) || 0;
+
+        // Apply
+        updateDomForProduct(pid, patch);
+
+        // Also: when highest changes but nextMinumBid not sent, we can recompute min bid
+        // (optional, safe fallback)
+        if (patch.highestBid != null && (evt.nextMinumBid == null) && isLoggedIn()){
+          getNextMinBid(patch.highestBid)
+            .then(({ minAllowed }) => updateDomForProduct(pid, { nextMinumBid: minAllowed }))
+            .catch(() => {});
+        }
+      });
+
+      SUBS.set(pid, sub);
+    }
+
+    function unsubscribeMissing(keepSet){
+      for (const [pid, sub] of SUBS.entries()){
+        if (!keepSet.has(String(pid))){
+          try{ sub.unsubscribe(); }catch(e){}
+          SUBS.delete(pid);
+        }
+      }
+    }
+
+    function syncSubscriptionsForVisible(){
+      if (!stompClient || !stompClient.connected) return;
+
+      // subscribe only for visible page items
+      const visibleIds = new Set();
+      document.querySelectorAll('[data-pid]').forEach(el => {
+        // only those actually visible in DOM (current mode)
+        const isHidden = el.classList.contains('hidden') || el.closest('.hidden');
+        if (!isHidden) visibleIds.add(String(el.getAttribute('data-pid')));
+      });
+
+      visibleIds.forEach(pid => ensureSubscribed(pid));
+      unsubscribeMissing(visibleIds);
+    }
+	
+	function isComingSoon(p) {
+	  return Boolean(p?.comingSoon);
+	}
+
+    // Stock qty helper (buy-now items)
+    function getQty(p){
+      const q = (p.quantity ?? p.qty ?? p.stock ?? p.availableQty);
+      return (q === undefined) ? null : q;
+    }
+    // Retail price helper (TODO(backend): only shows when the product carries a retail value)
+    function getRetail(p){
+      const r = (p.retailPrice ?? p.retail ?? p.msrp ?? p.compareAtPrice);
+      return (r == null || Number(r) <= 0) ? null : Number(r);
+    }
+    function belowRetailPct(price, retail){
+      if (!retail || retail <= 0 || price == null) return null;
+      const pct = Math.round((1 - (Number(price) / retail)) * 100);
+      return (pct > 0 && pct < 100) ? pct : null;
+    }
+    function categoryName(p){
+      return (p.category && (p.category.name || p.category.title)) ||
+        p.categoryName ||
+        (p.categoryId ? `Category ${p.categoryId}` : 'OTHER');
+    }
+
+    // Shared watchlist wiring for any card that has a [data-watch] button
+    function wireWatch(container, p){
+      const watchBtn = container.querySelector(`[data-watch="${p.id}"]`);
+      if (isLoggedIn() && watchBtn){
+        watchBtn.classList.remove('hidden');
+        if (WATCHED_SET.has(Number(p.id))) watchBtn.classList.add('active');
+        watchBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          try{
+            if (WATCHED_SET.has(Number(p.id))){
+              await removeFromWatchlist(p.id);
+              WATCHED_SET.delete(Number(p.id));
+              watchBtn.classList.remove('active');
+            } else {
+              await addToWatchlist(p.id);
+              WATCHED_SET.add(Number(p.id));
+              watchBtn.classList.add('active');
+            }
+          }catch(err){ LF.toast('Watchlist failed: ' + (err?.message || 'error'), 'error'); }
+        });
+      } else {
+        watchBtn?.classList.add('hidden');
+      }
+    }
+
+    // ==== GRID card: BUY NOW variant ====
+    // ===== Reference-design cards (grid + list), wired to live data =====
+    function lfPhBg(p){
+      const arr = [
+        'linear-gradient(135deg,#E6EDF4 0%,#C7D6E5 100%)',
+        'linear-gradient(135deg,#DCE4EE 0%,#B7C7DC 100%)',
+        'linear-gradient(135deg,#E4EBE5 0%,#C6D6CB 100%)',
+        'linear-gradient(135deg,#ECE8E1 0%,#D3CABB 100%)',
+        'linear-gradient(135deg,#F0EADC 0%,#DDCFB4 100%)'
+      ];
+      return arr[(Number(p.id) || 0) % arr.length];
+    }
+
+    function lfDecorate(p){
+      const isA = !isBuyNow(p);
+      const comingSoon = isComingSoon(p);
+      const images = getAllImages(p);
+      const img = images[0] || NO_IMAGE;
+      const cat = categoryName(p);
+      const currentBid = (p.highestBid != null ? p.highestBid : p.basePrice);
+      const priceVal = isA ? currentBid : p.basePrice;
+      const endIso = p.auctionEnd;
+      const endMs = endIso ? new Date(endIso).getTime() : 0;
+      const urgent = isA && endMs && (endMs - Date.now() < 3600000) && (endMs > Date.now());
+      const bidCount = (p.bidCount ?? p.totalBids ?? (Array.isArray(p.bids) ? p.bids.length : null));
+      const wh = warehouseForProduct(p);
+      const qty = getQty(p);
+      return {
+        isA, comingSoon, img,
+        cat: String(cat),
+        catUpper: String(cat).toUpperCase(),
+        title: p.title || 'Untitled',
+        lotNo: 'LOT ' + String(p.id == null ? '' : p.id).padStart(3, '0'),
+        priceLabel: isA ? (comingSoon ? 'Starting bid' : 'Current bid') : 'Buy now price',
+        priceText: formatPrice(priceVal),
+        timeLeft: timeLeftLabelSeconds(endIso),
+        startIso: p.auctionStart || '',
+        startsLeft: startsInLabelSeconds(p.auctionStart),
+        chipBg: urgent ? '#8A2B28' : '#14263F',
+        chipDot: urgent ? '#FF6B68' : '#37C0DC',
+        bidsText: isA ? ((bidCount != null ? bidCount : 0) + ' bids') : 'In stock',
+        condition: safeText(p.condition || p.itemCondition || p.grade, '—'),
+        statusText: isA ? 'AUCTION' : 'BUY NOW',
+        badgeText: comingSoon ? 'Coming Soon' : (isA ? 'Auction' : 'Buy Now'),
+        badgeStyle: comingSoon
+          ? 'background:#eef0f2;color:#6b7480;'
+          : (isA
+            ? 'background:#1f8b57;color:#fff;box-shadow:0 1px 4px rgba(16,32,46,.22);'
+            : 'background:#16202e;color:#fff;box-shadow:0 1px 4px rgba(16,32,46,.22);'),
+        timeStyle: urgent ? 'color:#c0453f;font-weight:700;' : 'color:#6b7480;font-weight:600;',
+        badgeDot: isA ? '#1F8B57' : '#ffffff',
+        idText: 'ID #' + (p.id == null ? '—' : p.id),
+        sku: safeText(p.sku || p.skuCode || p.productCode, 'LF-' + (p.id == null ? '' : p.id)),
+        qty: (qty == null ? '—' : qty),
+        stockText: 'In stock',
+        whText: 'Warehouse ' + (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId ?? 1),
+        hub: wh ? safeText(wh.name) : '—',
+        addr: wh ? formatWarehouseAddress(wh) : '—',
+        phBg: lfPhBg(p)
+      };
+    }
+
+    function lfMeta(icon, label, value, color){
+      const vc = color || '#14263F';
+      const vw = color ? 700 : 600;
+      return '<div><div style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#A0AEAA;font-weight:700;display:flex;align-items:center;gap:5px;">' +
+        icon + label + '</div><div style="font-size:13px;color:' + vc + ';font-weight:' + vw + ';margin-top:4px;">' + value + '</div></div>';
+    }
+
+    // Wiring shared by both card layouts
+    function lfWireWatchAll(container, p){
+      const btns = Array.from(container.querySelectorAll('[data-watch="' + p.id + '"]'));
+      if (!isLoggedIn()){ btns.forEach(b => b.classList.add('hidden')); return; }
+      const watched = () => WATCHED_SET.has(Number(p.id));
+      const sync = () => btns.forEach(b => {
+        b.classList.remove('hidden');
+        b.classList.toggle('active', watched());
+        const lbl = b.querySelector('[data-watchlabel]');
+        if (lbl) lbl.textContent = watched() ? 'Watching' : 'Watch';
+      });
+      sync();
+      btns.forEach(b => b.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        try {
+          if (watched()){ await removeFromWatchlist(p.id); WATCHED_SET.delete(Number(p.id)); }
+          else { await addToWatchlist(p.id); WATCHED_SET.add(Number(p.id)); }
+          sync();
+        } catch (err){ LF.toast('Watchlist failed: ' + (err?.message || 'error'), 'error'); }
+      }));
+    }
+
+    function lfWireQuick(container, p){
+      const qbBtn = container.querySelector('[data-qb="' + p.id + '"]');
+      const qbMsg = container.querySelector('[data-qbm="' + p.id + '"]');
+      if (!qbBtn) return;
+      const setLbl = (t) => { const l = qbBtn.querySelector('[data-bind="quickBidText"]'); if (l) l.textContent = t; };
+
+      if (hasWon(p)){
+        qbBtn.classList.remove('hidden'); qbBtn.disabled = true;
+        qbBtn.dataset.wonLocked = "1"; wireWonHover(qbBtn); qbBtn.title = "You already won this item";
+      }
+      if (isLoggedIn() && qbMsg){
+        qbBtn.classList.remove('hidden'); qbBtn.disabled = true;
+        const highest = (p.highestBid != null ? p.highestBid : p.basePrice);
+        getNextMinBid(highest).then(({ minAllowed }) => {
+          if (!qbBtn.dataset.wonLocked) qbBtn.disabled = false;
+          qbBtn.dataset.amount = String(minAllowed);
+          setLbl('Quick bid ' + formatPrice(minAllowed));
+        }).catch(() => { qbBtn.disabled = true; });
+
+        qbBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (qbBtn.dataset.wonLocked) return;
+          const amt = Number(qbBtn.dataset.amount || 0);
+          if (!amt) return;
+          showQbMessage(qbMsg, 'Placing bid…', 'info');
+          const stopBusy = LF.busy(qbBtn, 'Bidding…');
+          try {
+            const latest = getLatestProduct(p.id) || p;
+            await validateQuickBidOrThrow(latest, amt, qbMsg);
+            const prod = await placeQuickBid(p.id, amt);
+            MY_BID_SET.add(Number(p.id));
+            if (prod?.isAutoOutbid && String(prod.isAutoOutbid).trim() !== "") showQbMessage(qbMsg, prod.isAutoOutbid, 'err', 10000);
+            else showQbMessage(qbMsg, '✅ Bid placed!', 'ok', 2500);
+            // Refresh the status badge right away (Winning, or Losing if auto-outbid).
+            if (prod && prod.wonUserId !== undefined) applyWonUi(container, p.id, prod.wonUserId);
+          } catch (err){
+            if (err?.message && !["not_logged_in","auction_ended","already_highest_bidder","bad_amount"].includes(err.message))
+              showQbMessage(qbMsg, '❌ ' + (err.message || 'Bid failed'), 'err', 4000);
+          } finally {
+            stopBusy();
+          }
+        });
+      } else {
+        // Logged out: still show Quick Bid so guests see the price, but any
+        // click prompts sign in instead of placing a bid.
+        qbBtn.classList.remove('hidden'); qbBtn.disabled = false;
+        qbMsg?.classList.add('hidden');
+        const highest = (p.highestBid != null ? p.highestBid : p.basePrice);
+        getNextMinBid(highest)
+          .then(({ minAllowed }) => setLbl('Quick bid ' + formatPrice(minAllowed)))
+          .catch(() => setLbl('Quick bid'));
+        qbBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          requireLogin(() => {});
+        });
+      }
+    }
+
+    // Gate an action behind login: run it if signed in, else show the
+    // login / sign-up popup (auth.js modal, falls back to ?login=1).
+    function requireLogin(action){
+      if (isLoggedIn()) { action(); return; }
+      if (typeof window.openLoginModal === 'function') window.openLoginModal();
+      else window.location.href = '/index.html?login=1';
+    }
+
+    function lfWireCard(container, p, d){
+      // Browsing is free: image + title open the product page for anyone.
+      container.querySelectorAll('.clickable-img').forEach(el => el.addEventListener('click', () => navigateForProduct(p)));
+      // Purchase intent (Place Bid / Buy Now) requires login → popup if signed out.
+      const idBtn = container.querySelector('[data-id]');
+      if (idBtn) idBtn.addEventListener('click', () => requireLogin(() => navigateForProduct(p)));
+      container.querySelectorAll('.lf-addcart').forEach(b => b.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        requireLogin(async () => {
+          const normalHtml = b.dataset.normalHtml || b.innerHTML;
+          b.dataset.normalHtml = normalHtml;
+          setCartButtonState(b, 'Adding...', true);
+
+          try {
+            await addProductToCart(p.id, 1);
+            setCartButtonState(b, 'Added to cart', true);
+            if (typeof window.__updateTopnavUI === 'function') window.__updateTopnavUI();
+            // Cart is a full page now — don't pop a drawer; the header cart badge
+            // updates and the button confirms. Users open the cart when ready.
+            setTimeout(() => setCartButtonState(b, normalHtml, false), 1800);
+          } catch (err) {
+            setCartButtonState(b, 'Add failed', false);
+            LF.toast('Could not add to cart: ' + (err?.message || 'error'), 'error');
+            setTimeout(() => setCartButtonState(b, normalHtml, false), 2200);
+          }
+        });
+      }));
+      lfWireWatchAll(container, p);
+      if (!d.comingSoon && d.isA) lfWireQuick(container, p);
+      applyWonUi(container, p.id, p.wonUserId);
+    }
+
+    // ==== GRID card ====
+    function productCardGrid(p){
+      const d = lfDecorate(p);
+      const card = document.createElement('article');
+      card.className = 'lf-card';
+      card.setAttribute('style', 'background:#fff;border:1px solid #E0E8E2;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;');
+      card.setAttribute('data-pid', p.id);
+      card.setAttribute('data-auction-end', p.auctionEnd || '');
+      if (d.comingSoon && p.auctionStart) card.setAttribute('data-go-live', p.auctionStart);
+      card.dataset.wonUserId = (p.wonUserId == null ? '' : String(p.wonUserId));
+      if (hasWon(p)) card.classList.add('wonFrame');
+
+      const timeChip = d.comingSoon
+        ? '<div style="display:flex;align-items:center;gap:5px;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;color:#6b7480;font-weight:600;">' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>' +
+            '<span data-bind="goLiveLeft">' + d.startsLeft + '</span></div>'
+        : ((d.isA)
+          ? '<div style="display:flex;align-items:center;gap:5px;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;' + d.timeStyle + '">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>' +
+              '<span data-bind="timeBoxLeft">' + d.timeLeft + '</span></div>'
+          : '');
+
+      const metaLine = d.isA ? (d.bidsText + ' · ' + d.condition) : ('In stock · ' + d.condition);
+
+      const primaryBtn = d.comingSoon
+        ? '<button class="lf-btn clickable-img" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">View Product</button>'
+        : '<button data-id="' + p.id + '" class="lf-btn" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">' + (d.isA ? 'Place Bid' : 'Buy Now') + '</button>';
+
+      const secondaryBtn = d.comingSoon ? ''
+        : (d.isA
+          ? '<button data-qb="' + p.id + '" data-bind="quickBidBtn" class="lf-btn lf-quick hidden" style="margin-top:8px;width:100%;font-weight:700;font-size:13px;padding:10px;border-radius:9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#1f8b57"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg><span data-bind="quickBidText">Quick bid</span></button>' +
+            '<div class="qbMsg hidden" data-bind="qbMsg" data-qbm="' + p.id + '"></div>'
+          : '<button class="lf-btn lf-addcart" style="margin-top:8px;width:100%;font-weight:700;font-size:13px;padding:10px;border-radius:9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #dfe2e6;background:#fff;color:#16202e;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="18" cy="20" r="1.4"></circle><path d="M6 6L5 3H2"></path></svg>Add to cart</button>');
+
+      card.innerHTML =
+        '<div class="thumb" style="position:relative;overflow:hidden;background:#f3f4f6;">' +
+          '<div class="lf-img clickable-img" style="position:relative;aspect-ratio:4/3;background-position:center;background-size:cover;background-image:url(\'' + d.img + '\');cursor:pointer;"></div>' +
+          '<span class="lf-typebadge" style="position:absolute;left:14px;top:14px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 11px;border-radius:6px;' + d.badgeStyle + '">' + d.badgeText + '</span>' +
+          '<button data-watch="' + p.id + '" type="button" class="lf-btn lf-card-watch hidden" title="Watchlist" style="position:absolute;right:13px;top:13px;width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;">' +
+            '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="2.6"></circle></svg></button>' +
+        '</div>' +
+        '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;flex:1;">' +
+          '<div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#aab1ba;margin-bottom:7px;">' + d.catUpper + '</div>' +
+          '<h3 class="clickable-img" style="font-weight:600;font-size:15px;line-height:1.35;margin:0 0 16px;color:#16202e;min-height:40px;cursor:pointer;">' + d.title + '</h3>' +
+          '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:auto;">' +
+            '<div>' +
+              '<div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#97a0ab;font-weight:700;margin-bottom:4px;">' + d.priceLabel + '</div>' +
+              '<div data-bind="currentBid" style="font-weight:800;font-size:23px;line-height:1;color:#16202e;font-variant-numeric:tabular-nums;">' + d.priceText + '</div>' +
+            '</div>' + timeChip +
+          '</div>' +
+          '<div style="font-size:12px;color:#aab1ba;margin-top:9px;font-weight:500;">' + metaLine + '</div>' +
+          '<div style="margin-top:15px;">' + primaryBtn + '</div>' + secondaryBtn +
+        '</div>';
+
+      lfWireCard(card, p, d);
+      return card;
+    }
+
+    // ==== LIST row ====
+    function productCardList(p){
+      const d = lfDecorate(p);
+      const row = document.createElement('article');
+      row.className = 'lf-card lf-listrow';
+      row.setAttribute('style', 'background:#fff;border:1px solid #E0E8E2;border-radius:18px;overflow:hidden;display:flex;align-items:stretch;');
+      row.setAttribute('data-pid', p.id);
+      row.setAttribute('data-auction-end', p.auctionEnd || '');
+      if (d.comingSoon && p.auctionStart) row.setAttribute('data-go-live', p.auctionStart);
+      row.dataset.wonUserId = (p.wonUserId == null ? '' : String(p.wonUserId));
+      if (hasWon(p)) row.classList.add('wonFrame');
+
+      const cell = (label, val) =>
+        '<div><div style="font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#aab1ba;font-weight:700;">' + label + '</div>' +
+        '<div style="font-size:13px;color:#16202e;font-weight:600;margin-top:3px;">' + val + '</div></div>';
+
+      const priceSide =
+        '<div>' +
+          '<div style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#97a0ab;font-weight:600;">' + d.priceLabel + '</div>' +
+          '<div data-bind="currentBid" style="font-weight:800;font-size:26px;line-height:1;margin-top:4px;color:#16202e;font-variant-numeric:tabular-nums;">' + d.priceText + '</div>' +
+          (d.comingSoon
+            ? '<div style="display:flex;align-items:center;gap:6px;font-size:12.5px;margin-top:9px;font-variant-numeric:tabular-nums;color:#6b7480;font-weight:600;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg><span data-bind="goLiveLeft">' + d.startsLeft + '</span></div>'
+            : (d.isA
+            ? '<div style="display:flex;align-items:center;gap:6px;font-size:12.5px;margin-top:9px;font-variant-numeric:tabular-nums;' + d.timeStyle + '"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg><span data-bind="timeBoxLeft">' + d.timeLeft + '</span></div>'
+            : '<div style="font-size:12px;color:#6b7480;font-weight:600;margin-top:9px;display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"></path></svg>Instant checkout</div>')) +
+        '</div>';
+
+      const sideBtns = d.comingSoon
+        ? '<button class="lf-btn clickable-img" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">View Product</button>'
+        : (d.isA
+          ? '<button data-id="' + p.id + '" class="lf-btn" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">Place Bid</button>' +
+            '<button data-qb="' + p.id + '" data-bind="quickBidBtn" class="lf-btn lf-quick hidden" style="width:100%;font-weight:700;font-size:12.5px;padding:9px;border-radius:9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#1f8b57"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg><span data-bind="quickBidText">Quick bid</span></button>' +
+            '<div class="qbMsg hidden" data-bind="qbMsg" data-qbm="' + p.id + '"></div>'
+          : '<button data-id="' + p.id + '" class="lf-btn" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">Buy Now</button>' +
+            '<button class="lf-btn lf-addcart" style="width:100%;font-weight:700;font-size:12.5px;padding:9px;border-radius:9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #dfe2e6;background:#fff;color:#16202e;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"></path><circle cx="9" cy="20" r="1.4"></circle><circle cx="18" cy="20" r="1.4"></circle><path d="M6 6L5 3H2"></path></svg>Add to cart</button>');
+
+      const qtyText = (d.qty === '—') ? '—' : (d.qty + ' units');
+
+      row.innerHTML =
+        '<div class="listThumb lf-img clickable-img" style="position:relative;width:210px;flex-shrink:0;background:#f3f4f6;background-image:url(\'' + d.img + '\');background-position:center;background-size:cover;overflow:hidden;cursor:pointer;">' +
+          '<span class="lf-typebadge" style="position:absolute;left:13px;top:13px;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:6px;' + d.badgeStyle + '">' + d.badgeText + '</span>' +
+        '</div>' +
+        '<div style="flex:1;min-width:0;padding:18px 22px;display:flex;flex-direction:column;">' +
+          '<div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#97a0ab;margin-bottom:4px;">' + d.catUpper + '</div>' +
+          '<h3 class="clickable-img" style="font-weight:700;font-size:18px;line-height:1.25;margin:0 0 14px;color:#16202e;cursor:pointer;">' + d.title + '</h3>' +
+          '<div class="lf-metagrid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 18px;margin-top:auto;">' +
+            cell('Category', d.cat) + cell('Condition', d.condition) + cell('Quantity', qtyText) + cell('Pickup', d.hub) +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#97a0ab;margin-top:14px;font-weight:500;"><span>' + d.bidsText + '</span><span style="color:#d3d8dd;">·</span><span>' + d.lotNo + '</span></div>' +
+        '</div>' +
+        '<div class="lf-side" style="width:230px;flex-shrink:0;border-left:1px solid #e6e8ec;padding:18px 22px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;">' +
+          priceSide +
+          '<div style="display:flex;flex-direction:column;gap:8px;">' + sideBtns +
+            '<button data-watch="' + p.id + '" type="button" class="lf-btn lf-watch-out hidden" style="width:100%;font-weight:700;font-size:13px;padding:11px;border-radius:9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="2.6"></circle></svg><span data-watchlabel>Watch</span></button>' +
+          '</div>' +
+        '</div>';
+
+      lfWireCard(row, p, d);
+      return row;
+    }
+
+    function setView(mode){
+      VIEW_MODE = mode;
+
+      if (mode === 'grid'){
+        grid.classList.remove('hidden');
+        list.classList.add('hidden');
+        gridViewBtn.classList.add('active');
+        listViewBtn.classList.remove('active');
+        gridViewBtn.setAttribute('aria-pressed','true');
+        listViewBtn.setAttribute('aria-pressed','false');
+      } else {
+        list.classList.remove('hidden');
+        grid.classList.add('hidden');
+        listViewBtn.classList.add('active');
+        gridViewBtn.classList.remove('active');
+        listViewBtn.setAttribute('aria-pressed','true');
+        gridViewBtn.setAttribute('aria-pressed','false');
+      }
+
+      render();
+    }
+
+    // Build a windowed list of page numbers, e.g. [1,'...',4,5,6,'...',42]
+    function pageWindow(cur, total){
+      const out = [];
+      const push = n => { if (!out.includes(n)) out.push(n); };
+      push(1);
+      for (let n = cur - 1; n <= cur + 1; n++){ if (n > 1 && n < total) push(n); }
+      if (total > 1) push(total);
+      // insert ellipses where there are gaps
+      const withDots = [];
+      for (let i = 0; i < out.length; i++){
+        withDots.push(out[i]);
+        if (i < out.length - 1 && out[i+1] - out[i] > 1) withDots.push('...');
+      }
+      return withDots;
+    }
+
+    function render(){
+      const total = FILTERED.length;
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      CURRENT_PAGE = Math.min(CURRENT_PAGE, totalPages);
+
+      const start = (CURRENT_PAGE - 1) * PAGE_SIZE;
+      const pageItems = FILTERED.slice(start, start + PAGE_SIZE);
+
+      // Products haven't loaded yet → keep showing skeletons instead of flashing
+      // an "empty" message before the first fetch resolves.
+      if(!PRODUCTS_LOADED){
+        showSkeletons();
+        return;
+      }
+
+      grid.innerHTML = '';
+      list.innerHTML = '';
+
+      if(pageItems.length === 0){
+        if (VIEW_MODE === 'grid'){
+          grid.innerHTML = `<div class="muted" style="grid-column:1/-1;padding:24px;text-align:center">No items found.</div>`;
+        } else {
+          list.innerHTML = `<div class="muted" style="padding:24px;text-align:center">No items found.</div>`;
+        }
+      }else{
+        if (VIEW_MODE === 'grid'){
+          pageItems.forEach(p => grid.appendChild(productCardGrid(p)));
+        } else {
+          pageItems.forEach(p => list.appendChild(productCardList(p)));
+        }
+      }
+
+      metaInfo.textContent = `${total} item${total!==1?'s':''}`;
+      pageInfoInline.textContent = `Page ${CURRENT_PAGE} of ${totalPages}`;
+
+      if(totalPages > 1){
+        pagination.classList.remove('hidden');
+        prevPage.disabled = CURRENT_PAGE===1;
+        nextPage.disabled = CURRENT_PAGE===totalPages;
+        // Design pager: prev / "Page x of y" / next
+        pageInfo.textContent = `${CURRENT_PAGE} of ${totalPages}`;
+      }else{
+        pagination.classList.add('hidden');
+      }
+
+      // ✅ after DOM updated: subscribe to visible items + refresh countdown
+      syncSubscriptionsForVisible();
+      tickAllCountdowns();
+    }
+
+    // ==== Filtering / Sorting ====
+    function applyFilters(){
+      const q = (searchBox.value||'').trim().toLowerCase();
+      const catId = categorySelect.value ? Number(categorySelect.value) : null;
+      const type = typeSelect.value; // all | auction | buynow
+      const whVal = (document.getElementById('warehouseSelect')?.value) || 'all';
+
+      FILTERED = ALL_PRODUCTS.filter(p => {
+        const matchesText = !q || (p.title && p.title.toLowerCase().includes(q));
+        const matchesCat = !catId || p.categoryId === catId || (p.category && p.category.id === catId);
+        const matchesType = (type === 'all' || !type) ? true : (p._kind === type);
+        const pwh = (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId);
+        const matchesWh = (whVal === 'all') || (pwh != null && String(pwh) === String(whVal));
+        return matchesText && matchesCat && matchesType && matchesWh;
+      });
+
+      const sort = sortSelect.value;
+      FILTERED.sort((a,b) => {
+        // "recommended" keeps the interleaved auction/buy-now smooth-flow order
+        if(sort==='recommended') return 0;
+        if(sort==='endingSoon'){
+          const ta = a.auctionEnd ? new Date(a.auctionEnd).getTime() : Infinity;
+          const tb = b.auctionEnd ? new Date(b.auctionEnd).getTime() : Infinity;
+          return ta - tb;
+        }
+        if(sort==='newlyListed'){
+          const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return tb - ta;
+        }
+        if(sort==='priceLowHigh'){
+          const ca = (a.highestBid != null ? a.highestBid : a.basePrice);
+          const cb = (b.highestBid != null ? b.highestBid : b.basePrice);
+          return (Number(ca)||0) - (Number(cb)||0);
+        }
+        if(sort==='priceHighLow'){
+          const ca = (a.highestBid != null ? a.highestBid : a.basePrice);
+          const cb = (b.highestBid != null ? b.highestBid : b.basePrice);
+          return (Number(cb)||0) - (Number(ca)||0);
+        }
+        if(sort==='mostBids'){
+          const ba = (a.bidCount ?? a.totalBids ?? (Array.isArray(a.bids)?a.bids.length:0));
+          const bb = (b.bidCount ?? b.totalBids ?? (Array.isArray(b.bids)?b.bids.length:0));
+          return (Number(bb)||0) - (Number(ba)||0);
+        }
+        return 0;
+      });
+
+      CURRENT_PAGE = 1;
+      render();
+    }
+
+    // ==== Events ====
+    $('#refreshBtn').addEventListener('click', () => {
+      categorySelect.value = '';
+      searchBox.value = '';
+      typeSelect.value = 'all';   // smooth flow: show auctions + buy-now
+      applyFilters();
+    });
+
+    applyBtn.addEventListener('click', applyFilters);
+
+    // Category is filtered client-side now (both kinds already loaded).
+    categorySelect.addEventListener('change', applyFilters);
+    typeSelect.addEventListener('change', applyFilters);
+
+    sortSelect.addEventListener('change', applyFilters);
+    searchBox.addEventListener('input', applyFilters);
+
+    // Segmented Type tabs (All / Auctions / Buy Now) drive the hidden typeSelect.
+    document.querySelectorAll('#typeTabs .lf-segbtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#typeTabs .lf-segbtn').forEach(b => b.classList.remove('is-on'));
+        btn.classList.add('is-on');
+        typeSelect.value = btn.dataset.tab || 'all';
+        applyFilters();
+      });
+    });
+
+    // "Sorted by" label mirror.
+    const SORT_LABELS = { endingSoon:'Ending soonest', newlyListed:'Newest first', priceLowHigh:'Price: low to high', priceHighLow:'Price: high to low', mostBids:'Most bids' };
+    const sortLabelEl = document.getElementById('sortLabel');
+    function updateSortLabel(){ if (sortLabelEl) sortLabelEl.textContent = SORT_LABELS[sortSelect.value] || 'Ending soonest'; }
+    sortSelect.addEventListener('change', updateSortLabel);
+    updateSortLabel();
+
+    // Warehouse filter (client-side; product warehouse data is already loaded).
+    const warehouseSelect = document.getElementById('warehouseSelect');
+    warehouseSelect?.addEventListener('change', applyFilters);
+    function populateWarehouseSelect(){
+      if (!warehouseSelect || !WAREHOUSE_MAP.size) return;
+      const cur = warehouseSelect.value;
+      warehouseSelect.innerHTML = '<option value="all">All Warehouses</option>' +
+        Array.from(WAREHOUSE_MAP.values()).map(w => `<option value="${w.id}">${w.name || ('Warehouse ' + w.id)}</option>`).join('');
+      warehouseSelect.value = cur || 'all';
+    }
+
+    prevPage.addEventListener('click', () => {
+      if(CURRENT_PAGE>1){ CURRENT_PAGE--; render(); }
+    });
+    nextPage.addEventListener('click', () => {
+      const totalPages = Math.max(1, Math.ceil(FILTERED.length / PAGE_SIZE));
+      if(CURRENT_PAGE<totalPages){ CURRENT_PAGE++; render(); }
+    });
+
+    gridViewBtn.addEventListener('click', () => setView('grid'));
+    listViewBtn.addEventListener('click', () => setView('list'));
+
+    pageSizeSelect.addEventListener('change', () => {
+      const v = parseInt(pageSizeSelect.value, 10);
+      PAGE_SIZE = (!Number.isNaN(v) && v > 0) ? v : 10;
+      CURRENT_PAGE = 1;
+      render();
+    });
+
+    // --- Auction / Buy Now toggle navigation ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auction / Buy Now are just filters on this same listing page now.
+      $$('.view-nav').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target;
+          const tab = document.querySelector('#typeTabs .lf-segbtn[data-tab="' + target + '"]');
+          if (tab) tab.click();
+        });
+      });
+    });
+
+    // ===== Category pills (new design) =====
+    function setActivePill(el){
+      document.querySelectorAll('#catPills .pill-cat').forEach(b => b.classList.remove('active'));
+      if (el) el.classList.add('active');
+    }
+
+    // Build the pill row from the SAME categories used by the (hidden) categorySelect,
+    // so each pill maps to a real category id and filters via the existing code path.
+    function buildCategoryPills(){
+      const host = document.getElementById('catPills');
+      if (!host) return;
+
+      // clear any previously injected pills (keep the "All" pill / #refreshBtn)
+      host.querySelectorAll('.pill-cat[data-cat]:not(#refreshBtn)').forEach(n => n.remove());
+
+      const opts = Array.from(categorySelect.options).filter(o => o.value); // skip "All Categories"
+      opts.slice(0, 6).forEach(o => {                                       // show up to 6 like the mock
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'pill-cat';
+        b.dataset.cat = o.value;
+        b.textContent = o.textContent;
+        b.addEventListener('click', async () => {
+          setActivePill(b);
+          categorySelect.value = o.value;
+          await fetchByCategory(o.value);
+        });
+        host.appendChild(b);
+      });
+    }
+
+    // "All" pill also runs the original reset handler; here we just mark it active.
+    document.getElementById('refreshBtn')?.addEventListener('click', function(){ setActivePill(this); });
+
+    // Hero "Start browsing" → jump to the listings.
+    document.getElementById('heroBrowse')?.addEventListener('click', () => {
+      document.querySelector('.toolbar')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+
+    // Hero tiles → filter by the first category whose name matches the keyword.
+    document.querySelectorAll('.heroTile[data-hero-cat]').forEach(tile => {
+      tile.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const key = (tile.dataset.heroCat || '').toLowerCase();
+        const match = Array.from(categorySelect.options)
+          .find(o => o.value && o.textContent.toLowerCase().includes(key));
+        if (match){
+          categorySelect.value = match.value;
+          const pill = document.querySelector(`#catPills .pill-cat[data-cat="${match.value}"]`);
+          setActivePill(pill || null);
+          await fetchByCategory(match.value);
+        }
+        document.querySelector('.toolbar')?.scrollIntoView({ behavior:'smooth', block:'start' });
+      });
+    });
+
+    // Header search hook (used by the nav search in topnav.html): live filter, no reload.
+    window.applyHeaderSearch = function(term){
+      searchBox.value = term || '';
+      applyFilters();
+      document.querySelector('.toolbar')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    };
+
+    // ==== Boot ====
+    (async function init(){
+      pageSizeSelect.value = "12";
+      setView('grid');                    // paint skeleton cards immediately
+
+      // Banners are decorative — load in the background so they never delay the
+      // toolbar or the product grid.
+      loadBanners();
+
+      // Card-decoration data (warehouses for pickup, watchlist + bid status) is
+      // needed before the cards render, but NOT before the filter shows. Kick it
+      // all off in parallel now and await it just before fetching products.
+      const cardDataReady = Promise.all([
+        loadWarehouses().then(populateWarehouseSelect),
+        loadMyWatchlist(),
+        loadMyBids()
+      ]);
+
+      // Categories drive the visible category filter. Load + build them first so
+      // the toolbar appears right away, while the product cards are still loading —
+      // instead of being stuck behind banners / watchlist / bids / the product fetch.
+      await loadAllCategories();
+      buildCategoryPills();               // build pills from real categories
+
+      // ✅ Prefill from URL params (this page is the single listing view):
+      //    ?q=  → search term ; ?type=auction|buynow → pre-set the Type filter
+      //    so "Buy Now" / "Auctions" links land here pre-filtered (no separate page).
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const q = params.get('q');
+        if (q) searchBox.value = q;
+        const t = (params.get('type') || '').toLowerCase();
+        if (t === 'auction' || t === 'buynow') {
+          typeSelect.value = t;
+          document.querySelectorAll('#typeTabs .lf-segbtn').forEach(b => b.classList.toggle('is-on', b.dataset.tab === t));
+        }
+        // ?category=<id> → pre-select category (from the Shop by Category page).
+        const cat = params.get('category');
+        if (cat && Array.from(categorySelect.options).some(o => o.value === String(cat))) {
+          categorySelect.value = String(cat);
+        }
+      } catch(e){}
+
+      // Ensure warehouse / watchlist / bid data is in so cards paint with correct
+      // pickup + watch + bid states on first render.
+      await cardDataReady;
+      await fetchAllProducts();
+
+      // ✅ Start 1s countdown updates
+      startCountdownTicker();
+
+      // ✅ Start websocket + subscribe to visible products
+      connectSocketIndex();
+    })();
+  </script>
+
+  <script>
+    /* ===== Leftpanel wiring (optional) ===== */
+    function wireLeftPanelFilters() {
+      const lpType = document.getElementById('lp_typeSelect');
+      const lpCat  = document.getElementById('lp_categorySelect');
+      const lpApply= document.getElementById('lp_applyBtn');
+
+      if (!lpType && !lpCat) return;
+
+      function syncPageToPanel(){
+        if (lpType) lpType.value = typeSelect.value;
+        if (lpCat)  lpCat.value  = categorySelect.value;
+      }
+
+      async function syncPanelToPageAndApply(){
+        if (lpType) typeSelect.value = lpType.value;
+        if (lpCat)  categorySelect.value = lpCat.value;
+
+        const val = categorySelect.value;
+        if (!val) await fetchAllProducts();
+        else await fetchByCategory(val);
+
+        applyFilters();
+      }
+
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.burger')) syncPageToPanel();
+      });
+
+      lpType?.addEventListener('change', syncPanelToPageAndApply);
+
+      lpCat?.addEventListener('change', async () => {
+        categorySelect.value = lpCat.value;
+        const val = categorySelect.value;
+        if (!val) await fetchAllProducts();
+        else await fetchByCategory(val);
+      });
+
+      lpApply?.addEventListener('click', syncPanelToPageAndApply);
+
+      syncPageToPanel();
+    }
+
+    window.addEventListener("leftpanel:ready", () => {
+      wireLeftPanelFilters();
+    });
+  </script>
+  
+  <script>
+  window.addEventListener('load', () => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('openLogin') === 'true') {
+      // Wait until auth.js initializes modal
+      const tryOpen = () => {
+        if (typeof window.openLoginModal === 'function') {
+          window.openLoginModal();
+
+          // Clean URL (remove query param)
+          window.history.replaceState({}, document.title, "/index.html");
+        } else {
+          setTimeout(tryOpen, 100); // retry until ready
+        }
+      };
+
+      tryOpen();
+    }
+  });
+</script>
+
+  <!-- Hero highlight rotator — static marketing slides. TODO(backend): wire to featured lots. -->
+  <script>
+    (function(){
+      var slides = [
+        { t:'Up to 70% off retail', s:'Brand-name appliances, electronics and home goods — tested and priced to move.', img:'/img/70percantageoffretail.png' },
+        { t:'Wholesale & bulk lots', s:'Pallets and case-packs at the best prices for resellers.', img:'/img/wholesaleandbulkitems.png' },
+        { t:'Fast shipping across Canada', s:'Won lots and buy-now orders shipped fast, coast to coast.', img:'/img/Fastshipping.png' }
+      ];
+      var imgEl = document.getElementById('heroImg');
+      var tEl = document.getElementById('heroHiliteT');
+      var sEl = document.getElementById('heroHiliteS');
+      var dotsEl = document.getElementById('heroDots');
+      if(!imgEl || !tEl || !sEl || !dotsEl) return;
+
+      var layers = slides.map(function(sl, i){
+        var d = document.createElement('div');
+        d.className = 'lf-herolayer' + (i===0 ? ' on' : '');
+        d.style.backgroundImage = "url('" + sl.img + "')";
+        imgEl.insertBefore(d, imgEl.firstChild);
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = (i===0 ? 'on' : '');
+        dot.setAttribute('aria-label', 'Slide ' + (i+1));
+        dot.addEventListener('click', function(){ go(i); });
+        dotsEl.appendChild(dot);
+        return d;
+      });
+      var dots = Array.prototype.slice.call(dotsEl.children);
+      var cntEl = document.getElementById('heroCounter');
+      var cur = 0, timer = null;
+      function paint(){
+        layers.forEach(function(l,i){ l.classList.toggle('on', i===cur); });
+        dots.forEach(function(dd,i){ dd.classList.toggle('on', i===cur); });
+        tEl.textContent = slides[cur].t;
+        sEl.textContent = slides[cur].s;
+        if (cntEl) cntEl.textContent = (cur + 1) + ' / ' + slides.length;
+      }
+      function go(i){ cur = (i + slides.length) % slides.length; paint(); restart(); }
+      function next(){ go(cur + 1); }
+      function restart(){ if(timer) clearInterval(timer); timer = setInterval(next, 5000); }
+      var prevBtn = document.getElementById('heroPrev');
+      var nextBtn = document.getElementById('heroNext');
+      if (prevBtn) prevBtn.addEventListener('click', function(){ go(cur - 1); });
+      if (nextBtn) nextBtn.addEventListener('click', function(){ go(cur + 1); });
+      paint(); restart();
+    })();
+  </script>
+
+  <!-- Hero CTA wiring: switch the type tab (via .view-nav) and scroll to the listings -->
+  <script>
+    (function(){
+      var listings = document.getElementById('listings');
+      ['ctaAuctions', 'ctaBuyNow'].forEach(function(id){
+        var b = document.getElementById(id);
+        if (b && listings) b.addEventListener('click', function(){ listings.scrollIntoView({ behavior: 'smooth' }); });
+      });
+
+      // Phone "More filters" toggle — badge counts non-default filters so users
+      // know something is filtering their results even while collapsed.
+      var mf = document.getElementById('moreFiltersBtn');
+      var filterBar = document.querySelector('.lf-filter');
+      function mfUpdate(){
+        var n = 0;
+        var c = document.getElementById('categorySelect'); if (c && c.value) n++;
+        var w = document.getElementById('warehouseSelect'); if (w && w.value !== 'all') n++;
+        var s = document.getElementById('sortSelect'); if (s && s.value !== 'endingSoon') n++;
+        var badge = document.getElementById('mfCount');
+        if (badge){ badge.textContent = n; badge.classList.toggle('hidden', n === 0); }
+      }
+      if (mf && filterBar){
+        mf.addEventListener('click', function(){
+          var open = filterBar.classList.toggle('open');
+          mf.setAttribute('aria-expanded', open ? 'true' : 'false');
+          document.getElementById('mfLabel').textContent = open ? 'Hide filters' : 'More filters';
+          mfUpdate();
+        });
+        filterBar.addEventListener('change', mfUpdate);
+        mfUpdate();
+      }
+    })();
+  </script>
+
+</body>
+</html>
