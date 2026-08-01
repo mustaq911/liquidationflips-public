@@ -67,6 +67,8 @@
   .row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #eef0f2;gap:16px}
   .row .muted{color:#6b7480;font-weight:600;font-size:14px}
   #highestBid{font-weight:800;font-size:18px;color:#1f8b57}
+  .bidcount{font-size:12px;font-weight:700;color:#6b7480;margin-top:2px}
+  .bidcount.hidden{display:none}
   #lotId,#lotCategory{font-weight:700;font-size:14px;color:#16202e}
   .bidlabel{font-size:12px;font-weight:700;color:#16202e;margin:18px 0 7px;display:block}
   .bid-form{display:flex;gap:10px}
@@ -182,7 +184,7 @@
           <div style="text-align:right;"><div class="totalMsrpDisplay" id="countdownLabel">Time left</div><div class="countdown" id="countdown">—</div></div>
         </div>
 
-        <div class="row"><div class="muted" id="highestBidLabel">Highest bid</div><div id="highestBid">$0.00</div></div>
+        <div class="row"><div class="muted" id="highestBidLabel">Highest bid</div><div style="text-align:right"><div id="highestBid">$0.00</div><div id="bidCount" class="bidcount hidden">🔨 0 bids</div></div></div>
         <div class="row"><div class="muted">Lot ID</div><div id="lotId">—</div></div>
         <div class="row"><div class="muted">Category</div><div id="lotCategory">—</div></div>
 
@@ -642,7 +644,8 @@
           await loadBidIncrement();
         }
 
-        // Manifest
+        // Bid count ("🔨 N bids") + manifest
+        loadBidCount(product.id);
         loadManifest(product.id);
 
       } catch (err) {
@@ -665,6 +668,26 @@
 	  
 	}
 	
+	// Total number of bids placed on this lot (same endpoint the admin bid-history
+	// panel uses). Shown as "🔨 N bids" next to the highest bid. Fails quietly —
+	// a missing count just leaves the label hidden rather than blocking the page.
+	async function loadBidCount(productId){
+	  const el = qs('#bidCount');
+	  if (!el) return;
+	  try {
+		const res = await fetch(`${API_BASE_URL}/bids/product/${productId}`, {
+		  headers: token ? { "Authorization": `Bearer ${token}` } : {}
+		});
+		if (!res.ok) return;
+		const bids = await res.json();
+		const n = Array.isArray(bids) ? bids.length : 0;
+		// Solid brand-green gavel (not the multicolor 🔨 emoji) so it matches the site.
+		const gavel = '<svg width="12" height="12" viewBox="0 0 24 24" fill="#1f8b57" aria-hidden="true" style="vertical-align:-1px;margin-right:5px;"><path d="M1 21h12v2H1zM5.24 8.07l2.83-2.83 14.14 14.14-2.83 2.83zM12.32 1.02l5.66 5.66-2.83 2.83-5.66-5.66zM3.83 9.48l5.66 5.66-2.83 2.83-5.66-5.66z"/></svg>';
+		el.innerHTML = `${gavel}${n} ${n === 1 ? 'bid' : 'bids'}`;
+		el.classList.remove('hidden');
+	  } catch (e) { /* leave hidden */ }
+	}
+
 	async function loadBidIncrement(){
       const highest = Number((qs('#highestBid')?.textContent || '0').replace(/[^0-9.]/g, '')) || 0;
 
@@ -777,15 +800,9 @@
         setTimeout(() => { msg.textContent = ""; }, 4000);
         return;
       }
-      // if (wonUserId == userid) {
-	  if (wonUserId && String(wonUserId) === String(userid)) {
-        msg.textContent = `You're already the highest bidder.`;
-        msg.style.color = "#6b7480";
-        msg.style.fontSize = "14px";
-        msg.style.fontWeight = "600";
-        setTimeout(() => { msg.textContent = ""; }, 4000);
-        return;
-      }
+      // A current highest bidder is allowed to raise their max bid, so we no longer
+      // block here. The amount must still clear minAllowed (checked above), and the
+      // backend stays the final authority on whether a self-raise is permitted.
 
       const stopBusy = LF.busy(qs('#bidNow'), 'Placing bid…');
       try {

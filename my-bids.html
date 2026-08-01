@@ -318,6 +318,13 @@
     const countLost = document.getElementById("countLost");
 
     let activeTab = "ongoing";
+    // Deep link: /my-bids.html?tab=won lands straight on the Won tab. Used by the
+    // account menu's "Wins to Pay" shortcut and the drawer's "Open all Wins" link
+    // so a winner reaches the Pay button without hunting through tabs.
+    (function initTabFromQuery(){
+      const t = new URLSearchParams(location.search).get("tab");
+      if (t === "ongoing" || t === "won" || t === "lost") activeTab = t;
+    })();
     let RAW = [];
 
     const fmtMoney = (x) => {
@@ -606,12 +613,19 @@
       initExpandBidPagination(expandTr, bids, 5);
     }
 
+    // Reflect activeTab onto the tab buttons (the HTML hardcodes "ongoing" as
+    // active, so a ?tab=won deep-link needs the highlight moved on load).
+    function syncTabButtons(){
+      document.querySelectorAll(".tabBtn").forEach(b => {
+        b.classList.toggle("active", b.dataset.tab === activeTab);
+      });
+    }
+
     function wireTabs(){
       document.querySelectorAll(".tabBtn").forEach(btn => {
         btn.addEventListener("click", () => {
-          document.querySelectorAll(".tabBtn").forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
           activeTab = btn.dataset.tab;
+          syncTabButtons();
           render();
         });
       });
@@ -644,6 +658,7 @@
     }
 
     wireTabs();
+    syncTabButtons();
     qEl.addEventListener("input", render);
     document.getElementById("btnRefresh").addEventListener("click", load);
     document.getElementById("btnPrint").addEventListener("click", () => window.print());

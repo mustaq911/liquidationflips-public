@@ -51,6 +51,12 @@
           <a href="/my-bids.html" id="allBidsLink">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="2"><path d="M14 13l-3 3-7-7 3-3z"></path><path d="M11 10l5-5 4 4-5 5M3 21h8"></path></svg>All Bids &amp; Results
           </a>
+          <!-- Wins to Pay: auctions this user won that still need checkout. Deep-links
+               straight to the Won tab where the green Pay button lives. The badge
+               (set in auth.js) only shows when there are unpaid wins. -->
+          <a href="/my-bids.html?tab=won" id="winsToPayLink">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M6 4h12v4a6 6 0 0 1-12 0z"></path><path d="M18 5h2a2 2 0 0 1-2 3M6 5H4a2 2 0 0 0 2 3"></path></svg>Wins to Pay <span class="badge badge-pay hidden" id="winsToPayCount">0</span>
+          </a>
           <a href="/watchlist.html" id="watchLink">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="2.6"></circle></svg>Watchlist <span class="badge hidden" id="watchCount">0</span>
           </a>
@@ -174,6 +180,7 @@
   </div>
   <div class="acct-tabs">
     <button type="button" class="acct-tab on" data-accttab="bids">Ongoing Bids</button>
+    <button type="button" class="acct-tab" data-accttab="won">Won <span class="acct-tabdot hidden" id="acctWonDot"></span></button>
     <button type="button" class="acct-tab" data-accttab="watch">Watchlist</button>
   </div>
   <div class="acct-searchrow">

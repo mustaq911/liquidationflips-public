@@ -728,10 +728,9 @@
         throw new Error("auction_ended");
       }
 
-      if (p.wonUserId != null && String(p.wonUserId) === String(userid)) {
-        showQbMessage(qbMsgEl, "⚠️ You are already the highest bidder.", "err", 4000);
-        throw new Error("already_highest_bidder");
-      }
+      // NOTE: we intentionally no longer block the current highest bidder here —
+      // a leader is allowed to raise their max bid. The backend remains the final
+      // authority and will reject the bid if it disallows self-raising.
 
       const amt = Number(minAllowed);
       if (!Number.isFinite(amt) || amt <= 0) {
@@ -815,6 +814,45 @@
     // ✅ Product ids the signed-in user has bid on — powers the Winning/Losing
     //    status badge. Seeded from /bids/my-bids on load, kept fresh on quick-bid.
     const MY_BID_SET = new Set();
+
+    // ===== Card bid counts ("N bids") =====
+    // The listing payload doesn't include a bid count, and /bids/product/{id} is
+    // auth-gated (401 when logged out). So counts are fetched per lot for signed-in
+    // users and cached; logged-out visitors simply don't see a count (better than a
+    // misleading "0 bids"). If the backend later adds `bidCount` to the listing,
+    // lfDecorate uses it directly and this fetch just confirms it.
+    const BID_COUNT_CACHE = new Map(); // pid(String) -> number
+    // Solid brand-green gavel (matches the product page), shown before the count.
+    const GAVEL_SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="#1f8b57" aria-hidden="true" style="vertical-align:-1px;margin-right:4px;"><path d="M1 21h12v2H1zM5.24 8.07l2.83-2.83 14.14 14.14-2.83 2.83zM12.32 1.02l5.66 5.66-2.83 2.83-5.66-5.66zM3.83 9.48l5.66 5.66-2.83 2.83-5.66-5.66z"/></svg>';
+    function bidCountLabel(n){ n = Number(n) || 0; return n + (n === 1 ? ' bid' : ' bids'); }
+    function bidCountHtml(n){ return GAVEL_SVG + bidCountLabel(n) + ' · '; }
+    function setBidCountText(pid, n){
+      document.querySelectorAll(`[data-pid="${pid}"] [data-bind="bidCount"]`).forEach(el => { el.innerHTML = bidCountHtml(n); });
+    }
+    async function fetchBidCount(pid){
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('no_auth');   // endpoint requires a token
+      const res = await fetch(`${API_BASE_URL}/bids/product/${pid}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error('bidcount_failed');
+      const bids = await res.json();
+      return Array.isArray(bids) ? bids.length : 0;
+    }
+    function refreshBidCount(pid){
+      pid = String(pid);
+      fetchBidCount(pid).then(n => { BID_COUNT_CACHE.set(pid, n); setBidCountText(pid, n); }).catch(() => {});
+    }
+    // Fill counts for the auction cards currently in the DOM (cache-first).
+    function refreshVisibleBidCounts(){
+      const seen = new Set();
+      document.querySelectorAll('[data-pid] [data-bind="bidCount"]').forEach(el => {
+        const card = el.closest('[data-pid]');
+        const pid = card && card.getAttribute('data-pid');
+        if (!pid || seen.has(pid)) return;
+        seen.add(pid);
+        if (BID_COUNT_CACHE.has(pid)) setBidCountText(pid, BID_COUNT_CACHE.get(pid));
+        else refreshBidCount(pid);
+      });
+    }
 
     async function addProductToCart(productId, quantity = 1){
       const token = localStorage.getItem('token');
@@ -1141,6 +1179,10 @@
 
       // Also refresh time labels quickly after auctionEnd patch
       if (patch.auctionEnd) tickAllCountdowns();
+
+      // A new highest bid means a new bid was placed — refresh the card's count
+      // (covers both our own quick bid and other users' bids via the WS feed).
+      if (patch.highestBid != null) refreshBidCount(pid);
     }
 
 	/** ==  ApplyWonUI ==> Winning-Frame Embeded == */ 
@@ -1189,17 +1231,20 @@
 
 	  if (!qbBtn) return;
 
-	  if (iWon){
+	  // Lock the Quick Bid button ONLY once the auction has ENDED and you won it —
+	  // there's nothing left to bid on. While the auction is still LIVE, a winning
+	  // (highest) bidder stays unlocked so they can raise their max bid.
+	  if (iWon && ended){
 		// ✅ lock + wire hover
 		qbBtn.disabled = true;
 		qbBtn.dataset.wonLocked = "1";
 		qbBtn.classList.remove('hidden');
-		qbBtn.title = "You already won / currently winning";
+		qbBtn.title = "You already won this item";
 
 		// store the normal label BEFORE we start swapping it on hover
 		// qbBtn.dataset.normalHtml = qbBtn.dataset.normalHtml || qbBtn.innerHTML;
 
-		wireWonHover(qbBtn, "🏆 You're winning");
+		wireWonHover(qbBtn, "🏆 You won");
 		if (!qbBtn._wonHoverActive) setQuickBidLabelFromAmount(qbBtn);
 
 	  } else {
@@ -1215,8 +1260,11 @@
 		  label.textContent = `Quick Bid ${formatPrice(qbBtn.dataset.amount)}`;
 		}*/
 
-		
-		qbBtn.disabled = !isLoggedIn();
+
+		// Keep Quick Bid clickable for logged-out guests too: their click handler
+		// (wired in lfWireQuick) fires requireLogin() to prompt sign in. Disabling
+		// it here would swallow the click and the login popup would never show.
+		qbBtn.disabled = false;
 		qbBtn.title = "";
 		
 		// ✅ restore label from latest amount
@@ -1428,6 +1476,10 @@
         chipBg: urgent ? '#8A2B28' : '#14263F',
         chipDot: urgent ? '#FF6B68' : '#37C0DC',
         bidsText: isA ? ((bidCount != null ? bidCount : 0) + ' bids') : 'In stock',
+        // Prefix shown before condition/lot on the card. Empty when the count is
+        // unknown (logged-out or not yet fetched) so we never show a wrong "0 bids";
+        // filled in by refreshVisibleBidCounts() / live bid updates.
+        bidsPrefix: isA ? (bidCount != null ? bidCountHtml(bidCount) : '') : '',
         condition: safeText(p.condition || p.itemCondition || p.grade, '—'),
         statusText: isA ? 'AUCTION' : 'BUY NOW',
         badgeText: comingSoon ? 'Coming Soon' : (isA ? 'Auction' : 'Buy Now'),
@@ -1484,9 +1536,11 @@
       if (!qbBtn) return;
       const setLbl = (t) => { const l = qbBtn.querySelector('[data-bind="quickBidText"]'); if (l) l.textContent = t; };
 
-      if (hasWon(p)){
+      // Only lock when the auction has ENDED and you won it. A live winning bidder
+      // stays unlocked so they can raise their max bid (applyWonUi keeps this in sync).
+      if (hasWon(p) && isAuctionEnded(p.auctionEnd)){
         qbBtn.classList.remove('hidden'); qbBtn.disabled = true;
-        qbBtn.dataset.wonLocked = "1"; wireWonHover(qbBtn); qbBtn.title = "You already won this item";
+        qbBtn.dataset.wonLocked = "1"; wireWonHover(qbBtn, "🏆 You won"); qbBtn.title = "You already won this item";
       }
       if (isLoggedIn() && qbMsg){
         qbBtn.classList.remove('hidden'); qbBtn.disabled = true;
@@ -1509,6 +1563,22 @@
             await validateQuickBidOrThrow(latest, amt, qbMsg);
             const prod = await placeQuickBid(p.id, amt);
             MY_BID_SET.add(Number(p.id));
+
+            // Reflect our own bid on the card right away — the current bid AND the
+            // next Quick Bid amount — instead of waiting on the WS broadcast (which
+            // also arrives and confirms). Prefer server-returned values; fall back
+            // to what we bid and a recomputed minimum.
+            const newHighest = (prod && prod.highestBid != null) ? Number(prod.highestBid) : amt;
+            const patch = { highestBid: newHighest };
+            if (prod && prod.wonUserId !== undefined) patch.wonUserId = prod.wonUserId;
+            if (prod && prod.nextMinumBid != null) patch.nextMinumBid = Number(prod.nextMinumBid);
+            updateDomForProduct(p.id, patch);
+            if (patch.nextMinumBid == null){
+              getNextMinBid(newHighest)
+                .then(({ minAllowed }) => updateDomForProduct(p.id, { nextMinumBid: minAllowed }))
+                .catch(() => {});
+            }
+
             if (prod?.isAutoOutbid && String(prod.isAutoOutbid).trim() !== "") showQbMessage(qbMsg, prod.isAutoOutbid, 'err', 10000);
             else showQbMessage(qbMsg, '✅ Bid placed!', 'ok', 2500);
             // Refresh the status badge right away (Winning, or Losing if auto-outbid).
@@ -1518,6 +1588,12 @@
               showQbMessage(qbMsg, '❌ ' + (err.message || 'Bid failed'), 'err', 4000);
           } finally {
             stopBusy();
+            // LF.busy() restores the button's pre-bid HTML on stop, which clobbers
+            // any Quick Bid amount update that landed while the spinner showed. The
+            // amount lives inside the button; the current-bid text does not — which
+            // is why the price updated but the Quick Bid amount didn't. Re-sync the
+            // label from the (now-current) dataset.amount to show the new minimum.
+            setQuickBidLabelFromAmount(qbBtn);
           }
         });
       } else {
@@ -1527,7 +1603,12 @@
         qbMsg?.classList.add('hidden');
         const highest = (p.highestBid != null ? p.highestBid : p.basePrice);
         getNextMinBid(highest)
-          .then(({ minAllowed }) => setLbl('Quick bid ' + formatPrice(minAllowed)))
+          .then(({ minAllowed }) => {
+            // Store the amount so a later applyWonUi()/live patch keeps the
+            // price on the label instead of reverting to a bare "Quick Bid".
+            qbBtn.dataset.amount = String(minAllowed);
+            setLbl('Quick bid ' + formatPrice(minAllowed));
+          })
           .catch(() => setLbl('Quick bid'));
         qbBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -1600,7 +1681,7 @@
               '<span data-bind="timeBoxLeft">' + d.timeLeft + '</span></div>'
           : '');
 
-      const metaLine = d.isA ? (d.bidsText + ' · ' + d.condition) : ('In stock · ' + d.condition);
+      const metaLine = d.isA ? ('<span data-bind="bidCount">' + d.bidsPrefix + '</span>' + d.condition) : ('In stock · ' + d.condition);
 
       const primaryBtn = d.comingSoon
         ? '<button class="lf-btn clickable-img" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">View Product</button>'
@@ -1684,7 +1765,7 @@
           '<div class="lf-metagrid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 18px;margin-top:auto;">' +
             cell('Category', d.cat) + cell('Condition', d.condition) + cell('Quantity', qtyText) + cell('Pickup', d.hub) +
           '</div>' +
-          '<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#97a0ab;margin-top:14px;font-weight:500;"><span>' + d.bidsText + '</span><span style="color:#d3d8dd;">·</span><span>' + d.lotNo + '</span></div>' +
+          '<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#97a0ab;margin-top:14px;font-weight:500;"><span data-bind="bidCount">' + d.bidsPrefix + '</span><span>' + d.lotNo + '</span></div>' +
         '</div>' +
         '<div class="lf-side" style="width:230px;flex-shrink:0;border-left:1px solid #e6e8ec;padding:18px 22px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;">' +
           priceSide +
@@ -1782,6 +1863,7 @@
 
       // ✅ after DOM updated: subscribe to visible items + refresh countdown
       syncSubscriptionsForVisible();
+      refreshVisibleBidCounts();
       tickAllCountdowns();
     }
 

@@ -485,6 +485,11 @@
 				localStorage.setItem('token', data.token || '');
 				localStorage.setItem('userid', String(data.userId ?? ''));
 				localStorage.setItem('username', data.username || username);
+				// Persist the real account email so pages that show it (Orders, Cart,
+				// Watchlist, dropdown header) don't fall back to a stale value. On this
+				// app the login field / username is the email; prefer an explicit
+				// data.email if the API returns one.
+				localStorage.setItem('email', data.email || data.username || username);
 
 				closeModal();
 				window.location.reload();
@@ -519,6 +524,7 @@
 			  localStorage.removeItem('token');
 			  localStorage.removeItem('userid');
 			  localStorage.removeItem('username');
+			  localStorage.removeItem('email');
 			  return true;
 			}
 			return false;
@@ -542,6 +548,7 @@
 				localStorage.removeItem('token');
 				localStorage.removeItem('userid');
 				localStorage.removeItem('username');
+				localStorage.removeItem('email');
 			  }
 			} catch (e) {}
 
@@ -571,6 +578,15 @@
 			  if (userAvatar) {
 				  const initial = String(shortName || '').trim().charAt(0).toUpperCase();
 				  userAvatar.textContent = initial || 'U';
+			  }
+			  // Heal a stale email left in storage by an older demo build. The real
+			  // login used to not store 'email', so 'demo@liquidationflips.ca' (the
+			  // demo tour's sentinel) could linger and surface on Orders/Cart/
+			  // Watchlist. If it's missing or is that demo value, sync it to the real
+			  // account (username is the email on this app).
+			  const storedEmail = localStorage.getItem('email');
+			  if (username !== 'User' && (!storedEmail || storedEmail === 'demo@liquidationflips.ca')) {
+				localStorage.setItem('email', username);
 			  }
 			  // Dropdown header (display only)
 			  if (udName)  udName.textContent  = shortName;
@@ -660,6 +676,7 @@
 			localStorage.removeItem('token');
 			localStorage.removeItem('userid');
 			localStorage.removeItem('username');
+			localStorage.removeItem('email');
 			updateTopnavUI();
 			
 			// 🔥 Always redirect to home page
@@ -934,22 +951,41 @@ async function loadMenuCounts() {
   const len = (arr) => (Array.isArray(arr) ? arr.length : 0);
 
   try {
-    const [ongoingRes, wonRes, watchRes, ordersRes] = await Promise.all([
+    // /bids/my-bids carries per-entry paymentRequired + orderId, the exact fields
+    // the My Bids "Won" tab uses to show its Pay button. Counting those gives the
+    // "Wins to Pay" badge — auctions won but not yet checked out. (The old
+    // products/count/won endpoint counted ALL wins, including paid ones, so the
+    // badge would never clear; this is the actionable number instead.)
+    const [ongoingRes, myBidsRes, watchRes, ordersRes] = await Promise.all([
       fetch(`${auth_API_BASE_URL}/bids/count/ongoing/${userId}`, { headers: authHeader }),
-      fetch(`${auth_API_BASE_URL}/products/count/won/${userId}`, { headers: authHeader }),
+      fetch(`${auth_API_BASE_URL}/bids/my-bids/${userId}`, { headers: authHeader }).catch(() => null),
       fetch(`${auth_API_BASE_URL}/watchlist/user/${userId}`, { headers: authHeader }).catch(() => null),
       fetch(`${auth_API_BASE_URL}/orders/user/${userId}`, { headers: authHeader }).catch(() => null)
     ]);
 
     const ongoing = ongoingRes.ok ? await ongoingRes.json() : 0;
-    const won = wonRes.ok ? await wonRes.json() : 0;
     const watch = (watchRes && watchRes.ok) ? len(await watchRes.json()) : 0;
     const orders = (ordersRes && ordersRes.ok) ? len(await ordersRes.json()) : 0;
 
+    let winsToPay = 0;
+    if (myBidsRes && myBidsRes.ok) {
+      const myBids = await myBidsRes.json();
+      if (Array.isArray(myBids)) {
+        winsToPay = myBids.filter(e => e && e.paymentRequired === true && e.orderId != null).length;
+      }
+    }
+
     setBadge("ongoingBidCount", ongoing);
-    setBadge("wonAuctionCount", won);
+    setBadge("winsToPayCount", winsToPay);
     setBadge("watchCount", watch);
     setBadge("ordersCount", orders);
+
+    // Surface unpaid wins on the avatar itself (a small dot) + the drawer's Won
+    // tab, so the user sees "you owe payment" before opening the menu.
+    const userMenu = document.getElementById("userMenu");
+    if (userMenu) userMenu.classList.toggle("has-alert", winsToPay > 0);
+    const wonDot = document.getElementById("acctWonDot");
+    if (wonDot) wonDot.classList.toggle("hidden", winsToPay <= 0);
     // The cart badge is refreshed separately by refreshCartCount().
   } catch (e) {
     console.error("Count load failed", e);
