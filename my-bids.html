@@ -319,7 +319,7 @@
 
     let activeTab = "ongoing";
     // Deep link: /my-bids.html?tab=won lands straight on the Won tab. Used by the
-    // account menu's "Wins to Pay" shortcut and the drawer's "Open all Wins" link
+    // account menu's "Pay Won Auctions" shortcut and the drawer's "Open all Wins" link
     // so a winner reaches the Pay button without hunting through tabs.
     (function initTabFromQuery(){
       const t = new URLSearchParams(location.search).get("tab");

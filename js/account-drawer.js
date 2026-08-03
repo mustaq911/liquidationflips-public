@@ -35,13 +35,13 @@
     });
   }
 
-  var overlay, panel, bodyEl, searchInput, closeBtn, viewAll;
+  var overlay, panel, bodyEl, searchInput, closeBtn, viewAll, wonLink;
   var activeTab = 'bids';
 
-  // Full-page destination + label for each tab's "Open full page" link.
+  // Full-page destination + label for each tab's "Open full page" link. Won has no
+  // tab of its own — it's reached via the "View won auctions" link on the bids view.
   var FULL_PAGE = {
     bids:  { href: '/my-bids.html',          label: 'Open All Bids & Results' },
-    won:   { href: '/my-bids.html?tab=won',  label: 'Open all Wins & Payments' },
     watch: { href: '/watchlist.html',        label: 'Open full Watchlist page' }
   };
   var RAW = {};        // tab -> raw array/object
@@ -50,6 +50,7 @@
   function els() {
     overlay = $('acctOverlay'); panel = $('acctPanel'); bodyEl = $('acctBody');
     searchInput = $('acctSearch'); closeBtn = $('acctClose'); viewAll = $('acctViewAll');
+    wonLink = $('acctWonLink');
   }
 
   /* ---- open / close ---- */
@@ -72,11 +73,13 @@
   }
 
   function setTab(tab) {
-    if (tab !== 'bids' && tab !== 'won' && tab !== 'watch') tab = 'bids';
+    if (tab !== 'bids' && tab !== 'watch') tab = 'bids';
     activeTab = tab;
     Array.prototype.forEach.call(panel.querySelectorAll('.acct-tab'), function (b) {
       b.classList.toggle('on', b.getAttribute('data-accttab') === tab);
     });
+    // "View won auctions" only belongs on the Ongoing Bids view.
+    if (wonLink) wonLink.classList.toggle('hidden', tab !== 'bids');
     if (searchInput) searchInput.value = '';
     if (viewAll) {
       var fp = FULL_PAGE[tab] || FULL_PAGE.bids;
@@ -113,7 +116,6 @@
     var my = ++seq;
     bodyEl.innerHTML = loadingHTML();
     if (tab === 'bids') return loadBids(my);
-    if (tab === 'won') return loadWon(my);
     if (tab === 'watch') return loadWatch(my);
   }
 
@@ -226,67 +228,6 @@
     });
   }
 
-  // WON — auctions this user won. The whole point of this tab is the Pay button
-  // on wins that still need checkout; paid wins stay listed with a "Paid" state.
-  // Mirrors the My Bids "Won" tab so the drawer is a quick path to pay.
-  function isEnded(p) {
-    var st = String((p && p.status) || '').toUpperCase();
-    if (st.indexOf('COMPLETED') >= 0 || st.indexOf('ENDED') >= 0) return true;
-    return !!(p && p.auctionEnd) && new Date(p.auctionEnd).getTime() <= Date.now();
-  }
-  function iWon(p) {
-    var uid = userId();
-    return !!(uid && p && p.wonUserId != null && String(p.wonUserId) === String(uid));
-  }
-  function payBtn(orderId) {
-    return '<button type="button" class="acct-pay" data-payorder="' + esc(orderId) + '">' +
-      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path></svg>' +
-      '<span>Pay now</span></button>';
-  }
-
-  function loadWon(my) {
-    fetch(API + '/bids/my-bids/' + userId(), { headers: authHeaders() })
-      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
-      .then(function (data) { RAW.won = Array.isArray(data) ? data : []; if (fresh(my)) renderWon(); })
-      .catch(function () { if (fresh(my)) bodyEl.innerHTML = emptyHTML('Could not load your wins.'); });
-  }
-  function renderWon() {
-    var term = q();
-    var rows = (RAW.won || []).filter(function (e) {
-      var p = e.product || {};
-      if (!(isEnded(p) && iWon(p))) return false;   // only auctions you actually won
-      if (!term) return true;
-      return String((p.title || '') + ' ' + (p.id || '')).toLowerCase().indexOf(term) >= 0;
-    });
-    if (!rows.length) { bodyEl.innerHTML = emptyHTML('No wins yet. Win an auction and it shows here — ready to pay.'); return; }
-    // Unpaid wins first so the action items sit at the top.
-    rows.sort(function (a, b) { return (b.paymentRequired === true) - (a.paymentRequired === true); });
-    bodyEl.innerHTML = rows.map(function (e) {
-      var p = e.product || {};
-      var cat = (p.category && p.category.name) || p.categoryName || 'Lot';
-      var needsPay = e.paymentRequired === true && e.orderId != null;
-      var st = needsPay ? { label: 'Payment due', cls: 'warn' } : { label: 'Won', cls: 'ok' };
-      var action = needsPay ? payBtn(e.orderId) : '';
-      return rowHTML({
-        photo: p.imageUrl, title: p.title || 'Untitled',
-        sub: cat + ' · Lot #' + (p.id != null ? p.id : '—'),
-        right: money(p.highestBid), status: st, action: action,
-        href: '/product-view.html?id=' + p.id
-      });
-    }).join('');
-    wireWonPay();
-  }
-  function wireWonPay() {
-    Array.prototype.forEach.call(bodyEl.querySelectorAll('.acct-pay'), function (btn) {
-      btn.addEventListener('click', function (ev) {
-        ev.preventDefault();       // the row is a link — don't navigate to the product
-        ev.stopPropagation();
-        var oid = btn.getAttribute('data-payorder');
-        if (oid) window.location.href = '/checkout.html?orderId=' + encodeURIComponent(oid);
-      });
-    });
-  }
-
   // WATCHLIST — watched lots with an inline unwatch icon (and Quick Bid on any
   // lot that's still a live auction).
   function loadWatch(my) {
@@ -370,7 +311,6 @@
     });
     if (searchInput) searchInput.addEventListener('input', function () {
       if (activeTab === 'bids') renderBids();
-      else if (activeTab === 'won') renderWon();
       else if (activeTab === 'watch') renderWatch();
     });
   }

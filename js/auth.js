@@ -953,7 +953,7 @@ async function loadMenuCounts() {
   try {
     // /bids/my-bids carries per-entry paymentRequired + orderId, the exact fields
     // the My Bids "Won" tab uses to show its Pay button. Counting those gives the
-    // "Wins to Pay" badge — auctions won but not yet checked out. (The old
+    // "Pay Won Auctions" badge — auctions won but not yet checked out. (The old
     // products/count/won endpoint counted ALL wins, including paid ones, so the
     // badge would never clear; this is the actionable number instead.)
     const [ongoingRes, myBidsRes, watchRes, ordersRes] = await Promise.all([
