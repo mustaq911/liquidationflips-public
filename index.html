@@ -545,6 +545,10 @@
     let ALL_PRODUCTS = [];
     let FILTERED = [];
     let CURRENT_PAGE = 1;
+    // Page to restore from the URL (?page=) on first load; consumed by the first
+    // applyFilters() so a refresh / shared link lands on the same page. Any later
+    // filter/search/sort change clears it and resets to page 1.
+    let PENDING_URL_PAGE = null;
     let PRODUCTS_LOADED = false;   // stays false until the first product fetch resolves
 
     // ✅ Warehouse cache (same as BuyNow)
@@ -1391,7 +1395,7 @@
 
     // Stock qty helper (buy-now items)
     function getQty(p){
-      const q = (p.quantity ?? p.qty ?? p.stock ?? p.availableQty);
+      const q = (p.quantity ?? p.stockQty ?? p.qty ?? p.stock ?? p.availableQty);
       return (q === undefined) ? null : q;
     }
     // Retail price helper (TODO(backend): only shows when the product carries a retail value)
@@ -1493,7 +1497,9 @@
         idText: 'ID #' + (p.id == null ? '—' : p.id),
         sku: safeText(p.sku || p.skuCode || p.productCode, 'LF-' + (p.id == null ? '' : p.id)),
         qty: (qty == null ? '—' : qty),
-        stockText: 'In stock',
+        // Stock line for buy-now cards: show the remaining quantity when the
+        // backend provides it, otherwise fall back to a plain "In stock".
+        stockText: (qty == null ? 'In stock' : (Number(qty) <= 0 ? 'Out of stock' : qty + ' in stock')),
         whText: 'Warehouse ' + (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId ?? 1),
         hub: wh ? safeText(wh.name) : '—',
         addr: wh ? formatWarehouseAddress(wh) : '—',
@@ -1681,7 +1687,9 @@
               '<span data-bind="timeBoxLeft">' + d.timeLeft + '</span></div>'
           : '');
 
-      const metaLine = d.isA ? ('<span data-bind="bidCount">' + d.bidsPrefix + '</span>' + d.condition) : ('In stock · ' + d.condition);
+      const metaLine = d.isA
+        ? ('<span data-bind="bidCount">' + d.bidsPrefix + '</span>' + d.condition)
+        : (d.stockText + (d.condition && d.condition !== '—' ? ' · ' + d.condition : ''));
 
       const primaryBtn = d.comingSoon
         ? '<button class="lf-btn clickable-img" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">View Product</button>'
@@ -1861,6 +1869,16 @@
         pagination.classList.add('hidden');
       }
 
+      // Keep the URL in sync with the (clamped) current page so a refresh or a
+      // shared link reopens on the same page. replaceState avoids piling up a
+      // history entry per page click.
+      try {
+        const url = new URL(window.location.href);
+        if (CURRENT_PAGE > 1) url.searchParams.set('page', CURRENT_PAGE);
+        else url.searchParams.delete('page');
+        window.history.replaceState(null, '', url);
+      } catch(e){}
+
       // ✅ after DOM updated: subscribe to visible items + refresh countdown
       syncSubscriptionsForVisible();
       refreshVisibleBidCounts();
@@ -1915,7 +1933,10 @@
         return 0;
       });
 
-      CURRENT_PAGE = 1;
+      // Honor ?page= on the first render after load; every later filter/sort/search
+      // change falls through to page 1 (and render() then clears the URL param).
+      if (PENDING_URL_PAGE != null) { CURRENT_PAGE = PENDING_URL_PAGE; PENDING_URL_PAGE = null; }
+      else { CURRENT_PAGE = 1; }
       render();
     }
 
@@ -1964,12 +1985,21 @@
       warehouseSelect.value = cur || 'all';
     }
 
+    // When paging, jump back up to the top of the results so the new page
+    // starts from the first item instead of leaving the user at the pager.
+    function scrollToResultsTop(){
+      const anchor = document.querySelector('.lf-grid-sec');
+      if(!anchor) return;
+      const top = anchor.getBoundingClientRect().top + window.pageYOffset - 90;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+
     prevPage.addEventListener('click', () => {
-      if(CURRENT_PAGE>1){ CURRENT_PAGE--; render(); }
+      if(CURRENT_PAGE>1){ CURRENT_PAGE--; render(); scrollToResultsTop(); }
     });
     nextPage.addEventListener('click', () => {
       const totalPages = Math.max(1, Math.ceil(FILTERED.length / PAGE_SIZE));
-      if(CURRENT_PAGE<totalPages){ CURRENT_PAGE++; render(); }
+      if(CURRENT_PAGE<totalPages){ CURRENT_PAGE++; render(); scrollToResultsTop(); }
     });
 
     gridViewBtn.addEventListener('click', () => setView('grid'));
@@ -2098,6 +2128,9 @@
         if (cat && Array.from(categorySelect.options).some(o => o.value === String(cat))) {
           categorySelect.value = String(cat);
         }
+        // ?page=<n> → restore the page the user was on (refresh / shared link).
+        const pg = parseInt(params.get('page'), 10);
+        if (!Number.isNaN(pg) && pg > 1) PENDING_URL_PAGE = pg;
       } catch(e){}
 
       // Ensure warehouse / watchlist / bid data is in so cards paint with correct

@@ -318,7 +318,13 @@
     const countWon = document.getElementById("countWon");
     const countLost = document.getElementById("countLost");
 
-    let activeTab = "ongoing";
+    // Honour a ?tab=won deep-link — the account menu's "Pay Won Auctions" /
+    // "View won auctions" links land here straight on the Won tab.
+    let activeTab = (function(){
+      try{ var t = (new URLSearchParams(location.search)).get('tab');
+        if (t === 'won' || t === 'lost' || t === 'ongoing') return t; }catch(e){}
+      return "ongoing";
+    })();
     let RAW = [];
 
     const fmtMoney = (x) => {
@@ -645,6 +651,8 @@
     }
 
     wireTabs();
+    // reflect the deep-linked tab in the button highlight on load
+    document.querySelectorAll(".tabBtn").forEach(b => b.classList.toggle("active", b.dataset.tab === activeTab));
     qEl.addEventListener("input", render);
     document.getElementById("btnRefresh").addEventListener("click", load);
     document.getElementById("btnPrint").addEventListener("click", () => window.print());

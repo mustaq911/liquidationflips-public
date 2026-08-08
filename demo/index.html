@@ -1344,7 +1344,7 @@
 
     // Stock qty helper (buy-now items)
     function getQty(p){
-      const q = (p.quantity ?? p.qty ?? p.stock ?? p.availableQty);
+      const q = (p.quantity ?? p.stockQty ?? p.qty ?? p.stock ?? p.availableQty);
       return (q === undefined) ? null : q;
     }
     // Retail price helper (TODO(backend): only shows when the product carries a retail value)
@@ -1442,7 +1442,9 @@
         idText: 'ID #' + (p.id == null ? '—' : p.id),
         sku: safeText(p.sku || p.skuCode || p.productCode, 'LF-' + (p.id == null ? '' : p.id)),
         qty: (qty == null ? '—' : qty),
-        stockText: 'In stock',
+        // Stock line for buy-now cards: show the remaining quantity when the
+        // backend provides it, otherwise fall back to a plain "In stock".
+        stockText: (qty == null ? 'In stock' : (Number(qty) <= 0 ? 'Out of stock' : qty + ' in stock')),
         whText: 'Warehouse ' + (p.warehouseId ?? p.warehouseID ?? p.pickupWarehouseId ?? 1),
         hub: wh ? safeText(wh.name) : '—',
         addr: wh ? formatWarehouseAddress(wh) : '—',
@@ -1601,7 +1603,9 @@
               '<span data-bind="timeBoxLeft">' + d.timeLeft + '</span></div>'
           : '');
 
-      const metaLine = d.isA ? (d.bidsText + ' · ' + d.condition) : ('In stock · ' + d.condition);
+      const metaLine = d.isA
+        ? (d.bidsText + ' · ' + d.condition)
+        : (d.stockText + (d.condition && d.condition !== '—' ? ' · ' + d.condition : ''));
 
       const primaryBtn = d.comingSoon
         ? '<button class="lf-btn clickable-img" style="width:100%;border:none;background:#16202e;color:#fff;font-weight:700;font-size:13.5px;padding:12px;border-radius:9px;cursor:pointer;font-family:inherit;">View Product</button>'

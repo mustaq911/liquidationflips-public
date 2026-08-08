@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Secure Payment - Liquidation Flips</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="/css/topnav.css?v=4">
+  <style>
+    :root{
+      --bg:#EAF0EC; --panel:#ffffff; --text:#111827; --muted:#6b7280;
+      --brand:#1F8B57; --brand-2:#177045; --border:#e5e7eb; --danger:#dc2626;
+      --success:#16a34a; --shadow:0 16px 40px rgba(15,23,42,0.08);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+    .page{max-width:1400px;margin:22px auto;padding:0 28px;}
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start;}
+    @media (max-width:900px){ .grid{grid-template-columns:minmax(0,1fr);} }
+    .card{background:var(--panel);border-radius:16px;border:1px solid var(--border);box-shadow:var(--shadow);padding:18px;}
+    h1{font-size:22px;margin:0 0 6px;}
+    .subtitle{font-size:13px;color:var(--muted);margin-bottom:14px;}
+    .summary-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+    .pill{font-size:12px;color:var(--muted);border:1px solid var(--border);padding:6px 10px;border-radius:999px;background:#fff;}
+    .items{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+    .item{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:12px;background:#fff;}
+    .thumb{width:56px;height:56px;border-radius:10px;border:1px solid var(--border);background:#f3f4f6;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+    .title{font-weight:700;font-size:14px;margin:0;}
+    .meta{font-size:12px;color:var(--muted);margin-top:2px;}
+    .price{font-weight:800;}
+    .totals{margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);display:flex;flex-direction:column;gap:8px;}
+    .row{display:flex;justify-content:space-between;font-size:14px;}
+    .row.muted{color:var(--muted);}
+    .row.total{font-size:16px;font-weight:900;}
+    .field{margin-top:10px;}
+    .field-row{display:flex;gap:12px;}
+    .field-row .field{flex:1;margin-top:10px;}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;}
+    input{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-size:14px;outline:none;background:#fff;font-family:inherit;}
+    input:focus{border-color:#b7c5ff;box-shadow:0 0 0 3px rgba(31,139,87,.12);}
+    .card-input-wrap{position:relative;}
+    .card-input-wrap .brands{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;gap:5px;color:#9ca3af;font-size:18px;}
+    .btn{margin-top:14px;width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--brand);background:var(--brand);color:#fff;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-size:14px;}
+    .btn:hover{background:var(--brand-2);border-color:var(--brand-2);}
+    .btn:disabled{opacity:.75;cursor:not-allowed;}
+    .msg{margin-top:10px;font-size:13px;}
+    .msg.error{color:var(--danger);}
+    .msg.success{color:var(--success);}
+    .secure-note{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px;margin-top:12px;}
+  </style>
+</head>
+<body>
+  <div id="topnavContainer"></div>
+
+  <!-- Demo mode: config + demo-data BEFORE anything fetches, then auth for the topnav -->
+  <script src="/js/config.js?v=4"></script>
+  <script src="/js/demo-data.js?v=1"></script>
+  <script src="/js/auth.js?v=4" defer></script>
+
+  <div class="page">
+    <div class="grid">
+      <!-- LEFT: Order Summary -->
+      <div class="card">
+        <div class="summary-header">
+          <div>
+            <h1>Order Summary</h1>
+            <div class="subtitle">Review your order before paying.</div>
+          </div>
+          <div class="pill" id="order-pill">Order #—</div>
+        </div>
+
+        <div id="summary-items" class="items"></div>
+
+        <div class="totals">
+          <div class="row muted"><span>Subtotal</span><span id="sum-subtotal">—</span></div>
+          <div class="row muted"><span>Tax</span><span id="sum-tax">—</span></div>
+          <div class="row muted"><span>Shipping</span><span id="sum-ship">—</span></div>
+          <div class="row total"><span>Total</span><span id="sum-total">—</span></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Payment -->
+      <div class="card">
+        <h1>Secure Payment</h1>
+        <div class="subtitle">Enter your card details to complete payment securely.</div>
+
+        <div class="field">
+          <label for="cardholder-name">Name on card</label>
+          <input id="cardholder-name" type="text" placeholder="Full name" autocomplete="cc-name" />
+        </div>
+
+        <div class="field">
+          <label for="card-number">Card number</label>
+          <div class="card-input-wrap">
+            <input id="card-number" type="text" inputmode="numeric" placeholder="1234 1234 1234 1234" autocomplete="cc-number" />
+            <span class="brands"><i class="fa-brands fa-cc-visa"></i><i class="fa-brands fa-cc-mastercard"></i><i class="fa-brands fa-cc-amex"></i></span>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="card-exp">Expiry</label>
+            <input id="card-exp" type="text" inputmode="numeric" placeholder="MM / YY" autocomplete="cc-exp" />
+          </div>
+          <div class="field">
+            <label for="card-cvc">CVC</label>
+            <input id="card-cvc" type="text" inputmode="numeric" placeholder="CVC" autocomplete="cc-csc" />
+          </div>
+          <div class="field">
+            <label for="card-zip">Postal code</label>
+            <input id="card-zip" type="text" placeholder="A1A 1A1" autocomplete="postal-code" />
+          </div>
+        </div>
+
+        <button id="pay-btn" class="btn" type="button">
+          <span id="pay-btn-label"><i class="fa-solid fa-lock"></i> Pay <span id="pay-btn-amt"></span></span>
+        </button>
+
+        <div id="pay-message" class="msg" role="status"></div>
+
+        <div class="secure-note"><i class="fa-solid fa-shield-halved" style="color:#1F8B57"></i> Payments are encrypted and processed securely.</div>
+
+        <p style="font-size:12.5px;color:#6b7280;text-align:center;margin:12px 0 0;line-height:1.5;">By completing your purchase, you agree to our <a href="/terms.html" target="_blank" rel="noopener" style="color:#1F8B57;text-decoration:underline;">Terms &amp; Conditions</a> and <a href="/agreement.html" target="_blank" rel="noopener" style="color:#1F8B57;text-decoration:underline;">User &amp; Purchase Agreement</a>.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Demo card page — a faithful stand-in for the real Stripe checkout, but with
+    // plain inputs so the guided tour can visibly fill in card details. It never
+    // charges anything; the tour drives navigation to the receipt after "Pay".
+    (function(){
+      const API_BASE_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) || 'https://api.liquidationflips.ca';
+
+      function money(v, currency){
+        if (v === null || v === undefined) return '—';
+        const n = Number(v);
+        if (Number.isNaN(n)) return String(v);
+        return new Intl.NumberFormat('en-CA', { style:'currency', currency: currency || 'CAD' }).format(n);
+      }
+      function q(name){ return new URL(location.href).searchParams.get(name); }
+
+      // topnav (auth.js also injects it, but fetch directly too so it's there early)
+      fetch('/topnav.html').then(r => r.text())
+        .then(html => { const c = document.getElementById('topnavContainer'); if (c && !c.innerHTML.trim()) c.innerHTML = html; })
+        .catch(()=>{});
+
+      function renderSummary(order){
+        const currency = (order.currency || 'CAD').toUpperCase();
+        document.getElementById('order-pill').textContent = `Order #${order.id ?? q('orderId') ?? ''}`;
+
+        const list = document.getElementById('summary-items');
+        list.innerHTML = '';
+        const items = order.items || order.orderItems || [];
+        if (!items.length){
+          list.innerHTML = `<div class="subtitle">No items found for this order.</div>`;
+        } else {
+          for (const it of items){
+            const title = it.productTitle || it.title || `Product #${it.productId ?? ''}`;
+            const qty = it.quantity ?? 1;
+            const price = it.price ?? it.unitPrice ?? it.amount ?? 0;
+            const lineTotal = it.lineTotal ?? (Number(price) * Number(qty));
+            const imgUrl = it.productImageUrl || it.productImage || it.thumbnailUrl || '';
+            const el = document.createElement('div');
+            el.className = 'item';
+            el.innerHTML = `
+              <div class="thumb">${imgUrl ? `<img src="${imgUrl}" alt="">` : `<i class="fa-solid fa-box" style="color:#9ca3af"></i>`}</div>
+              <div><p class="title">${title}</p><div class="meta">Qty: ${qty}</div></div>
+              <div class="price">${money(lineTotal, currency)}</div>`;
+            list.appendChild(el);
+          }
+        }
+
+        const subtotal = order.subtotal ?? order.subTotal ?? null;
+        const tax = order.tax ?? null;
+        const shipping = order.shipping ?? 0;
+        const total = order.totalAmount ?? order.total ?? null;
+        document.getElementById('sum-subtotal').textContent = money(subtotal, currency);
+        document.getElementById('sum-tax').textContent = money(tax, currency);
+        document.getElementById('sum-ship').textContent = shipping ? money(shipping, currency) : 'Free';
+        document.getElementById('sum-total').textContent = money(total, currency);
+        const amt = document.getElementById('pay-btn-amt');
+        if (amt) amt.textContent = money(total, currency);
+      }
+
+      async function init(){
+        const orderId = q('orderId');
+        if (orderId){
+          try{
+            const res = await fetch(`${API_BASE_URL}/orders/${orderId}`, { headers:{ 'Accept':'application/json' } });
+            const order = await res.json();
+            renderSummary(order);
+          }catch(e){ /* demo: summary is best-effort */ }
+        }
+
+        // "Pay" just shows a processing state — the tour advances to the receipt.
+        const btn = document.getElementById('pay-btn');
+        btn.addEventListener('click', function(){
+          btn.disabled = true;
+          document.getElementById('pay-btn-label').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing…';
+        });
+      }
+
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+      else init();
+    })();
+  </script>
+</body>
+</html>

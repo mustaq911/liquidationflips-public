@@ -886,7 +886,7 @@
         });
 
         const totalMsrpEl = document.getElementById("totalMsrpDisplay");
-        if (totalMsrpEl) totalMsrpEl.textContent = ` $${totalMsrpSum.toFixed(2)}`;
+        if (totalMsrpEl) totalMsrpEl.textContent = ` $${totalMsrpSum.toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
 
         renderManifestPage();
       } catch (err) {

@@ -62,18 +62,52 @@
 
     /* ===== Phone mode: render the site inside an iPhone ===== */
     .film.is-phone .window{
-      max-width:400px;margin:0 auto;overflow:visible;
-      border-radius:56px;padding:13px;border:1px solid #2b3543;
+      position:relative;max-width:400px;margin:0 auto;overflow:visible;
+      border-radius:56px;padding:14px;border:1px solid #2b3543;
       background:#0b1017;box-shadow:0 26px 60px -20px rgba(13,20,29,.6), inset 0 0 0 2px #000;
+    }
+    /* iPhone side buttons: volume rocker (left) + side/power button (right) */
+    .film.is-phone .window::before{
+      content:"";position:absolute;left:-2px;top:148px;width:3px;height:44px;border-radius:3px;
+      background:#161d26;box-shadow:0 60px 0 #161d26;
+    }
+    .film.is-phone .window::after{
+      content:"";position:absolute;right:-2px;top:176px;width:3px;height:76px;border-radius:3px;background:#161d26;
     }
     .film.is-phone .winbar{display:none}
     .film.is-phone .viewport{border-radius:44px;overflow:hidden}
-    .film.is-phone .notch{
-      display:flex;align-items:center;justify-content:center;gap:8px;
-      position:absolute;top:20px;left:50%;transform:translateX(-50%);
-      width:132px;height:30px;background:#000;border-radius:0 0 16px 16px;z-index:26;
+    .film.is-phone .notch{display:none}   /* replaced by the status-bar island below */
+
+    /* ===== iOS status bar across the top of the screen (phone mode only) ===== */
+    /* Height matches the safe-area padding injected into each page (48 of 844 ≈
+       5.7%), so page content starts cleanly below it instead of being clipped by
+       the island. */
+    .statusbar{display:none}
+    .film.is-phone .statusbar{
+      display:flex;align-items:center;justify-content:space-between;
+      position:absolute;top:0;left:0;right:0;height:5.7%;min-height:22px;
+      padding:0 7% 0 7.5%;z-index:18;background:#fff;color:#16202e;
+      font-weight:700;font-size:11px;letter-spacing:.02em;pointer-events:none;
     }
-    .film.is-phone .notch-cam{width:8px;height:8px;border-radius:50%;background:#1b2733;box-shadow:0 0 0 2px #05070a}
+    .film.is-phone .sb-time{font-variant-numeric:tabular-nums}
+    .film.is-phone .sb-icons{display:flex;align-items:center;gap:5px}
+    .film.is-phone .sb-icons svg{display:block;height:11px;width:auto}
+    /* the Dynamic-Island pill, centered in the bar */
+    .film.is-phone .sb-island{
+      position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+      display:flex;align-items:center;justify-content:flex-end;padding-right:12px;
+      width:34%;max-width:112px;height:66%;min-height:20px;
+      background:#000;border-radius:999px;
+    }
+    .film.is-phone .sb-cam{width:9px;height:9px;border-radius:50%;background:#0b1622;box-shadow:inset 0 0 0 2px #05070a, 0 0 4px rgba(90,150,255,.45)}
+
+    /* Home indicator bar along the bottom of the screen */
+    .home-indicator{display:none}
+    .film.is-phone .home-indicator{
+      display:block;position:absolute;bottom:2.4%;left:50%;transform:translateX(-50%);
+      width:33%;max-width:128px;height:4px;border-radius:999px;
+      background:rgba(22,32,46,.3);z-index:18;pointer-events:none;
+    }
     .winbar{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#111a24}
     .winbar .dots{display:flex;gap:7px}
     .winbar .dots i{width:11px;height:11px;border-radius:50%;display:block}
@@ -113,6 +147,45 @@
     .veil .spin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.25);border-top-color:#fff;animation:spin .7s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
+    /* Click-to-play gate — the tour waits here until the viewer starts it */
+    .playgate{
+      position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:14px;text-align:center;padding:24px;cursor:pointer;color:#fff;
+      background:linear-gradient(160deg,#0d141d,#16324a);
+    }
+    .playgate.hidden{display:none}
+    .playgate .pg-btn{
+      width:76px;height:76px;border-radius:999px;background:var(--green);display:grid;place-items:center;
+      box-shadow:0 18px 42px -14px rgba(31,139,87,.75);transition:transform .2s ease;
+    }
+    .playgate:hover .pg-btn{transform:scale(1.07)}
+    .playgate .pg-btn svg{margin-left:5px}
+    .playgate .pg-title{font-size:clamp(17px,2.5vw,23px);font-weight:800;letter-spacing:-.01em}
+    .playgate .pg-sub{font-size:13.5px;color:#c7d3e0;max-width:420px;line-height:1.5}
+
+    /* Cinematic black-out interstitial (fast-forward + "raise again" message) */
+    .blackout{
+      position:absolute;inset:0;z-index:32;display:flex;align-items:center;justify-content:center;
+      padding:30px;text-align:center;background:#05070a;color:#f3f6f9;
+      opacity:0;pointer-events:none;transition:opacity .55s ease;
+    }
+    .blackout.on{opacity:1}
+    .blackout .bo-inner{max-width:540px}
+    .blackout .bo-icon{font-size:36px;line-height:1;display:block;margin-bottom:14px}
+    /* animated "moving forward" clock — only shown in clock mode */
+    .bo-clock{width:96px;height:96px;margin:0 auto 18px;display:none;filter:drop-shadow(0 6px 18px rgba(126,230,179,.25))}
+    .blackout.clock .bo-clock{display:block}
+    .blackout.clock .bo-icon{display:none}
+    .bo-clock .face{fill:none;stroke:#2b3543;stroke-width:4}
+    .bo-clock .tick{stroke:#3a4656;stroke-width:3;stroke-linecap:round}
+    .bo-clock .hand{transform-origin:50px 50px;stroke-linecap:round}
+    .bo-clock .hand.min{stroke:#f3f6f9;stroke-width:3.4;animation:clockSpin 1s linear infinite}
+    .bo-clock .hand.hour{stroke:#7ee6b3;stroke-width:4.6;animation:clockSpin 12s linear infinite}
+    @keyframes clockSpin{to{transform:rotate(360deg)}}
+    @media (prefers-reduced-motion:reduce){ .bo-clock .hand{animation-duration:6s !important} }
+    .blackout .bo-title{margin:0;font-size:clamp(18px,2.7vw,25px);font-weight:800;line-height:1.32;letter-spacing:-.01em}
+    .blackout .bo-sub{margin:12px 0 0;font-size:14.5px;line-height:1.55;color:#aeb8c4}
+
     /* Fake cursor — lives in viewport space so it stays crisp during zoom */
     .cursor{
       position:absolute;left:0;top:0;width:28px;height:28px;z-index:20;pointer-events:none;
@@ -128,6 +201,19 @@
     }
     .cursor.click .ring{animation:ripple .55s ease-out}
     @keyframes ripple{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(2.3)}}
+
+    /* ===== Winner's confetti — a burst over the viewport when you win ===== */
+    .confetti-layer{position:absolute;inset:0;z-index:24;pointer-events:none;overflow:hidden}
+    .confetti-piece{
+      position:absolute;top:-18px;width:9px;height:14px;opacity:0;will-change:transform;
+      animation:confetti-fall linear forwards;
+    }
+    @keyframes confetti-fall{
+      0%{opacity:0;transform:translateY(-18px) translateX(0) rotate(0deg)}
+      8%{opacity:1}
+      100%{opacity:1;transform:translateY(var(--fall,640px)) translateX(var(--dx,0)) rotate(var(--rot,360deg))}
+    }
+    @media (prefers-reduced-motion:reduce){ .confetti-piece{animation-duration:.01s!important;opacity:0!important} }
 
     /* ===== Caption + controls ===== */
     .coach{max-width:1180px;margin:16px auto 0;padding:0 20px;display:flex;gap:14px;align-items:flex-start}
@@ -190,7 +276,6 @@
         <span class="url"><i class="fa-solid fa-lock"></i> <span id="urlText">liquidationflips.ca</span></span>
         <span class="rec"><span class="blink"></span> <span>REC</span></span>
       </div>
-      <div class="notch"><span class="notch-cam"></span></div>
       <div class="viewport" id="viewport">
         <div class="camera" id="camera">
           <div class="filmframe" id="filmframe">
@@ -198,11 +283,50 @@
                     referrerpolicy="no-referrer"></iframe>
           </div>
         </div>
+
+        <!-- iOS status bar (time · dynamic island · signal/wifi/battery) -->
+        <div class="statusbar" aria-hidden="true">
+          <span class="sb-time">9:41</span>
+          <span class="sb-island"><span class="sb-cam"></span></span>
+          <span class="sb-icons">
+            <svg viewBox="0 0 20 12" fill="#16202e"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="5" width="3" height="7" rx="1"/><rect x="9" y="2.5" width="3" height="9.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+            <svg viewBox="0 0 16 12" fill="#16202e"><path d="M8 2.4c2.5 0 4.8 1 6.5 2.6l1.3-1.4C13.7 1.6 11 .4 8 .4S2.3 1.6.2 3.6l1.3 1.4C3.2 3.4 5.5 2.4 8 2.4zM8 6c1.3 0 2.5.5 3.4 1.4l1.3-1.4C11.5 4.8 9.8 4 8 4s-3.5.8-4.7 2l1.3 1.4C5.5 6.5 6.7 6 8 6zm0 3.4l1.9-2C9.4 6.9 8.7 6.6 8 6.6s-1.4.3-1.9.8l1.9 2z"/></svg>
+            <svg viewBox="0 0 26 12" fill="none"><rect x="0.6" y="0.6" width="21" height="10.8" rx="2.6" stroke="#16202e" stroke-opacity=".4" stroke-width="1"/><rect x="2" y="2" width="16" height="8" rx="1.3" fill="#16202e"/><rect x="23" y="3.6" width="1.8" height="4.8" rx="0.9" fill="#16202e" fill-opacity=".4"/></svg>
+          </span>
+        </div>
+        <div class="home-indicator" aria-hidden="true"></div>
+
         <div class="cursor" id="cursor" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M5 3l14 7-6 1.5L11 19 5 3z" fill="#16202e" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>
           <span class="ring"></span>
         </div>
         <div class="veil" id="veil"><span class="spin"></span> <span id="veilText">Loading…</span></div>
+
+        <!-- Cinematic black-out (fast-forward / "raise your bid again" message) -->
+        <div class="blackout" id="blackout" aria-hidden="true">
+          <div class="bo-inner">
+            <svg class="bo-clock" viewBox="0 0 100 100" aria-hidden="true">
+              <circle class="face" cx="50" cy="50" r="42"></circle>
+              <line class="tick" x1="50" y1="10" x2="50" y2="17"></line>
+              <line class="tick" x1="50" y1="83" x2="50" y2="90"></line>
+              <line class="tick" x1="10" y1="50" x2="17" y2="50"></line>
+              <line class="tick" x1="83" y1="50" x2="90" y2="50"></line>
+              <line class="hand hour" x1="50" y1="50" x2="50" y2="31"></line>
+              <line class="hand min"  x1="50" y1="50" x2="50" y2="20"></line>
+              <circle cx="50" cy="50" r="3.2" fill="#7ee6b3"></circle>
+            </svg>
+            <span class="bo-icon" id="blackoutIcon"></span>
+            <p class="bo-title" id="blackoutText"></p>
+            <p class="bo-sub" id="blackoutSub"></p>
+          </div>
+        </div>
+
+        <!-- Click-to-play gate -->
+        <div class="playgate" id="playGate" role="button" tabindex="0" aria-label="Play the walkthrough">
+          <div class="pg-btn"><svg width="30" height="30" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></div>
+          <div class="pg-title" id="pgTitle">Play the auction walkthrough</div>
+          <div class="pg-sub">See a full lot go from first bid to paid — it plays itself, about a minute.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -281,6 +405,63 @@
       return null;
     }
 
+    // ---- helpers to script the auction "drama" on the live product page ----
+    // The page runs its own 1s countdown ticker that keeps writing to #countdown.
+    // Swapping the node for a clone detaches that ticker (it holds the old
+    // reference); we then run OUR OWN ticker so the fast-forwarded clock keeps
+    // counting down live instead of sitting frozen.
+    var pvCountTimer = null;
+    function pvCountClear(){ if(pvCountTimer){ clearInterval(pvCountTimer); pvCountTimer = null; } }
+    function pvFreezeNode(doc){
+      var el = doc.getElementById('countdown');
+      if(!el) return null;
+      if(!el.dataset.frozen){
+        var clone = el.cloneNode(true);
+        clone.dataset.frozen = '1';
+        if(el.parentNode) el.parentNode.replaceChild(clone, el);
+        el = clone;
+      }
+      return el;
+    }
+    // Accepts a duration like "1h 00m 00s" / "18m 22s" and keeps ticking it down,
+    // or a literal like "Ended" (shown as-is, ticker stopped).
+    function pvSetCountdown(doc, val){
+      var el = pvFreezeNode(doc);
+      if(!el) return;
+      pvCountClear();
+      var hm = /(\d+)\s*h/.exec(val), mm = /(\d+)\s*m/.exec(val), sm = /(\d+)\s*s/.exec(val);
+      if(!hm && !mm && !sm){ el.textContent = val; return; }   // literal (e.g. "Ended")
+      var secs = (hm?+hm[1]*3600:0) + (mm?+mm[1]*60:0) + (sm?+sm[1]:0);
+      var end = Date.now() + secs*1000;
+      function pad(n){ return (n<10?'0':'')+n; }
+      function paint(){
+        var ms = end - Date.now();
+        if(ms <= 0){ el.textContent = 'Ended'; pvCountClear(); return; }
+        var h = Math.floor(ms/3600000), m = Math.floor((ms%3600000)/60000), s = Math.floor((ms%60000)/1000);
+        el.textContent = h > 0 ? (h+'h '+pad(m)+'m '+pad(s)+'s') : (m+'m '+pad(s)+'s');
+      }
+      paint();
+      pvCountTimer = setInterval(paint, 1000);
+    }
+    function pvSetHeader(doc, type, text){   // type: 'win' | 'outbid'
+      var box  = doc.getElementById('headerWonMsg'),
+          t    = doc.getElementById('headerWonText'),
+          icon = doc.getElementById('headerWonIcon');
+      if(!box || !t) return;
+      box.classList.remove('hidden','win','outbid');
+      box.classList.add(type);
+      t.textContent = text;
+      if(icon){
+        icon.innerHTML = (type === 'outbid')
+          ? '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>'
+          : '<path d="M20 6L9 17l-5-5"></path>';
+      }
+    }
+    function pvSetHighest(doc, text){
+      var el = doc.getElementById('highestBid');
+      if(el) el.textContent = text;
+    }
+
     // ---------------------------------------------------------------------
     // Two separate tours — auction and buy-now have different pay workflows.
     // Each is an ordered list of steps; same url in a row = no reload.
@@ -291,51 +472,212 @@
       { url:'/demo/index.html?'+DEMO, flow:'Auction',
         ready:['article.lf-card[data-pid]'],
         target:[firstAuctionCard, 'article.lf-card', '.lf-header'],
-        click:false, dwell:2600,
+        click:false, dwell:1800,
         cap:'Auction lots on the homepage — each shows the current bid and a live countdown.' },
 
       { url:'/demo/index.html?'+DEMO, flow:'Auction',
         target:[ function(d){ var a=firstAuctionCard(d); return a && a.querySelector('button[data-id]'); },
                  'article.lf-card button[data-id]' ],
-        click:true, dwell:1600,
-        cap:'Open a lot to place a bid on it.' },
+        click:false, dwell:900,
+        cap:'Open a lot to place a bid on it.',
+        interact: async function(doc, api){
+          var btn = firstAuctionCard(doc); btn = btn && btn.querySelector('button[data-id]');
+          await api.pulse(btn);   // pulse only — the tour loads the demo lot next (no live page flash)
+        } },
 
       { url:'/demo/product-view.html?id='+AUCTION_ID+'&'+DEMO, flow:'Auction',
         ready:['#bidPanel','#lotTitle','#highestBid'],
         target:['#lotTitle','#hero'],
-        click:false, dwell:2400,
+        click:false, dwell:1900,
         cap:'The lot page — full photos, condition, the highest bid and a live countdown.' },
 
       { url:'/demo/product-view.html?id='+AUCTION_ID+'&'+DEMO, flow:'Auction',
+        target:['#tabManifest','#panelManifest'],
+        click:false, dwell:2600,
+        cap:'This lot is a truckload, so open the Manifest tab to see every unit inside — brand, SKU, quantity and estimated retail.',
+        interact: async function(doc, api){
+          var tab = doc.querySelector('#tabManifest');
+          if(tab){ await api.cursorTo(tab); await api.press(tab); await api.wait(1800); }
+        } },
+
+      // Place your first max bid — you're on top, ~1h left on the clock
+      { url:'/demo/product-view.html?id='+AUCTION_ID+'&'+DEMO, flow:'Auction',
         target:['#bidPanel','#bidNow','#highestBid'],
-        click:false, dwell:3200,
-        cap:'Enter your maximum bid and place it — you become the top bidder instantly.',
+        click:false, dwell:2600,
+        cap:'Enter your maximum bid and place it — you’re the top bidder, with about an hour left on the clock.',
         interact: async function(doc, api){
           var input = doc.querySelector('#bidAmount');
           var btn   = doc.querySelector('#bidNow');
-          if(input){ await api.cursorTo(input); await api.type(input, '375'); await api.wait(500); }
-          if(btn){ await api.cursorTo(btn); await api.press(btn); }
-          await api.wait(2400);   // watch the "Bid placed — you're the highest bidder" result
+          if(input){ await api.cursorTo(input); await api.type(input, '3500'); await api.wait(500); }
+          if(btn){ await api.cursorTo(btn); await api.press(btn); await api.wait(1600); }
+          pvSetHighest(doc, '$3,500.00');
+          pvSetHeader(doc, 'win', "You're the highest bidder");
+          pvSetCountdown(doc, '1h 00m 00s');
+          await api.wait(1200);
         } },
 
-      { url:'/demo/my-bids.html?'+DEMO, flow:'Auction',
-        ready:['[data-tab="won"]'],
-        target:['[data-tab="won"]'],
-        click:false, dwell:3000,
-        cap:'When the auction ends and you’re highest, the lot appears under My Bids → Won, invoice ready.',
+      // Time passes (clock black-out) → a rival outbids you
+      { url:'/demo/product-view.html?id='+AUCTION_ID+'&'+DEMO, flow:'Auction',
+        target:['#headerWonMsg','#highestBid'],
+        click:false, dwell:2400,
+        cap:'A little time passes while the auction runs — then a rival tops you. You’ve been outbid, but you can jump straight back in and take the lead.',
         interact: async function(doc, api){
+          // black out with the moving-forward clock while the clock winds down
+          await api.blackout('', 'Moving forward…', 'A little time passes while the auction runs…', true);
+          var t = ['0h 48m 12s','0h 31m 05s','0h 22m 40s'];
+          for(var i=0;i<t.length;i++){ pvSetCountdown(doc, t[i]); await api.wait(420); }
+          await api.wait(800);
+          // behind the curtain, a rival takes the lead
+          pvSetHighest(doc, '$3,600.00');
+          pvSetHeader(doc, 'outbid', "You've been outbid — raise your bid to win");
+          await api.unblackout();   // reveal the "you've been outbid" state
+          var input = doc.querySelector('#bidAmount');
+          if(input){ await api.cursorTo(input); }
+          await api.wait(1200);
+        } },
+
+      // Reclaim the lead — place another max bid and you're on top again
+      { url:'/demo/product-view.html?id='+AUCTION_ID+'&'+DEMO, flow:'Auction',
+        target:['#bidPanel','#bidNow','#highestBid'],
+        click:false, dwell:2400,
+        cap:'You’re not out of it — place another maximum bid and you’re right back on top of the lot.',
+        interact: async function(doc, api){
+          var input = doc.querySelector('#bidAmount');
+          var btn   = doc.querySelector('#bidNow');
+          if(input){ await api.cursorTo(input); await api.type(input, '3800'); await api.wait(500); }
+          if(btn){ await api.cursorTo(btn); await api.press(btn); await api.wait(1400); }
+          // proxy bidding only nudges you just above the rival, not to your full max
+          pvSetHighest(doc, '$3,650.00');
+          pvSetHeader(doc, 'win', "You're the highest bidder again — auto-bidding up to $3,800");
+          await api.wait(1200);
+        } },
+
+      // Black-out message → bump your MAX even higher, while you're still winning
+      { url:'/demo/product-view.html?id='+AUCTION_ID+'&'+DEMO, flow:'Auction',
+        target:['#bidPanel','#bidNow'],
+        click:false, dwell:2600,
+        cap:'Want a bigger cushion? You can raise your maximum even while you’re winning — the price doesn’t move now, but we’ll auto-bid up to it if someone challenges you later. Set it and go to bed.',
+        interact: async function(doc, api){
+          await api.blackout('💸', 'Think that’s not enough?',
+            'Bump your max bid higher any time — as many times as you like. You still only pay just enough to stay on top.');
+          await api.wait(2800);   // hold a touch longer — this is a key idea to read
+          await api.unblackout();
+          var input = doc.querySelector('#bidAmount');
+          var btn   = doc.querySelector('#bidNow');
+          if(input){ await api.cursorTo(input); await api.type(input, '4200'); await api.wait(600); }
+          if(btn){ await api.cursorTo(btn); await api.press(btn); await api.wait(1400); }
+          // you're already on top, so the price holds — only your ceiling rises
+          pvSetHighest(doc, '$3,650.00');
+          pvSetHeader(doc, 'win', "Still the highest bidder — auto-bidding up to $4,200");
+          pvSetCountdown(doc, '0h 18m 22s');
+          await api.wait(1000);
+        } },
+
+      // Black-out → fast-forward through the night to the final seconds
+      { url:'/demo/product-view.html?id='+AUCTION_ID+'&'+DEMO, flow:'Auction',
+        target:['#countdown','#countdownLabel'],
+        click:false, dwell:2200,
+        cap:'You head to bed — fast-forwarding to the last seconds. Your max bid keeps you on top automatically.',
+        interact: async function(doc, api){
+          // black out and show the animated clock winding forward
+          await api.blackout('', 'Moving forward…',
+            'Fast-forwarding through the night — your max bid keeps auto-bidding for you.', true);
+          // behind the black screen, race the on-page clock down toward the end
+          var t = ['0h 41m 08s','0h 22m 40s','0h 09m 41s','0h 03m 10s','0h 00m 27s','0h 00m 12s'];
+          for(var i=0;i<t.length;i++){ pvSetCountdown(doc, t[i]); await api.wait(420); }
+          // leave ~8s on the clock (still ticking live) and reveal it counting down
+          pvSetCountdown(doc, '0h 00m 08s');
+          await api.wait(700);
+          await api.unblackout();   // reveal the final seconds, still ticking
+          await api.wait(2600);     // watch it tick down to the wire
+        } },
+
+      // Auction ends — you won
+      { url:'/demo/product-view.html?id='+AUCTION_ID+'&'+DEMO, flow:'Auction',
+        target:['#headerWonMsg','#countdown'],
+        click:false, dwell:2200,
+        cap:'The clock hits zero and you’re still on top — the truckload is yours. 🎉 Time to check out.',
+        interact: async function(doc, api){
+          pvSetCountdown(doc, 'Ended');
+          var lbl = doc.getElementById('countdownLabel'); if(lbl) lbl.textContent = 'Auction ended';
+          pvSetHeader(doc, 'win', 'Auction ended — you won this lot! 🎉');
+          // Auction's over — bidding is closed, so hide the whole bid panel
+          var panel = doc.querySelector('#bidPanel'); if(panel){ panel.classList.add('hidden'); }
+          await api.celebrate();     // winner's confetti burst over the frame
+          await api.wait(2000);
+        } },
+
+      // Open the account menu and choose "Pay Won Auctions" (no teleporting)
+      { url:'/demo/product-view.html?id='+AUCTION_ID+'&'+DEMO, flow:'Auction',
+        target:['#userMenu','.lf-userchip','.lf-header'],
+        click:false, dwell:2000,
+        cap:'Click your account menu up top and choose “Pay Won Auctions” — that’s where every lot you’ve won waits for checkout.',
+        interact: async function(doc, api){
+          var chip = doc.querySelector('#userMenu');
+          if(chip){ await api.cursorTo(chip); await api.press(chip); await api.wait(800); }   // open the account dropdown
+          var link = doc.querySelector('#winsToPayLink') || doc.querySelector('#allBidsLink');
+          if(link){
+            // show the click but stay in the sandbox (the live link targets the real my-bids)
+            link.addEventListener('click', function(e){ e.preventDefault(); }, { once:true });
+            await api.cursorTo(link);
+            await api.press(link);
+            await api.wait(900);
+          }
+        } },
+
+      // Land straight on the Won tab (the "Pay Won Auctions" deep-link)
+      { url:'/demo/my-bids.html?tab=won&'+DEMO, flow:'Auction',
+        ready:['[data-tab="won"]','.btn-pay'],
+        target:['.btn-pay','[data-tab="won"]'],
+        click:false, dwell:1900,
+        cap:'You land on My Bids → Won — the truckload you won, with its invoice ready to settle.',
+        interact: async function(doc, api){
+          // make sure the Won tab is active (deep-link should already do this)
           var wonTab = doc.querySelector('[data-tab="won"]');
-          if(wonTab){ await api.cursorTo(wonTab); await api.press(wonTab); await api.wait(700); }
+          if(wonTab && !/\bactive\b/.test(wonTab.className)){ await api.cursorTo(wonTab); await api.press(wonTab); await api.wait(900); }
           var pay = doc.querySelector('.btn-pay');
           if(pay){ await api.cursorTo(pay); }
-          await api.wait(1200);
+          await api.wait(1000);
+        } },
+
+      { url:'/demo/my-bids.html?tab=won&'+DEMO, flow:'Auction',
+        ready:['.btn-pay'],
+        target:['.btn-pay'],
+        click:false, dwell:1600,
+        cap:'Click Pay to check out and settle the invoice on your won truckload.',
+        interact: async function(doc, api){
+          var pay = doc.querySelector('.btn-pay');
+          // pulse only — the live Pay link points at /checkout.html; the tour loads
+          // the secure card page next so nothing jumps out of the demo.
+          if(pay){ await api.pulse(pay); }
+        } },
+
+      // Enter card details on the secure checkout, then pay
+      { url:'/demo/checkout-payment.html?orderId=LF-90420&'+DEMO, flow:'Auction',
+        ready:['#card-number','#pay-btn'],
+        target:['#card-number','#pay-btn'],
+        click:false, dwell:1400,
+        cap:'Review the order and enter your card details on the secure checkout — then pay.',
+        interact: async function(doc, api){
+          var name = doc.querySelector('#cardholder-name');
+          var num  = doc.querySelector('#card-number');
+          var exp  = doc.querySelector('#card-exp');
+          var cvc  = doc.querySelector('#card-cvc');
+          var zip  = doc.querySelector('#card-zip');
+          var pay  = doc.querySelector('#pay-btn');
+          if(name){ await api.cursorTo(name); await api.type(name, 'Alex Morgan'); }
+          if(num){  await api.cursorTo(num);  await api.type(num, '4242 4242 4242 4242'); }
+          if(exp){  await api.cursorTo(exp);  await api.type(exp, '12 / 27'); }
+          if(cvc){  await api.cursorTo(cvc);  await api.type(cvc, '123'); }
+          if(zip){  await api.cursorTo(zip);  await api.type(zip, 'M5V 2T6'); }
+          if(pay){  await api.cursorTo(pay);  await api.press(pay); await api.wait(1000); }
         } },
 
       { url:'/demo/payment-success.html?orderId=LF-90420&'+DEMO, flow:'Auction',
         ready:['#orderId','#total'],
         target:['#orderId',{text:'successful'},'h1','h2'],
-        click:false, dwell:3400,
-        cap:'Pay the invoice and you’re done — instant receipt and shipping updates on your won lot.' }
+        click:false, dwell:3000,
+        cap:'Paid! Instant receipt and shipping updates on your won lot — that’s the whole auction, start to finish.' }
     ];
 
     // ===== BUY NOW: browse → pick qty → add to cart → checkout → pay =====
@@ -343,41 +685,76 @@
       { url:'/demo/index.html?'+DEMO, flow:'Buy Now',
         ready:['article.lf-card[data-pid]'],
         target:[ function(d){ return firstCardByBtn(d, /buy now/i); }, 'article.lf-card', '.lf-header'],
-        click:false, dwell:2600,
+        click:false, dwell:2200,
         cap:'Buy-now lots on the homepage — a fixed price, ready to purchase, no bidding.' },
 
       { url:'/demo/index.html?'+DEMO, flow:'Buy Now',
         target:[ function(d){ var c=firstCardByBtn(d, /buy now/i); return c && c.querySelector('button[data-id]'); },
                  'article.lf-card button[data-id]' ],
-        click:true, dwell:1600,
-        cap:'Open a buy-now lot to purchase it.' },
+        click:false, dwell:900,
+        cap:'Open a buy-now lot to purchase it.',
+        interact: async function(doc, api){
+          var c = firstCardByBtn(doc, /buy now/i); c = c && c.querySelector('button[data-id]');
+          await api.pulse(c);
+        } },
 
       { url:'/demo/product-buynow.html?id='+BUYNOW_ID+'&'+DEMO, flow:'Buy Now',
         ready:['#buyNowBtn','#lotTitle','#buyPrice'],
         target:['#buyPrice','#buyQty','#lotTitle'],
-        click:false, dwell:2800,
+        click:false, dwell:2200,
         cap:'Fixed price — pick a quantity and the order total updates live.',
         interact: async function(doc, api){
           var qty = doc.querySelector('#buyQty');
-          if(qty){ await api.cursorTo(qty); await api.type(qty, '2'); await api.wait(400); }
-          await api.wait(1000);
+          // #buyQty rewrites its own value on every input, so set it in one shot
+          // (typing char-by-char would land on "12" and mismatch the cart).
+          if(qty){ await api.cursorTo(qty); await api.setValue(qty, 2); await api.wait(700); }
+          await api.wait(500);
         } },
 
       { url:'/demo/product-buynow.html?id='+BUYNOW_ID+'&'+DEMO, flow:'Buy Now',
         target:['#buyNowBtn',{text:'Buy Now'}],
-        click:true, dwell:2000,
-        cap:'“Buy Now” adds it to your cart and takes you to checkout.' },
+        click:false, dwell:1200,
+        cap:'“Buy Now” adds it to your cart and takes you to checkout.',
+        interact: async function(doc, api){
+          await api.pulse(doc.querySelector('#buyNowBtn'));
+        } },
 
       { url:'/demo/cart.html?'+DEMO, flow:'Buy Now',
         ready:['table','.totals-grand'],
         target:[{text:'Proceed to Checkout'},'.totals-grand','table'],
-        click:true, dwell:2800,
-        cap:'Your cart shows the item, quantity and running total, ready for secure checkout.' },
+        click:false, dwell:2200,
+        cap:'Your cart shows the item, quantity and running total, ready for secure checkout.',
+        interact: async function(doc, api){
+          var co = null, nodes = doc.querySelectorAll('button, a');
+          for(var i=0;i<nodes.length;i++){ if(/proceed to checkout/i.test(nodes[i].textContent||'')){ co = nodes[i]; break; } }
+          if(co){ await api.pulse(co); }   // pulse only — the live checkout goes off-sandbox
+        } },
+
+      // Enter card details on the secure checkout, then pay
+      { url:'/demo/checkout-payment.html?orderId=LF-90421&'+DEMO, flow:'Buy Now',
+        ready:['#card-number','#pay-btn'],
+        target:['#card-number','#pay-btn'],
+        click:false, dwell:1400,
+        cap:'Review the order and enter your card details on the secure checkout — then pay.',
+        interact: async function(doc, api){
+          var name = doc.querySelector('#cardholder-name');
+          var num  = doc.querySelector('#card-number');
+          var exp  = doc.querySelector('#card-exp');
+          var cvc  = doc.querySelector('#card-cvc');
+          var zip  = doc.querySelector('#card-zip');
+          var pay  = doc.querySelector('#pay-btn');
+          if(name){ await api.cursorTo(name); await api.type(name, 'Alex Morgan'); }
+          if(num){  await api.cursorTo(num);  await api.type(num, '4242 4242 4242 4242'); }
+          if(exp){  await api.cursorTo(exp);  await api.type(exp, '12 / 27'); }
+          if(cvc){  await api.cursorTo(cvc);  await api.type(cvc, '123'); }
+          if(zip){  await api.cursorTo(zip);  await api.type(zip, 'M5V 2T6'); }
+          if(pay){  await api.cursorTo(pay);  await api.press(pay); await api.wait(1000); }
+        } },
 
       { url:'/demo/payment-success.html?orderId=LF-90421&'+DEMO, flow:'Buy Now',
         ready:['#orderId','#total'],
         target:['#orderId',{text:'successful'},'h1','h2'],
-        click:false, dwell:3400,
+        click:false, dwell:3000,
         cap:'Paid! Instant receipt and shipping updates — that’s the whole buy-now checkout.' }
     ];
 
@@ -410,7 +787,7 @@
     var deviceLabel = document.getElementById('deviceLabel');
     var deviceIcon  = document.getElementById('deviceIcon');
 
-    var index = 0, playing = true, seq = 0, baseScale = 1, loadedUrl = null;
+    var index = 0, playing = false, seq = 0, baseScale = 1, loadedUrl = null;
 
     function stepUrl(s){ return typeof s.url === 'function' ? s.url() : s.url; }
     function wait(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
@@ -430,16 +807,45 @@
 
     // Fit the logical frame to the current viewport width.
     function layout(){
-      pickDevice();
-      var w = viewport.clientWidth || FW;
-      baseScale = w / FW;
+      var phone = pickDevice();
       filmframe.style.width  = FW + 'px';
       filmframe.style.height = FH + 'px';
       iframe.style.width  = FW + 'px';
       iframe.style.height = FH + 'px';
-      viewport.style.height = Math.round(FH * baseScale) + 'px';
+      var win = film.querySelector('.window');
+      if(phone){
+        // Size the phone so the WHOLE device plus the caption stays in view — scale
+        // to the smaller of the available width and ~58% of the screen height.
+        var availW  = (film.clientWidth || FW);
+        var budgetH = Math.max(360, window.innerHeight * 0.58);
+        var phoneW  = Math.min(availW - 6, 300);
+        baseScale   = Math.min(phoneW / FW, budgetH / FH);
+        var sw = Math.round(FW * baseScale), sh = Math.round(FH * baseScale);
+        viewport.style.width  = sw + 'px';
+        viewport.style.height = sh + 'px';
+        if(win){ win.style.width = (sw + 30) + 'px'; win.style.maxWidth = 'none'; }
+      } else {
+        viewport.style.width = '';
+        if(win){ win.style.width = ''; win.style.maxWidth = ''; }
+        var w = viewport.clientWidth || FW;
+        baseScale = w / FW;
+        viewport.style.height = Math.round(FH * baseScale) + 'px';
+      }
       // keep whatever zoom the current step wants
       applyCamera(current || null, false);
+      syncSafeArea();   // status-bar inset follows the device mode
+    }
+
+    // Toggle the in-page safe-area inset (below the status bar) to match the
+    // current device: on in phone mode, off in desktop. Runs on every load and
+    // whenever the layout flips between iPhone and browser.
+    function syncSafeArea(doc){
+      try{
+        doc = doc || iframe.contentDocument;
+        if(doc && doc.documentElement){
+          doc.documentElement.classList.toggle('lf-phone', film.classList.contains('is-phone'));
+        }
+      }catch(e){}
     }
 
     // Apply the camera transform. focus = {cx,cy,z} in logical coords, or null=rest.
@@ -466,6 +872,35 @@
       cursor.classList.remove('click'); void cursor.offsetWidth; cursor.classList.add('click');
     }
 
+    // Winner's confetti — spray a burst of falling pieces over the viewport (the
+    // screen area, not inside the frame) and clean itself up after it lands.
+    function launchConfetti(){
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+      if(reduce) return;
+      var layer = document.createElement('div');
+      layer.className = 'confetti-layer';
+      var W = viewport.clientWidth || 600, H = viewport.clientHeight || 600;
+      var colors = ['#1f8b57','#7ee6b3','#22A06B','#ffbd2e','#ff5f56','#4c9dff','#ffffff'];
+      var n = Math.max(60, Math.min(130, Math.round(W / 6)));
+      for(var i=0;i<n;i++){
+        var p = document.createElement('i');
+        p.className = 'confetti-piece';
+        p.style.background = colors[i % colors.length];
+        p.style.left = (Math.random() * W) + 'px';
+        p.style.width = (6 + Math.random() * 6) + 'px';
+        p.style.height = (10 + Math.random() * 8) + 'px';
+        if(Math.random() < 0.5) p.style.borderRadius = '50%';
+        p.style.setProperty('--fall', (H + 40) + 'px');
+        p.style.setProperty('--dx', (Math.random() * 200 - 100) + 'px');
+        p.style.setProperty('--rot', (Math.random() * 900 - 450) + 'deg');
+        p.style.animationDelay = (Math.random() * 0.45) + 's';
+        p.style.animationDuration = (1.7 + Math.random() * 1.5) + 's';
+        layer.appendChild(p);
+      }
+      viewport.appendChild(layer);
+      setTimeout(function(){ if(layer.parentNode) layer.parentNode.removeChild(layer); }, 3800);
+    }
+
     // Where a logical (in-iframe) point lands on screen given the current camera.
     function screenPos(lx, ly){
       if(current){
@@ -478,18 +913,39 @@
       var r = el.getBoundingClientRect();
       return { x: r.left + r.width/2, y: r.top + r.height/2 };
     }
-    // Scroll INSIDE the iframe only (never the parent page) to bring el into the
-    // 800px film window. Using el.scrollIntoView() would also scroll this page.
+    // Smoothly scroll INSIDE the iframe only (never the parent page) to bring el
+    // into the 800px film window. Using el.scrollIntoView() would also scroll this
+    // page. We animate with our own rAF easing so the recording glides instead of
+    // jumping, and resolve the promise when it settles so callers can safely read
+    // the element's final position.
+    var scrollRaf = null;
     function scrollIntoIframe(el, always){
-      try{
-        var d = el.ownerDocument, win = d.defaultView;
-        var r = el.getBoundingClientRect();
-        if(always || r.top < 40 || r.bottom > FH - 40){
+      return new Promise(function(resolve){
+        try{
+          var d = el.ownerDocument, win = d.defaultView;
+          var r = el.getBoundingClientRect();
+          if(!(always || r.top < 40 || r.bottom > FH - 40)){ return resolve(); }
           var cur = win.pageYOffset || d.documentElement.scrollTop || 0;
-          var target = cur + r.top - (FH/2 - r.height/2);
-          win.scrollTo(0, Math.max(0, target));
-        }
-      }catch(e){}
+          var target = Math.max(0, cur + r.top - (FH/2 - r.height/2));
+          var dist = target - cur;
+          if(Math.abs(dist) < 2){ win.scrollTo(0, target); return resolve(); }
+          if(scrollRaf) cancelAnimationFrame(scrollRaf);
+          var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+          if(reduce){ win.scrollTo(0, target); return resolve(); }
+          // longer travel = slightly longer glide, clamped so it never drags
+          var dur = Math.min(900, Math.max(360, Math.abs(dist) * 0.7));
+          var start = null;
+          function ease(t){ return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; } // easeInOutQuad
+          function frame(ts){
+            if(start === null) start = ts;
+            var p = Math.min(1, (ts - start) / dur);
+            win.scrollTo(0, cur + dist * ease(p));
+            if(p < 1){ scrollRaf = requestAnimationFrame(frame); }
+            else { scrollRaf = null; resolve(); }
+          }
+          scrollRaf = requestAnimationFrame(frame);
+        }catch(e){ resolve(); }
+      });
     }
 
     // Toolkit handed to a step's interact() so it can drive the REAL page:
@@ -499,11 +955,11 @@
         wait: async function(ms){ await wait(ms); if(cancelled(my)) throw 'cancel'; },
         cursorTo: async function(el, slow){
           if(!el) return;
-          scrollIntoIframe(el, false);
-          await wait(60);
+          await scrollIntoIframe(el, false);
+          if(cancelled(my)) throw 'cancel';
           var c = elCenterLogical(el), p = screenPos(c.x, c.y);
           moveCursor(p.x, p.y, !!slow);
-          await wait(slow ? CAM_MS : 620);
+          await wait(slow ? CAM_MS : 430);
           if(cancelled(my)) throw 'cancel';
         },
         type: async function(el, text){
@@ -515,16 +971,72 @@
           for(var i=0;i<text.length;i++){
             el.value += text.charAt(i);
             try{ el.dispatchEvent(new W.Event('input', {bubbles:true})); }catch(e){}
-            await wait(95);
+            await wait(45);
             if(cancelled(my)) throw 'cancel';
           }
           try{ el.dispatchEvent(new W.Event('change', {bubbles:true})); }catch(e){}
         },
+        // Set an input's value in ONE shot and fire input/change. Use this for
+        // fields whose own 'input' handler rewrites .value (e.g. the quantity box
+        // clamps + re-writes it every keystroke) — the char-by-char typer would
+        // fight that and append onto the rewritten value (typing "2" → "12").
+        setValue: async function(el, val){
+          if(!el) return;
+          var W = (el.ownerDocument && el.ownerDocument.defaultView) || window;
+          try{ el.focus(); }catch(e){}
+          el.value = String(val);
+          try{ el.dispatchEvent(new W.Event('input', {bubbles:true})); }catch(e){}
+          try{ el.dispatchEvent(new W.Event('change', {bubbles:true})); }catch(e){}
+          await wait(240);
+          if(cancelled(my)) throw 'cancel';
+        },
+        // Show a click (cursor + ripple) WITHOUT firing the element's real click —
+        // used on buttons/links whose handlers navigate to live (non-demo) pages.
+        pulse: async function(el){
+          if(el){
+            await scrollIntoIframe(el, false);
+            var c = elCenterLogical(el), p = screenPos(c.x, c.y);
+            moveCursor(p.x, p.y, false);
+            await wait(430);
+          }
+          clickPulse();
+          await wait(240);
+          if(cancelled(my)) throw 'cancel';
+        },
         press: async function(el){
           if(!el) return;
           clickPulse();
-          await wait(180);
+          await wait(160);
           try{ el.click(); }catch(e){}
+        },
+        // Fade the screen to black with a centered message (used for the
+        // "fast-forward" and "raise your bid again" beats). Pass clock:true to
+        // show the animated moving-forward clock instead of an emoji.
+        blackout: async function(icon, title, sub, clock){
+          var bi = document.getElementById('blackoutIcon');
+          var bt = document.getElementById('blackoutText');
+          var bs = document.getElementById('blackoutSub');
+          if(bi) bi.textContent = icon || '';
+          if(bt) bt.textContent = title || '';
+          if(bs) bs.textContent = sub || '';
+          var bo = document.getElementById('blackout');
+          bo.classList.toggle('clock', !!clock);
+          bo.classList.add('on');
+          await wait(700);
+          if(cancelled(my)) throw 'cancel';
+        },
+        unblackout: async function(){
+          var bo = document.getElementById('blackout');
+          bo.classList.remove('on');
+          await wait(650);
+          bo.classList.remove('clock');
+          if(cancelled(my)) throw 'cancel';
+        },
+        // Spray winner's confetti over the viewport (used when the lot is won).
+        celebrate: async function(){
+          launchConfetti();
+          await wait(250);
+          if(cancelled(my)) throw 'cancel';
         }
       };
     }
@@ -544,6 +1056,22 @@
           var doc;
           try{ doc = iframe.contentDocument; }catch(e){ return finish(); }
           if(!doc) return finish();
+          // Hide the page's scrollbar inside the frame — the tour scrolls the page
+          // itself, and a visible scrollbar looks like a stray button on the phone.
+          try{
+            var st = doc.createElement('style');
+            st.textContent =
+              'html,body{scrollbar-width:none!important;-ms-overflow-style:none!important}' +
+              'html::-webkit-scrollbar,body::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}' +
+              // Phone safe-area: push content below the status bar / island so it
+              // isn't clipped, and keep sticky headers docked below the bar too.
+              // Toggled live via the .lf-phone class on <html> (see syncSafeArea).
+              'html.lf-phone{scroll-padding-top:48px!important}' +
+              'html.lf-phone body{padding-top:48px!important}' +
+              'html.lf-phone .lf-header{top:48px!important}';
+            (doc.head || doc.documentElement).appendChild(st);
+          }catch(e){}
+          syncSafeArea(doc);
           var tries = 0, max = 90;             // ~9s max for async content
           (function poll(){
             var ok = !readySel || readySel.length===0;
@@ -561,10 +1089,10 @@
     }
 
     // Bring the target into view inside the iframe and return its logical rect.
-    function targetRect(doc, list){
+    async function targetRect(doc, list){
       var el = resolve(doc, list);
       if(!el){ return { cx:FW/2, cy:FH*0.32, z:1.4, el:null }; }
-      scrollIntoIframe(el, true);
+      await scrollIntoIframe(el, true);
       var r = el.getBoundingClientRect();
       var cx = r.left + r.width/2;
       var cy = r.top  + r.height/2;
@@ -577,6 +1105,10 @@
     async function play(){
       var my = ++seq;
       var s = steps[index];
+
+      // the tour has started — make sure the click-to-play gate is out of the way
+      var gate = document.getElementById('playGate');
+      if(gate) gate.classList.add('hidden');
 
       // caption + chrome
       coachStep.textContent = (index+1);
@@ -592,6 +1124,8 @@
         // reset camera to rest for the incoming page, cursor parks center-top
         current = null; applyCamera(null, false);
         moveCursor(viewport.clientWidth/2, 70, false);
+        document.getElementById('blackout').classList.remove('on','clock');  // never carry a black-out across a page change
+        pvCountClear();   // stop any tour-driven countdown from the previous page
         showVeil(true);
         await loadPage(url, s.ready || []);
         if(cancelled(my)) return;
@@ -607,8 +1141,9 @@
 
       if(s.onReady){ try{ s.onReady(doc); }catch(e){} }
 
-      // find the thing to look at
-      var t = targetRect(doc, s.target || ['body']);
+      // find the thing to look at (smoothly scrolls it into the film window)
+      var t = await targetRect(doc, s.target || ['body']);
+      if(cancelled(my)) return;
       t.z = s.zoom || ZOOM;
 
       // 1) move the cursor to the target at rest scale
@@ -651,7 +1186,9 @@
 
     function scheduleNext(my){
       if(cancelled(my)) return;
-      index = (index + 1) % steps.length;
+      // reached the last step — stop and show the "done, replay?" screen
+      if(index >= steps.length - 1){ showEndGate(); return; }
+      index = index + 1;
       play();
     }
 
@@ -716,10 +1253,45 @@
       document.getElementById('flowSwitch').innerHTML =
         '<a href="/demo.html?flow=auction" class="' + (isBuy ? '' : 'on') + '"><i class="fa-solid fa-gavel"></i> Auction flow</a>' +
         '<a href="/demo.html?flow=buynow" class="'  + (isBuy ? 'on' : '') + '"><i class="fa-solid fa-bolt"></i> Buy Now flow</a>';
+      var pgt = document.getElementById('pgTitle');
+      if(pgt) pgt.textContent = isBuy ? 'Play the Buy Now walkthrough' : 'Play the auction walkthrough';
     })();
 
-    // boot
-    buildDots(); layout(); play();
+    // Click-to-play gate — nothing runs until the viewer starts it. The same
+    // gate returns at the end as a "replay" screen (dataset.mode === 'replay').
+    function startTour(){
+      var gate = document.getElementById('playGate');
+      var replay = gate && gate.dataset.mode === 'replay';
+      if(gate) gate.classList.add('hidden');
+      if(replay){ ++seq; index = 0; loadedUrl = null; }   // rewind to the start
+      if(!playing) setPlaying(true); else play();
+    }
+
+    // The walkthrough finished — announce it and invite a replay.
+    var REPLAY_ICON = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>';
+    function showEndGate(){
+      playing = false;
+      playBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Play</span>';
+      var g = document.getElementById('playGate');
+      if(!g) return;
+      g.dataset.mode = 'replay';
+      var btn = g.querySelector('.pg-btn'); if(btn) btn.innerHTML = REPLAY_ICON;
+      var t = document.getElementById('pgTitle'); if(t) t.textContent = 'That’s the whole walkthrough — you’re done! 🎉';
+      var s = g.querySelector('.pg-sub'); if(s) s.textContent = 'Replay it from the start?';
+      g.classList.remove('hidden');
+    }
+    (function(){
+      var pg = document.getElementById('playGate');
+      if(!pg) return;
+      pg.addEventListener('click', startTour);
+      pg.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); startTour(); }
+      });
+    })();
+
+    // boot — lay everything out but wait on the gate before playing
+    playBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Play</span>';
+    buildDots(); layout();
   })();
   </script>
 </body>

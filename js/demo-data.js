@@ -54,15 +54,16 @@
     return 'data:image/svg+xml,' + encodeURIComponent(svg);
   }
 
-  var IPAD_IMGS = [
-    photo('#2b6cb0', '#1a365d', 'Apple iPad Air'),
-    photo('#3b82c4', '#22496e', 'Front'),
-    photo('#4a5568', '#2d3748', 'Back')
+  var OVEN_IMGS = [
+    '/demo/Images/d475bab1-19e0-4d9a-b7ae-e435252e2c9c-large.webp', // LG stainless double wall oven
+    '/demo/Images/2dece0c1-5321-405c-b576-15b062a1046a-large.webp', // LG microwave + wall oven combo
+    '/demo/Images/e4feb8ab-2cb6-49a9-83d5-72d7457c5093-large.webp'  // GE Profile smart single wall oven
   ];
   var FRYER_IMGS = [
-    photo('#1f8b57', '#155e3b', 'Ninja Air Fryer'),
-    photo('#2fa06b', '#1b7048', 'DualZone'),
-    photo('#374151', '#1f2937', 'In box')
+    '/demo/Images/61FrvAw250L._AC_SL1500_.jpg',   // hero — front, white background
+    '/demo/Images/81CXwzivE5L._AC_SL1500_.jpg',   // 6-in-1 versatility lifestyle
+    '/demo/Images/81%2BtMn-xwyL._AC_SL1500_.jpg', // XL 10-qt capacity ('+' encoded as %2B)
+    '/demo/Images/81A631oh9jL._AC_SL1500_.jpg'    // DualZone in-kitchen lifestyle
   ];
 
   var nowMs = Date.now();
@@ -71,24 +72,24 @@
   // ---- the DEMO PRODUCTS (shapes match what the real pages read) -----------
   var AUCTION = {
     id: 90001,
-    title: 'Apple iPad Air 11" (M2, 128GB, Wi-Fi)',
-    shortDescription: 'Open-box • Space Gray',
-    subtitle: 'Open-box • Space Gray',
+    title: 'Truckload of Wall Ovens, Compact Refrigerators, Microwave Wall Ovens & More by Insignia, Samsung, Frigidaire & More',
+    shortDescription: 'Truckload • Mixed major appliances • Customer returns',
+    subtitle: 'Truckload • ~24 units • Mixed condition',
     status: 'AUCTION',
     comingSoon: false,
-    imageUrl: IPAD_IMGS[0],
-    images: IPAD_IMGS,
-    highestBid: 340,
-    basePrice: 300,
-    bidCount: 12,
+    imageUrl: OVEN_IMGS[0],
+    images: OVEN_IMGS,
+    highestBid: 3200,
+    basePrice: 2500,
+    bidCount: 14,
     auctionStart: iso(nowMs - 36 * 3600 * 1000),
     auctionEnd: iso(nowMs + (2 * 3600 + 39 * 60) * 1000),
-    category: { id: 1, name: 'Electronics' },
-    categoryName: 'Electronics',
-    description: 'Lightly used, fully tested Apple iPad Air with the M2 chip, 128GB storage and Wi-Fi. Includes charger. Minor shelf wear on the box only.',
-    condition: 'Open box',
-    brand: 'Apple',
-    model: 'iPad Air 11" (M2)',
+    category: { id: 5, name: 'Major Appliances' },
+    categoryName: 'Major Appliances',
+    description: 'One full truckload of brand-name major appliances — wall ovens, microwave wall ovens, compact and full-size refrigerators, ranges, ice makers and range hoods from Insignia, Samsung, Frigidaire, LG, GE Profile, Whirlpool and more. Customer returns and overstock in mixed condition; sold as-is by the truckload. See the full manifest tab for the itemized list, SKUs and estimated retail.',
+    condition: 'Customer returns / overstock — mixed condition',
+    brand: 'Mixed (Insignia · Samsung · Frigidaire · LG · GE & more)',
+    model: 'Mixed truckload lot',
     sku: 'LF-90001',
     warehouseId: 1,
     quantity: 1,
@@ -99,9 +100,9 @@
 
   var BUYNOW = {
     id: 90002,
-    title: 'Ninja Foodi 8-Qt DualZone Air Fryer',
-    shortDescription: 'Brand new • Sealed',
-    subtitle: 'Brand new • Sealed',
+    title: 'Ninja Foodi 10-Qt/9.5L DualZone Smart XL Air Fryer (6-in-1, DZ550, Black)',
+    shortDescription: 'Brand new • Sealed • Black',
+    subtitle: 'Brand new • Sealed • Black',
     status: 'BUYNOW',
     comingSoon: false,
     imageUrl: FRYER_IMGS[0],
@@ -111,10 +112,10 @@
     highestBid: null,
     category: { id: 2, name: 'Home & Kitchen' },
     categoryName: 'Home & Kitchen',
-    description: 'Brand-new, factory-sealed Ninja Foodi 8-Qt DualZone air fryer. Two independent baskets, six cooking programs. Full manufacturer warranty.',
+    description: 'Brand-new, factory-sealed Ninja Foodi DualZone Smart XL air fryer with a 10-Qt (9.5L) capacity. Two independent XL zones and 6-in-1 versatility — air fry, roast, broil, bake, reheat and dehydrate. Includes the Smart Cook thermometer plus Match Cook and Smart Finish modes. Full manufacturer warranty.',
     condition: 'New',
     brand: 'Ninja',
-    model: 'Foodi DZ401',
+    model: 'Foodi DZ550',
     sku: 'LF-90002',
     warehouseId: 1,
     quantity: 40,
@@ -133,14 +134,42 @@
     { id: 1, name: 'Electronics' },
     { id: 2, name: 'Home & Kitchen' },
     { id: 3, name: 'Tools' },
-    { id: 4, name: 'Toys & Games' }
+    { id: 4, name: 'Toys & Games' },
+    { id: 5, name: 'Major Appliances' }
+  ];
+
+  // ---- the truckload MANIFEST (shape matches product-view.html's renderer) ----
+  // itemTitle / quantity / brand / partNumber / upc / sku / estimatedMsrp / totalMsrp
+  function mf(brand, partNumber, itemTitle, quantity, estimatedMsrp, sku, upc) {
+    return {
+      brand: brand, partNumber: partNumber, itemTitle: itemTitle,
+      quantity: quantity, upc: upc, sku: sku,
+      estimatedMsrp: estimatedMsrp,
+      totalMsrp: Math.round(estimatedMsrp * quantity * 100) / 100
+    };
+  }
+  var MANIFEST = [
+    mf('Bertazzoni', 'PRO-HARM-30', 'PRO-HARM 30" Liberty Induction Range, Stainless',            1, 8399.00, '6543604', '0808234065436'),
+    mf('LG',         'WDEP9423F',   '30" Built-In Electric Double Wall Oven, Stainless',           2, 2999.99, '6534257', '0195174065342'),
+    mf('Samsung',    'NQ70CB700D12','30" Combination Double Wall Oven w/ Microwave',               1, 5110.00, '6607564', '0887276660752'),
+    mf('Samsung',    'RF23BB8900MAA','Bespoke 36" 23 cu ft Counter-Depth 4-Door Refrigerator',     1, 4299.00, '6571434', '0887276657143'),
+    mf('Monogram',   'ZDIC050WPP',  'Undercounter Ice Maker — Panel Ready',                        1, 3599.00, '6492793', '0084691849279'),
+    mf('LG',         'WCEP6423F',   '30" Built-In Electric Wall Oven w/ Microwave, Stainless',     1, 3399.99, '6534259', '0195174065343'),
+    mf('GE Profile', 'PTS700LSNSS', '30" Built-In Convection Single Wall Oven',                    1, 3221.99, '6449216', '0084691844492'),
+    mf('Frigidaire', 'GCWS3067AF',  '30" Built-In Single Electric Wall Oven, Stainless',           1, 3199.00, '6678799', '0012505678879'),
+    mf('Dacor',      'HWHP3618S',   '36" Pro Canopy Wall Hood, 780–1,200 CFM',                     1, 2799.00, '6501984', '0812391650198'),
+    mf('Samsung',    'NQ70T5511DS', '30" Microwave Combination Wall Oven, Stainless',              1, 2699.00, '6512233', '0887276651223'),
+    mf('Frigidaire', 'GCWG2438AF',  '24" Built-In Single Gas Wall Oven, Stainless',                1, 2399.00, '6530964', '0012505653096'),
+    mf('Whirlpool',  'WOEC5030LZ',  '30" Smart Single Electric Wall Oven',                         1, 1799.00, '6470221', '0883049647022'),
+    mf('Insignia',   'NS-RTM18WH7', '18 cu ft Top-Freezer Refrigerator, White',                    2,  549.99, '6420011', '0600603420115'),
+    mf('Insignia',   'NS-CF26BK6',  '2.6 cu ft Compact Refrigerator, Black',                       4,  109.99, '6412345', '0600603412349')
   ];
 
   // Buy-now flow: the cart holds the air fryer the user just added.
   var CART = {
     userId: 42, subtotal: 259.98, tax: 0, fees: 0, totalAmount: 259.98,
     items: [
-      { orderItemId: 1, productId: 90002, productTitle: 'Ninja Foodi 8-Qt DualZone Air Fryer', productImageUrl: FRYER_IMGS[0], unitPrice: 129.99, lineTotal: 259.98, quantity: 2 }
+      { orderItemId: 1, productId: 90002, productTitle: 'Ninja Foodi 10-Qt/9.5L DualZone Smart XL Air Fryer (6-in-1, DZ550, Black)', productImageUrl: FRYER_IMGS[0], unitPrice: 129.99, lineTotal: 259.98, quantity: 2 }
     ]
   };
 
@@ -150,24 +179,24 @@
     items: CART.items
   };
 
-  // Auction flow: the won iPad, invoiced and then paid.
+  // Auction flow: the won truckload, invoiced and then paid.
   var AUCTION_ORDER = {
     id: 'LF-90420', orderId: 'LF-90420', status: 'PAID', currency: 'cad',
-    createdAt: iso(nowMs), subtotal: 365.00, tax: 0, total: 365.00,
+    createdAt: iso(nowMs), subtotal: 3500.00, tax: 0, total: 3500.00,
     items: [
-      { orderItemId: 1, productId: 90001, productTitle: 'Apple iPad Air 11" (M2, 128GB, Wi-Fi)', productImageUrl: IPAD_IMGS[0], unitPrice: 365.00, lineTotal: 365.00, quantity: 1 }
+      { orderItemId: 1, productId: 90001, productTitle: 'Truckload of Wall Ovens, Compact Refrigerators, Microwave Wall Ovens & More', productImageUrl: OVEN_IMGS[0], unitPrice: 3500.00, lineTotal: 3500.00, quantity: 1 }
     ]
   };
 
-  // my-bids "Won" tab: the iPad won at $365, invoice ready to pay.
+  // my-bids "Won" tab: the truckload won at $3,500, invoice ready to pay.
   var MYBIDS = [{
     paymentRequired: true,
     orderId: 'LF-90420',
-    bids: [{ userId: 42, bidAmount: 375, amount: 375 }],
+    bids: [{ userId: 42, bidAmount: 3500, amount: 3500 }],
     product: {
-      id: 90001, title: 'Apple iPad Air 11" (M2, 128GB, Wi-Fi)', imageUrl: IPAD_IMGS[0],
-      category: { name: 'Electronics' }, categoryName: 'Electronics',
-      status: 'ENDED', wonUserId: 42, highestBid: 365,
+      id: 90001, title: 'Truckload of Wall Ovens, Compact Refrigerators, Microwave Wall Ovens & More', imageUrl: OVEN_IMGS[0],
+      category: { name: 'Major Appliances' }, categoryName: 'Major Appliances',
+      status: 'ENDED', wonUserId: 42, highestBid: 3500,
       auctionEnd: iso(nowMs - 60 * 1000)
     }
   }];
@@ -185,7 +214,7 @@
     if (/\/bids\/product\/.*\/exists/.test(pathname))       return false;
     if (/\/bids\/my-bids/.test(pathname))                   return MYBIDS;
     if (/\/bids\b/.test(pathname))                          return {}; // POST /bids → success (no isAutoOutbid)
-    if (/\/manifests\//.test(pathname))                     return [];
+    if (/\/manifests\//.test(pathname))                     return MANIFEST;
     if (/\/orders\/cart\//.test(pathname))                  return CART;
     if (/\/orders\/LF-90420/.test(pathname))                return AUCTION_ORDER;
     if (/\/orders\//.test(pathname))                        return BUYNOW_ORDER;

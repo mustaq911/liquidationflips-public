@@ -749,7 +749,16 @@
         }
         return timeLeftLabel(iso);
       }
-      function tick(){ el.textContent = label(); }
+      function tick(){
+        el.textContent = label();
+        // Auction is over — bidding is closed, so hide the bid panel (and its
+        // Place bid button). Only applies to the countdown-to-end mode.
+        if (mode !== 'starts' && iso && (new Date(iso).getTime() - Date.now() <= 0)) {
+          const bp = qs('#bidPanel'); if (bp) bp.classList.add('hidden');
+          if (qs('#countdownLabel')) qs('#countdownLabel').textContent = 'Auction ended';
+          if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+        }
+      }
       tick();
       countdownTimer = setInterval(tick, 1000);
     }
@@ -902,7 +911,7 @@
         });
 
         const totalMsrpEl = document.getElementById("totalMsrpDisplay");
-        if (totalMsrpEl) totalMsrpEl.textContent = ` $${totalMsrpSum.toFixed(2)}`;
+        if (totalMsrpEl) totalMsrpEl.textContent = ` $${totalMsrpSum.toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
 
         renderManifestPage();
       } catch (err) {
